@@ -46,7 +46,7 @@ namespace Tatti3
                 label.Text = value;
             }
         }
-        public GameData.ArrayFileType Dat 
+        public GameData.ArrayFileType Dat
         {
             get; set;
         }
@@ -81,16 +81,11 @@ namespace Tatti3
             var namesPath = $"Root.Dat[{this.Dat}].Names";
             var path = $"Fields[{this.FieldId}].Item";
             AppState root = dat.Root;
-            var names = root.ArrayFileNames(this.Dat);
             var binding = new Binding
             {
                 Path = new PropertyPath(path),
-            };
-            var binding2 = new Binding
-            {
-                Path = new PropertyPath(path),
-                Converter = new EnumStat.DropdownFilterInvalid<string>(names),
-                Mode = BindingMode.OneWay,
+                NotifyOnTargetUpdated = true,
+                NotifyOnSourceUpdated = true,
             };
             var binding3 = new MultiBinding()
             {
@@ -104,12 +99,22 @@ namespace Tatti3
             binding3.Bindings.Add(new Binding {
                 Path = new PropertyPath(namesPath),
             });
-            Binding.AddTargetUpdatedHandler(dropdown, (obj, args) => {
-                dropdown.SelectedIndex = (int)dat.Fields[this.FieldId].Item;
-            });
+            var self = this;
+            EventHandler<DataTransferEventArgs> UpdateDropdownIndex = (obj, args) => {
+                var ctx = (AppState.DatTableRef)self.DataContext;
+                if (ctx == null)
+                {
+                    return;
+                }
+                var names = ctx.Root.ArrayFileNames(self.Dat);
+                int index = (int)ctx.Fields[self.FieldId].Item;
+                dropdown.SelectedIndex = index < names.Count ? index : -1;
+            };
+            Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);
+            Binding.AddTargetUpdatedHandler(numeric, UpdateDropdownIndex);
+            Binding.AddSourceUpdatedHandler(numeric, UpdateDropdownIndex);
 
             BindingOperations.SetBinding(numeric, TextBox.TextProperty, binding);
-            BindingOperations.SetBinding(dropdown, ComboBox.SelectedIndexProperty, binding2);
             BindingOperations.SetBinding(dropdown, ComboBox.ItemsSourceProperty, binding3);
         }
 
@@ -120,18 +125,18 @@ namespace Tatti3
             // Prevents mouse moving from scrolling the list
             // (From https://stackoverflow.com/questions/29638148/ )
             if (Keyboard.IsKeyDown(Key.Down) || Keyboard.IsKeyDown(Key.Up))
-                return;            
+                return;
 
             if (((Item)target.Content).Index == ((Item)dropdown.SelectedItem).Index)
                 return;
 
-            e.Handled = true;            
+            e.Handled = true;
         }
 
         uint field = 0;
         bool inited = false;
 
-        readonly struct Item 
+        readonly struct Item
         {
             public Item(string name, AppState state, int index)
             {
@@ -154,7 +159,7 @@ namespace Tatti3
         // converting Icon id to image source.
         // TODO Actually IMultiValueConverter was unnecessary.
         // Though the icon id being a binding dependency triggers updates to
-        // dropdown whenever a selected entry is changed, refactoring this 
+        // dropdown whenever a selected entry is changed, refactoring this
         // IMultiValueConverter away need that implemented in some other way.
         class ItemsConverter : IMultiValueConverter
         {

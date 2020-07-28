@@ -46,7 +46,7 @@ namespace Tatti3
                 label.Text = value;
             }
         }
-        public GameData.ArrayFileType Dat 
+        public GameData.ArrayFileType Dat
         {
             get => datArray;
             set
@@ -56,7 +56,7 @@ namespace Tatti3
                 {
                     button.Visibility = Visibility.Collapsed;
                 }
-                else 
+                else
                 {
                     button.Visibility = Visibility.Visible;
                 }
@@ -94,17 +94,11 @@ namespace Tatti3
             var namesPath = $"Root.Dat[{this.Dat}].Names";
             var path = $"Fields[{this.FieldId}].Item";
             AppState root = dat.Root;
-            var names = root.ArrayFileNames(this.Dat);
             var binding = new Binding
             {
                 Path = new PropertyPath(path),
                 NotifyOnTargetUpdated = true,
-            };
-            var binding2 = new Binding
-            {
-                Path = new PropertyPath(path),
-                Converter = new EnumStat.DropdownFilterInvalid<string>(names),
-                Mode = BindingMode.OneWay,
+                NotifyOnSourceUpdated = true,
             };
             var binding3 = new Binding
             {
@@ -112,15 +106,22 @@ namespace Tatti3
                 Mode = BindingMode.OneWay,
                 NotifyOnTargetUpdated = true,
             };
-            Binding.AddTargetUpdatedHandler(dropdown, (obj, args) => {
-                dropdown.SelectedIndex = (int)dat.Fields[this.FieldId].Item;
-            });
-            Binding.AddTargetUpdatedHandler(numeric, (obj, args) => {
-                dropdown.SelectedIndex = (int)dat.Fields[this.FieldId].Item;
-            });
+            var self = this;
+            EventHandler<DataTransferEventArgs> UpdateDropdownIndex = (obj, args) => {
+                var ctx = (AppState.DatTableRef)self.DataContext;
+                if (ctx == null)
+                {
+                    return;
+                }
+                var names = ctx.Root.ArrayFileNames(self.Dat);
+                int index = (int)ctx.Fields[self.FieldId].Item;
+                dropdown.SelectedIndex = index < names.Count ? index : -1;
+            };
+            Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);
+            Binding.AddTargetUpdatedHandler(numeric, UpdateDropdownIndex);
+            Binding.AddSourceUpdatedHandler(numeric, UpdateDropdownIndex);
 
             BindingOperations.SetBinding(numeric, TextBox.TextProperty, binding);
-            BindingOperations.SetBinding(dropdown, ComboBox.SelectedIndexProperty, binding2);
             BindingOperations.SetBinding(dropdown, ComboBox.ItemsSourceProperty, binding3);
         }
 
