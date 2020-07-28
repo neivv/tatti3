@@ -266,7 +266,7 @@ namespace Tatti3
             }
         }
 
-        static bool IsDatType(ArrayFileType type)
+        public static bool IsDatType(ArrayFileType type)
         {
             switch (type)
             {

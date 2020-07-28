@@ -23,6 +23,8 @@ namespace Tatti3
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static RoutedCommand JumpCommand = new RoutedCommand();
+
         public MainWindow()
         {
             var args = Environment.GetCommandLineArgs();
@@ -113,6 +115,11 @@ namespace Tatti3
             }
             var state = (AppState)DataContext;
             (var type, var index) = state.CurrentBackRefs.Set.ElementAt(selIndex);
+            JumpToEntry(type, index);
+        }
+
+        void JumpToEntry(ArrayFileType type, uint index) 
+        {
             int tab;
             switch (type)
             {
@@ -314,6 +321,17 @@ namespace Tatti3
         }
 
         void SaveCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        void JumpCmdExecuted(object target, ExecutedRoutedEventArgs e)
+        {
+            var (dat, entry) = ((ArrayFileType, uint))e.Parameter;
+            JumpToEntry(dat, entry);
+        }
+
+        void JumpCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }

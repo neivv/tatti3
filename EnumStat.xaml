@@ -23,5 +23,4 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
     </StackPanel>
-
 </UserControl>

@@ -48,7 +48,19 @@ namespace Tatti3
         }
         public GameData.ArrayFileType Dat 
         {
-            get; set;
+            get => datArray;
+            set
+            {
+                datArray = value;
+                if (!AppState.IsDatType(datArray))
+                {
+                    button.Visibility = Visibility.Collapsed;
+                }
+                else 
+                {
+                    button.Visibility = Visibility.Visible;
+                }
+            }
         }
         FrameworkElement IStatControl.LabelText
         {
@@ -69,6 +81,8 @@ namespace Tatti3
                 UpdateBinding();
             }
         }
+
+        public uint Index { get; private set; }
 
         void UpdateBinding()
         {
@@ -110,7 +124,18 @@ namespace Tatti3
             BindingOperations.SetBinding(dropdown, ComboBox.ItemsSourceProperty, binding3);
         }
 
+        void OnJumpClicked(object sender, RoutedEventArgs e)
+        {
+            var dat = (AppState.DatTableRef)this.DataContext;
+            if (dat == null)
+            {
+                return;
+            }
+            MainWindow.JumpCommand.Execute((Dat, dat.Fields[FieldId].Item), this);
+        }
+
         uint field = 0;
         bool inited = false;
+        GameData.ArrayFileType datArray;
     }
 }

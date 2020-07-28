@@ -24,5 +24,10 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
+        <Button Click="OnJumpClicked" x:Name="button">
+            <Button.Content>
+                <TextBlock Text="Jump ->" Margin="2,0,2,0" />
+            </Button.Content>
+        </Button>
     </StackPanel>
 </UserControl>
