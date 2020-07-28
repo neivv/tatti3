@@ -74,7 +74,7 @@ namespace Tatti3.GameData
                     }
                     else 
                     {
-                        return DatTable.LoadNew(file);
+                        return DatTable.LoadNew(file, legacyDecl);
                     }
                 }
             }

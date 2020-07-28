@@ -11,13 +11,14 @@ namespace Tatti3.GameData
 {
     class DatTable
     {
-        DatTable() 
+        DatTable(LegacyDatDecl decl) 
         {
             fields = new Dictionary<uint, DatValue>();
-            RefFields = new List<RefField>();
             Entries = 0;
-            invalidIndexStart = 0;
-            invalidIndexCount = 0;
+            RefFields = new List<RefField>(decl.RefFields);
+            invalidIndexStart = decl.InvalidIndexStart;
+            invalidIndexCount = decl.InvalidIndexCount;
+            legacyDecl = decl;
         }
 
         public DatTable(DatTable other)
@@ -31,17 +32,15 @@ namespace Tatti3.GameData
             Entries = other.Entries;
             invalidIndexStart = other.invalidIndexStart;
             invalidIndexCount = other.invalidIndexCount;
+            legacyDecl = other.legacyDecl;
         }
 
         /// Initializes DatTable from data in the original .dat format
         public static DatTable LoadLegacy(Stream input, LegacyDatDecl decl)
         {
             var reader = new BinaryReader(input);
-            var self = new DatTable();
+            var self = new DatTable(decl);
             self.Entries = decl.entries;
-            self.RefFields = new List<RefField>(decl.RefFields);
-            self.invalidIndexStart = decl.InvalidIndexStart;
-            self.invalidIndexCount = decl.InvalidIndexCount;
             uint index = 0;
             foreach (var field in decl.fields)
             {
@@ -86,7 +85,7 @@ namespace Tatti3.GameData
         }
 
         /// Initializes DatTable from data in the extended .dat format
-        public static DatTable LoadNew(Stream data)
+        public static DatTable LoadNew(Stream data, LegacyDatDecl decl)
         {
             // Format:
             //  u16 major_version (1)
@@ -113,7 +112,7 @@ namespace Tatti3.GameData
             //      Users should accept lengths larger than what they expect, and leave any
             //      trailing data they cannot understand unused/unread.
             var reader = new BinaryReader(data);
-            var self = new DatTable();
+            var self = new DatTable(decl);
             var major = reader.ReadUInt16();
             var minor = reader.ReadUInt16();
             if (major != 1 || minor == 0)
@@ -139,12 +138,12 @@ namespace Tatti3.GameData
                 var length = reader.ReadInt32();
                 fields.Add(new FieldDecl(fieldId, flags, offset, length));
             }
-            foreach (var decl in fields)
+            foreach (var field in fields)
             {
-                reader.BaseStream.Seek(decl.Offset, SeekOrigin.Begin);
-                byte[] bytes = new byte[decl.Length];
-                reader.Read(bytes, 0, decl.Length);
-                self.fields.Add(decl.FieldId, new DatValue(new List<byte>(bytes), decl.Format));
+                reader.BaseStream.Seek(field.Offset, SeekOrigin.Begin);
+                byte[] bytes = new byte[field.Length];
+                reader.Read(bytes, 0, field.Length);
+                self.fields.Add(field.FieldId, new DatValue(new List<byte>(bytes), field.Format));
             }
             return self;
         }
@@ -157,7 +156,7 @@ namespace Tatti3.GameData
             // load to a file equal to this, and that it would again save
             // to a file equal to first save.
             var bytes = stream.ToArray();
-            var newTable = DatTable.LoadNew(new MemoryStream(bytes));
+            var newTable = DatTable.LoadNew(new MemoryStream(bytes), legacyDecl);
             if (this != newTable)
             {
                 throw new Exception("Saved file does not produce an equivalent dat table");
@@ -350,6 +349,7 @@ namespace Tatti3.GameData
         Dictionary<uint, DatValue> fields;
         uint invalidIndexStart;
         uint invalidIndexCount;
+        LegacyDatDecl legacyDecl;
 
         public static bool operator ==(DatTable? left, DatTable? right)
         {
