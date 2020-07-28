@@ -1,0 +1,615 @@
+﻿<Window x:Class="Tatti3.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:local="clr-namespace:Tatti3"
+        mc:Ignorable="d"
+        Width="1000" Height="750">
+    <Window.Resources>
+        <local:BackRefConverter x:Key="BackRefConverter" />
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Open" Executed="OpenCmdExecuted"
+            CanExecute="OpenCmdCanExecute"/>
+        <CommandBinding Command="ApplicationCommands.Save" Executed="SaveCmdExecuted"
+            CanExecute="SaveCmdCanExecute"/>
+    </Window.CommandBindings>
+    <Grid Background="#FFE5E5E5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300px"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Menu DockPanel.Dock="Top" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Command="ApplicationCommands.Open" />
+                <MenuItem Header="_Save" Command="ApplicationCommands.Save" />
+            </MenuItem>
+        </Menu>
+        <DockPanel Grid.Column="0" Grid.Row="1" Grid.RowSpan="2">
+            <DockPanel DockPanel.Dock="Bottom">
+                <Button DockPanel.Dock="Left" Click="OnSearchButtonClicked">
+                    <Button.Content>
+                        <TextBlock Text="Search" Margin="2,0,2,0" />
+                    </Button.Content>
+                </Button>
+                <Button DockPanel.Dock="Right" Click="OnIdGotoButtonClicked">
+                    <Button.Content>
+                        <TextBlock Text="->" Margin="2,0,2,0" />
+                    </Button.Content>
+                </Button>
+                <TextBox x:Name="idJumpBox" Width="40" DockPanel.Dock="Right" KeyDown="OnIdGotoBoxKey" />
+                <TextBlock Text="ID Jump" DockPanel.Dock="Right" Margin="2,0,2,0" />
+                <TextBox x:Name="searchBox" KeyDown="OnSearchBoxKey" />
+            </DockPanel>
+            <ListBox x:Name="entryList" DockPanel.Dock="Top">
+                <ListBox.ItemsSource>
+                    <Binding Path="CurrentEntryNames" />
+                </ListBox.ItemsSource>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=Text}">
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Enabled}" Value="false">
+                                <Setter Property="IsEnabled" Value="false" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </DockPanel>
+        <GroupBox Grid.Column="1" Grid.Row="2">
+            <GroupBox.Header>
+                <TextBlock Text="Used by:" />
+            </GroupBox.Header>
+            <ListBox x:Name="backRefList">
+                <ListBox.ItemsSource>
+                    <Binding Path="CurrentBackRefs.Set" />
+                </ListBox.ItemsSource>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding Converter="{StaticResource BackRefConverter}">
+                                    <Binding
+                                        RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
+                                        Path="DataContext" />
+                                    <Binding />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <EventSetter Event="MouseDoubleClick" Handler="GotoBackRef"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </GroupBox>
+        <TabControl Grid.Column="1" Grid.Row="1" x:Name="rootTab">
+            <TabItem Header="Units">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Units]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                    <TabControl>
+                        <TabItem Header="Basic">
+                            <Grid Background="#FFE5E5E5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <GroupBox>
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Vital Statistics" />
+                                        </GroupBox.Header>
+                                        <StackPanel Orientation="Vertical">
+                                            <local:StatGroup>
+                                                <local:IntStat Text="Hit Points" FieldId="0x8" Scale="256"/>
+                                            </local:StatGroup>
+                                            <StackPanel Orientation="Horizontal">
+                                                <local:StatGroup>
+                                                    <local:IntStat Text="Shields" FieldId="0x7"/>
+                                                </local:StatGroup>
+                                                <local:StatGroup Flags="true">
+                                                    <local:BoolStat Text="Enable" FieldId="0x6:1"/>
+                                                </local:StatGroup>
+                                            </StackPanel>
+                                            <local:StatGroup>
+                                                <local:IntStat Text="Armor" FieldId="0x1b"/>
+                                                <local:DatRefStat Text="Upgrade" Dat="upgrades" FieldId="0x19"/> 
+                                            </local:StatGroup>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <GroupBox>
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Build Cost" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup>
+                                            <local:IntStat Text="Minerals" FieldId="0x28"/>
+                                            <local:IntStat Text="Vespene" FieldId="0x29"/>
+                                            <local:IntStat Text="Time" FieldId="0x2a"/>
+                                            <local:BoolStat Text="Brood War" FieldId="0x35:0x200"/>
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                </StackPanel>
+                                <GroupBox Grid.Row="1">
+                                    <GroupBox.Header>
+                                        <TextBlock Text="Weapons" />
+                                    </GroupBox.Header>
+                                    <StackPanel Orientation = "Horizontal">
+                                        <local:StatGroup>
+                                            <local:DatRefStat Text="Ground" Dat="weapons" FieldId="0x11"/> 
+                                            <local:DatRefStat Text="Air" Dat="weapons" FieldId="0x13"/> 
+                                        </local:StatGroup>
+                                        <local:StatGroup>
+                                            <local:IntStat Text="Max Hits" FieldId="0x12"/>
+                                            <local:IntStat Text="Max Hits" FieldId="0x14"/>
+                                        </local:StatGroup>
+                                    </StackPanel>
+                                </GroupBox>
+                                <DockPanel Grid.Row="2">
+                                    <GroupBox DockPanel.Dock="Left">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Supply" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup>
+                                            <local:IntStat Text="Required" FieldId="0x2e" Scale="2"/>
+                                            <local:IntStat Text="Provided" FieldId="0x2d" Scale="2"/>
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                    <GroupBox DockPanel.Dock="Left">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Space" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup>
+                                            <local:IntStat Text="Required" FieldId="0x30"/>
+                                            <local:IntStat Text="Provided" FieldId="0x2f"/>
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                    <GroupBox DockPanel.Dock="Left">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Score" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup>
+                                            <local:IntStat Text="Build" FieldId="0x31"/>
+                                            <local:IntStat Text="Destroy" FieldId="0x32"/>
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                </DockPanel>
+                                <DockPanel Grid.Row="3">
+                                    <GroupBox DockPanel.Dock="Left">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Race" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup Flags="true">
+                                            <local:BoolStat Text="Zerg" FieldId="0x2c:0x1"/>
+                                            <local:BoolStat Text="Terran" FieldId="0x2c:0x2"/>
+                                            <local:BoolStat Text="Protoss" FieldId="0x2c:0x4"/>
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                    <GroupBox DockPanel.Dock="Left">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Other Properties" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup LabelWidth="*">
+                                            <local:IntStat Text="Sight" FieldId="0x18"/>
+                                            <local:IntStat Text="Target Acquisition Range" FieldId="0x17"/>
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                </DockPanel>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Advanced">
+                            <Grid Background="#FFE5E5E5"/>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Weapons">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Weapons]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <DockPanel Background="#FFE5E5E5">
+                    <DockPanel DockPanel.Dock="Left">
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Damage Properties" />
+                            </GroupBox.Header>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <local:StatGroup>
+                                        <local:IntStat Text="Amount" FieldId="0xe"/>
+                                        <local:IntStat Text="Bonus" FieldId="0xf"/>
+                                        <local:IntStat Text="Factor" FieldId="0x11"/>
+                                        <local:IntStat Text="Cooldown" FieldId="0x10"/>
+                                    </local:StatGroup>
+                                    <local:StatGroup>
+                                        <local:EnumStat Text="Type" FieldId="0x7">
+                                            <system:String>Independent</system:String>
+                                            <system:String>Explosive</system:String>
+                                            <system:String>Concussive</system:String>
+                                            <system:String>Normal</system:String>
+                                            <system:String>Ignore Armor</system:String>
+                                        </local:EnumStat>
+                                        <local:EnumStat Text="Effect" FieldId="0xa">
+                                            <system:String>(Invalid)</system:String>
+                                            <system:String>Normal Hit</system:String>
+                                            <system:String>Splash (All)</system:String>
+                                            <system:String>Splash (Enemy)</system:String>
+                                            <system:String>Lockdown</system:String>
+                                            <system:String>Nuclear Missile</system:String>
+                                            <system:String>Parasite</system:String>
+                                            <system:String>Broodlings</system:String>
+                                            <system:String>EMP Shockwave</system:String>
+                                            <system:String>Irradiate</system:String>
+                                            <system:String>Ensnare</system:String>
+                                            <system:String>Plague</system:String>
+                                            <system:String>Stasis Field</system:String>
+                                            <system:String>Dark Swarm</system:String>
+                                            <system:String>Consume</system:String>
+                                            <system:String>Yamato Gun</system:String>
+                                            <system:String>Restoration</system:String>
+                                            <system:String>Disruption Web</system:String>
+                                            <system:String>Corrosive Acid</system:String>
+                                            <system:String>Mind Control</system:String>
+                                            <system:String>Feedback</system:String>
+                                            <system:String>Optical Flare</system:String>
+                                            <system:String>Maelstrom</system:String>
+                                            <system:String>Unknown (Crash)</system:String>
+                                            <system:String>Splash (Air)</system:String>
+                                        </local:EnumStat>
+                                    </local:StatGroup>
+                                </StackPanel>
+                                <local:StatGroup>
+                                    <local:DatRefStat Text="Upgrade" Dat="upgrades" FieldId="0x6"/> 
+                                </local:StatGroup>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Weapon Display" />
+                            </GroupBox.Header>
+                            <local:StatGroup>
+                                <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x0"/> 
+                                <local:DatRefStat Text="Error" Dat="StatTxt" FieldId="0x16"/> 
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Graphical Properties" />
+                            </GroupBox.Header>
+                            <StackPanel Orientation="Vertical">
+                                <DockPanel>
+                                    <local:StatGroup LabelWidth="*" DockPanel.Dock="Right"
+                                    Margin="5,0,0,0">
+                                        <local:IntStat Text="Remove After" FieldId="0x9"/>
+                                    </local:StatGroup>
+                                    <local:StatGroup DockPanel.Dock="Right">
+                                        <local:EnumStat Text="Behaviour" FieldId="0x8">
+                                            <system:String>Fly &amp; Don't Follow Target</system:String>
+                                            <system:String>Fly &amp; Follow Target</system:String>
+                                            <system:String>Appear on Target Unit</system:String>
+                                            <system:String>Persist on Target Site</system:String>
+                                            <system:String>Appear on Target Site</system:String>
+                                            <system:String>Appear on Attacker</system:String>
+                                            <system:String>Attack &amp; Self-Destruct</system:String>
+                                            <system:String>Bounce</system:String>
+                                            <system:String>Attack Target 3x3 Area</system:String>
+                                            <system:String>Go to Max. Range</system:String>
+                                        </local:EnumStat>
+                                    </local:StatGroup>
+                                </DockPanel>
+                                <local:StatGroup>
+                                    <local:DatRefStat Text="Graphics" Dat="Flingy" FieldId="0x1"/> 
+                                    <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x17"/> 
+                                </local:StatGroup>
+                                <DockPanel>
+                                    <local:StatGroup LabelWidth="*" DockPanel.Dock="Right">
+                                        <local:IntStat Text="Attack Angle" FieldId="0x12"/>
+                                        <local:IntStat Text="Launch Spin" FieldId="0x13"/>
+                                    </local:StatGroup>
+                                    <local:StatGroup DockPanel.Dock="Right">
+                                        <local:IntStat Text="X Offset" FieldId="0x14"/>
+                                        <local:IntStat Text="Y Offset" FieldId="0x15"/>
+                                    </local:StatGroup>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </DockPanel>
+                    <DockPanel DockPanel.Dock="Left">
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Minimum Range" />
+                            </GroupBox.Header>
+                            <local:StatGroup>
+                                <local:IntStat Text="Tiles" FieldId="0x4" Scale="32"/>
+                                <local:IntStat Text="Pixels" FieldId="0x4"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Maximum Range" />
+                            </GroupBox.Header>
+                            <local:StatGroup>
+                                <local:IntStat Text="Tiles" FieldId="0x5" Scale="32"/>
+                                <local:IntStat Text="Pixels" FieldId="0x5"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Splash Radii" />
+                            </GroupBox.Header>
+                            <local:StatGroup>
+                                <local:IntStat Text="Inner" FieldId="0xb"/>
+                                <local:IntStat Text="Medium" FieldId="0xc"/>
+                                <local:IntStat Text="Outer" FieldId="0xd"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Target Flags" />
+                            </GroupBox.Header>
+                            <local:StatGroup Flags="True">
+                                <local:BoolStat Text="Air" FieldId="0x3:0x1"/>
+                                <local:BoolStat Text="Ground" FieldId="0x3:0x2"/>
+                                <local:BoolStat Text="Mechanical" FieldId="0x3:0x4"/>
+                                <local:BoolStat Text="Organic" FieldId="0x3:0x8"/>
+                                <local:BoolStat Text="Non-Building" FieldId="0x3:0x10"/>
+                                <local:BoolStat Text="Non-Robotic" FieldId="0x3:0x20"/>
+                                <local:BoolStat Text="Terrain" FieldId="0x3:0x40"/>
+                                <local:BoolStat Text="Organic/Mech" FieldId="0x3:0x80"/>
+                                <local:BoolStat Text="Own" FieldId="0x3:0x100"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                    </DockPanel>
+                </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Flingy">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Flingy]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <TextBlock Text="General Properties" />
+                        </GroupBox.Header>
+                        <local:StatGroup LabelWidth="*">
+                            <local:DatRefStat Text="Sprite" Dat="Sprites" FieldId="0x0"/> 
+                            <local:IntStat Text="Top Speed" FieldId="0x1"/>
+                            <local:IntStat Text="Acceleration" FieldId="0x2"/>
+                            <local:IntStat Text="Halt Distance" FieldId="0x3"/>
+                            <local:IntStat Text="Turn Speed" FieldId="0x4"/>
+                            <local:EnumStat Text="Move Control" FieldId="0x6" DropdownWidth="220">
+                                <system:String>Flingy.dat Control</system:String>
+                                <system:String>Flingy.dat Control (No Deacceleration)</system:String>
+                                <system:String>Iscript.bin Control</system:String>
+                            </local:EnumStat>
+                            <local:IntStat Text="Unused" FieldId="0x5"/>
+                        </local:StatGroup>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Sprites">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Sprites]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <TextBlock Text="Sprite Properties" />
+                        </GroupBox.Header>
+                        <local:StatGroup LabelWidth="*">
+                            <local:DatRefStat Text="Image" Dat="Images" FieldId="0x0"/> 
+                            <local:BoolStat Text="Is Visible" FieldId="0x3:0x1"/>
+                            <local:BoolStat Text="Unknown2" FieldId="0x2:0x1"/>
+                            <local:EnumStat Text="Selection Circle" FieldId="0x4">
+                                <system:String>22 pixels</system:String>
+                                <system:String>32 pixels</system:String>
+                                <system:String>46 pixels</system:String>
+                                <system:String>62 pixels</system:String>
+                                <system:String>72 pixels</system:String>
+                                <system:String>94 pixels</system:String>
+                                <system:String>110 pixels</system:String>
+                                <system:String>122 pixels</system:String>
+                                <system:String>146 pixels</system:String>
+                                <system:String>224 pixels</system:String>
+                            </local:EnumStat>
+                            <local:IntStat Text="Health Bar" FieldId="0x1"/>
+                            <local:IntStat Text="Health Bar Y Offset" FieldId="0x5"/>
+                        </local:StatGroup>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Images">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Images]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Image File" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="80">
+                                <local:DatRefStat Text="GRP File" Dat="ImagesTbl" FieldId="0x0"/> 
+                                <local:IntStat Text="Iscript ID" FieldId="0x7"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <DockPanel DockPanel.Dock="Top">
+                            <GroupBox DockPanel.Dock="Left">
+                                <GroupBox.Header>
+                                    <TextBlock Text="General Properties" />
+                                </GroupBox.Header>
+                            </GroupBox>
+                            <GroupBox DockPanel.Dock="Left">
+                                <GroupBox.Header>
+                                    <TextBlock Text="Drawing Properties" />
+                                </GroupBox.Header>
+                            </GroupBox>
+                        </DockPanel>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Extra Overlays Placement" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="80">
+                                <local:DatRefStat Text="Attack" Dat="ImagesTbl" FieldId="0x9"/> 
+                                <local:DatRefStat Text="Damage" Dat="ImagesTbl" FieldId="0xa"/> 
+                                <local:DatRefStat Text="Special" Dat="ImagesTbl" FieldId="0xb"/> 
+                                <local:DatRefStat Text="Landing Dust" Dat="ImagesTbl" FieldId="0xc"/> 
+                                <local:DatRefStat Text="Liftoff Dust" Dat="ImagesTbl" FieldId="0xd"/> 
+                                <local:DatRefStat Text="Shields" Dat="ImagesTbl" FieldId="0x8"/> 
+                            </local:StatGroup>
+                        </GroupBox>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Upgrades">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Upgrades]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Upgrade Display" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="80">
+                                <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x7"/> 
+                                <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x8"/> 
+                            </local:StatGroup>
+                        </GroupBox>
+                        <DockPanel DockPanel.Dock="Top">
+                            <GroupBox DockPanel.Dock="Left">
+                                <GroupBox.Header>
+                                    <TextBlock Text="Base Cost" />
+                                </GroupBox.Header>
+                                <local:StatGroup LabelWidth="80">
+                                    <local:IntStat Text="Minerals" FieldId="0x0"/>
+                                    <local:IntStat Text="Vespene" FieldId="0x2"/>
+                                    <local:IntStat Text="Time" FieldId="0x4"/>
+                                </local:StatGroup>
+                            </GroupBox>
+                            <GroupBox DockPanel.Dock="Left">
+                                <GroupBox.Header>
+                                    <TextBlock Text="Factor Cost" />
+                                </GroupBox.Header>
+                                <local:StatGroup>
+                                    <local:IntStat Text="Minerals" FieldId="0x1"/>
+                                    <local:IntStat Text="Vespene" FieldId="0x3"/>
+                                    <local:IntStat Text="Time" FieldId="0x5"/>
+                                </local:StatGroup>
+                            </GroupBox>
+                        </DockPanel>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Upgrade Properties" />
+                            </GroupBox.Header>
+                            <DockPanel>
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
+                                    <local:IntStat Text="Max Repeats" FieldId="0xa"/>
+                                    <local:EnumStat Text="Race" FieldId="0x9" DropdownWidth="80">
+                                        <system:String>Zerg</system:String>
+                                        <system:String>Terran</system:String>
+                                        <system:String>Protoss</system:String>
+                                        <system:String>All</system:String>
+                                    </local:EnumStat>
+                                </local:StatGroup>
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
+                                    <local:BoolStat Text="Brood War" FieldId="0xb:1"/>
+                                </local:StatGroup>
+                            </DockPanel>
+                        </GroupBox>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Tech">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[TechData]" />
+                </TabItem.DataContext>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Technology Display" />
+                            </GroupBox.Header>
+                            <local:StatGroup>
+                                <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x6"/> 
+                                <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x7"/> 
+                            </local:StatGroup>
+                        </GroupBox>
+                        <DockPanel DockPanel.Dock="Top">
+                            <GroupBox DockPanel.Dock="Left">
+                                <GroupBox.Header>
+                                    <TextBlock Text="Technology Cost" />
+                                </GroupBox.Header>
+                                <local:StatGroup>
+                                    <local:IntStat Text="Minerals" FieldId="0x0"/>
+                                    <local:IntStat Text="Vespene" FieldId="0x1"/>
+                                    <local:IntStat Text="Time" FieldId="0x2"/>
+                                    <local:IntStat Text="Energy" FieldId="0x3"/>
+                                </local:StatGroup>
+                            </GroupBox>
+                            <GroupBox DockPanel.Dock="Left">
+                                <GroupBox.Header>
+                                    <TextBlock Text="Technology Properties" />
+                                </GroupBox.Header>
+                                <local:StatGroup>
+                                    <local:EnumStat Text="Race" FieldId="0x8" DropdownWidth="80">
+                                        <system:String>Zerg</system:String>
+                                        <system:String>Terran</system:String>
+                                        <system:String>Protoss</system:String>
+                                        <system:String>All</system:String>
+                                    </local:EnumStat>
+                                    <local:BoolStat Text="Unused" FieldId="0x9:1"/>
+                                    <local:BoolStat Text="Brood War" FieldId="0xa:1"/>
+                                </local:StatGroup>
+                            </GroupBox>
+                        </DockPanel>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

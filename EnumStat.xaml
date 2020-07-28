@@ -1,0 +1,27 @@
+<UserControl x:Class="Tatti3.EnumStat"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Tatti3"
+             mc:Ignorable="d" 
+             d:DesignHeight="20" d:DesignWidth="800"
+    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
+    <StackPanel Orientation="Horizontal">
+        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="30"
+         />
+        <ComboBox x:Name="dropdown" Width="160" Padding="5,1,5,0">
+            <ComboBox.ItemsSource>
+                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type
+                local:EnumStat}}" Path="EnumNames" />
+            </ComboBox.ItemsSource>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" >
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+    </StackPanel>
+
+</UserControl>

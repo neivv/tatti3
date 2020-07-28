@@ -1,0 +1,8 @@
+.vs
+.vscode
+bin
+obj
+exception.txt
+stack.txt
+wpf_trace.txt
+out
