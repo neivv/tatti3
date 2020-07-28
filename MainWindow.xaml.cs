@@ -90,6 +90,10 @@ namespace Tatti3
                 int index = AppState.DatFileTypeToIndex(state.CurrentDat);
                 var selections = state.Selections;
                 entryList.SelectedIndex = selections[index];
+                if (entryList.SelectedIndex != -1)
+                {
+                    entryList.ScrollIntoView(entryList.Items[entryList.SelectedIndex]);
+                }
             };
             this.entryList.SelectionChanged += (e, args) => {
                 if (entryList.SelectedIndex == -1)
