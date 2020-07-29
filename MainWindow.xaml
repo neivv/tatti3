@@ -17,6 +17,8 @@
             CanExecute="SaveCmdCanExecute"/>
         <CommandBinding Command="{x:Static local:MainWindow.JumpCommand}" Executed="JumpCmdExecuted"
             CanExecute="JumpCmdCanExecute"/>
+        <CommandBinding Command="{x:Static local:MainWindow.NewEntryCommand}"
+            Executed="NewEntryCmdExecuted" CanExecute="NewEntryCmdCanExecute"/>
     </Window.CommandBindings>
     <Grid Background="#FFE5E5E5">
         <Grid.RowDefinitions>
@@ -69,6 +71,12 @@
                         </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Duplicate as a new entry"
+                            Command="{x:Static local:MainWindow.NewEntryCommand}" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
             </ListBox>
         </DockPanel>
         <GroupBox Grid.Column="1" Grid.Row="2">

@@ -49,7 +49,7 @@ namespace Tatti3
 
             public class FieldRef : INotifyPropertyChanged
             {
-                public event PropertyChangedEventHandler? PropertyChanged; 
+                public event PropertyChangedEventHandler? PropertyChanged;
 
                 public FieldRef(DatTableRef parent, uint fieldIndex)
                 {
@@ -111,7 +111,7 @@ namespace Tatti3
                         {
                             var bit = value.Item1;
                             var combined = value.Item2 ? (bit | item) : (~bit & item);
-                            if (item != combined) 
+                            if (item != combined)
                             {
                                 parent.table.SetFieldUint(entryIndex, fieldIndex, combined);
                                 item = combined;
@@ -127,7 +127,7 @@ namespace Tatti3
                     {
                         entryIndex = (uint)parent.state.selections[parent.selectionIndex];
                         var newItem = parent.table.GetFieldUint(entryIndex, fieldIndex);
-                        if (newItem != item) 
+                        if (newItem != item)
                         {
                             item = newItem;
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
@@ -141,8 +141,8 @@ namespace Tatti3
                 uint item;
                 uint entryIndex;
             }
-            
-            public event PropertyChangedEventHandler? PropertyChanged; 
+
+            public event PropertyChangedEventHandler? PropertyChanged;
 
             public DatTableRef(AppState state, ArrayFileType type)
             {
@@ -184,7 +184,7 @@ namespace Tatti3
             public AppState Root { get => state; }
             Dictionary<uint, FieldRef> fieldRefs = new Dictionary<uint, FieldRef>();
 
-            FieldRef GetFieldRef(uint index) 
+            FieldRef GetFieldRef(uint index)
             {
                 FieldRef? val;
                 if (!fieldRefs.TryGetValue(index, out val))
@@ -203,7 +203,7 @@ namespace Tatti3
             List<string>? names;
         }
 
-        public AppState(GameData.GameData? gameData) 
+        public AppState(GameData.GameData? gameData)
         {
             selections = new ObservableCollection<int>();
             for (int i = 0; i < 8; i++)
@@ -248,7 +248,7 @@ namespace Tatti3
             };
         }
 
-        public IEnumerable<(ArrayFileType, GameData.DatTable)> IterDats() 
+        public IEnumerable<(ArrayFileType, GameData.DatTable)> IterDats()
         {
             ArrayFileType[] dats =
             {
@@ -256,7 +256,7 @@ namespace Tatti3
                 ArrayFileType.Sprites, ArrayFileType.Images, ArrayFileType.Upgrades,
                 ArrayFileType.TechData,
             };
-            foreach (var type in dats) 
+            foreach (var type in dats)
             {
                 var dat = GetDat(type);
                 if (dat != null)
@@ -332,10 +332,10 @@ namespace Tatti3
                 }
             };
             ArrayFileType[] usesBackRefsForNames = {
-                ArrayFileType.Flingy, 
-                ArrayFileType.Sprites, 
-                ArrayFileType.Images, 
-                ArrayFileType.CmdIcon, 
+                ArrayFileType.Flingy,
+                ArrayFileType.Sprites,
+                ArrayFileType.Images,
+                ArrayFileType.CmdIcon,
             };
             // When names first array of tuple change,
             // invalidate the second array's names as they
@@ -392,7 +392,19 @@ namespace Tatti3
                     }
                 };
             }
+            foreach ((var type, var dat) in IterDats())
+            {
+                dat.EntryCountChanged += (obj, args) => {
+                    OnEntryCountChanged(type);
+                };
+            }
             CmdIcons = new LazyDdsGrp(GameData?.CmdIcons);
+        }
+
+        void OnEntryCountChanged(ArrayFileType type)
+        {
+            backRefs.Clear();
+            OnNamesChanged(type);
         }
 
         void OnNamesChanged(ArrayFileType type)
@@ -587,11 +599,11 @@ namespace Tatti3
                     {
                         entries.Add(defaultName(datIdx));
                     }
-                    else 
+                    else
                     {
                         namesAdded.Clear();
                         var result = $"";
-                        foreach ((var backType, var backIndex) in backRefs) 
+                        foreach ((var backType, var backIndex) in backRefs)
                         {
                             const int limit = 3;
                             string name;
@@ -625,7 +637,7 @@ namespace Tatti3
                         entries.Add(result);
                     }
                 }
-                else 
+                else
                 {
                     entries.Add(defaultName(datIdx));
                 }
@@ -695,7 +707,7 @@ namespace Tatti3
                                     {
                                         this.backRefs.Remove(type);
                                         this.BackRefsChanged?.Invoke(this, new BackRefsChangedEventArgs(type));
-                                        if (this.currentDat == otherType) 
+                                        if (this.currentDat == otherType)
                                         {
                                             this.UpdateCurrentBackRef();
                                         }
@@ -720,7 +732,7 @@ namespace Tatti3
             UpdateCurrentBackRef();
         }
 
-        void UpdateCurrentBackRef() 
+        void UpdateCurrentBackRef()
         {
             var selectionIndex = DatFileTypeToIndex(currentDat);
             var datIndex = Selections[selectionIndex];
@@ -728,7 +740,7 @@ namespace Tatti3
             if (datIndex < refs.Count)
             {
                 CurrentBackRefs = refs[datIndex];
-            } 
+            }
             else
             {
                 CurrentBackRefs = new BackRef();
@@ -742,7 +754,7 @@ namespace Tatti3
                 ArrayFileType.Units => 0,
                 ArrayFileType.Weapons => 1,
                 ArrayFileType.Flingy => 2,
-                ArrayFileType.Sprites => 3, 
+                ArrayFileType.Sprites => 3,
                 ArrayFileType.Images => 4,
                 ArrayFileType.Upgrades => 5,
                 ArrayFileType.TechData => 6,
@@ -750,10 +762,10 @@ namespace Tatti3
             };
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;  
+        public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<NamesChangedEventArgs>? NamesChanged;
         public event EventHandler<BackRefsChangedEventArgs>? BackRefsChanged;
-        public class NamesChangedEventArgs : EventArgs 
+        public class NamesChangedEventArgs : EventArgs
         {
             public NamesChangedEventArgs(ArrayFileType type)
             {
@@ -761,7 +773,7 @@ namespace Tatti3
             }
             public ArrayFileType Type { get; set; }
         }
-        public class BackRefsChangedEventArgs : EventArgs 
+        public class BackRefsChangedEventArgs : EventArgs
         {
             public BackRefsChangedEventArgs(ArrayFileType type)
             {
@@ -816,7 +828,7 @@ namespace Tatti3
                 NotifyPropertyChanged();
             }
         }
-  
+
         ArrayFileType currentDat;
         public ArrayFileType CurrentDat
         {
@@ -830,10 +842,10 @@ namespace Tatti3
 
         public LazyDdsGrp CmdIcons { get; private set; }
 
-        void NotifyPropertyChanged([CallerMemberName] String propertyName = "")  
-        {  
+        void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }  
+        }
 
         Dictionary<ArrayFileType, List<string>> entryNames = new Dictionary<ArrayFileType, List<String>>();
         Dictionary<ArrayFileType, List<EntryListData>> indexPrefixedEntryNames =

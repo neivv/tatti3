@@ -11,7 +11,7 @@ namespace Tatti3.GameData
 {
     class DatTable
     {
-        DatTable(LegacyDatDecl decl) 
+        DatTable(LegacyDatDecl decl)
         {
             fields = new Dictionary<uint, DatValue>();
             Entries = 0;
@@ -248,14 +248,14 @@ namespace Tatti3.GameData
             };
         }
 
-        static UInt16 ReadU16(List<byte> list, uint index) 
+        static UInt16 ReadU16(List<byte> list, uint index)
         {
             return BinaryPrimitives.ReadUInt16LittleEndian(
                 new ReadOnlySpan<byte>(list.GetRange((int)index * 2, 2).ToArray())
             );
         }
 
-        static UInt32 ReadU32(List<byte> list, uint index) 
+        static UInt32 ReadU32(List<byte> list, uint index)
         {
             return BinaryPrimitives.ReadUInt32LittleEndian(
                 new ReadOnlySpan<byte>(list.GetRange((int)index * 4, 4).ToArray())
@@ -289,14 +289,14 @@ namespace Tatti3.GameData
             FieldChanged?.Invoke(this, new FieldChangedEventArgs(fieldId, index));
         }
 
-        static void WriteU16(List<byte> list, uint index, uint value) 
+        static void WriteU16(List<byte> list, uint index, uint value)
         {
             int i = (int)index * 2;
             list[i] = (byte)value;
             list[i + 1] = (byte)(value >> 8);
         }
 
-        static void WriteU32(List<byte> list, uint index, uint value) 
+        static void WriteU32(List<byte> list, uint index, uint value)
         {
             int i = (int)index * 4;
             list[i] = (byte)value;
@@ -305,7 +305,7 @@ namespace Tatti3.GameData
             list[i + 3] = (byte)(value >> 24);
         }
 
-        static void WriteU64(List<byte> list, uint index, ulong value) 
+        static void WriteU64(List<byte> list, uint index, ulong value)
         {
             int i = (int)index * 8;
             list[i] = (byte)value;
@@ -316,6 +316,41 @@ namespace Tatti3.GameData
             list[i + 5] = (byte)(value >> 40);
             list[i + 6] = (byte)(value >> 48);
             list[i + 7] = (byte)(value >> 56);
+        }
+
+        public void DuplicateEntry(uint sourceIndex)
+        {
+            Entries += 1;
+            foreach (var pair in fields)
+            {
+                var fieldId = pair.Key;
+                var field = pair.Value;
+                var old = GetFieldUint(sourceIndex, fieldId);
+                int len = 0;
+                switch (field.DataFormat)
+                {
+                    case DatFieldFormat.Uint8:
+                        len = 1;
+                        break;
+                    case DatFieldFormat.Uint16:
+                        len = 2;
+                        break;
+                    case DatFieldFormat.Uint32:
+                        len = 4;
+                        break;
+                    case DatFieldFormat.Uint64:
+                        len = 8;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+                for (int i = 0; i < len; i++)
+                {
+                    field.Data.Add((byte)old);
+                    old = old >> 8;
+                }
+            }
+            EntryCountChanged?.Invoke(this, new EventArgs());
         }
 
         public override bool Equals(object? obj)
@@ -332,7 +367,7 @@ namespace Tatti3.GameData
         }
 
         public event EventHandler<FieldChangedEventArgs>? FieldChanged;
-        public class FieldChangedEventArgs : EventArgs 
+        public class FieldChangedEventArgs : EventArgs
         {
             public FieldChangedEventArgs(uint field, uint index)
             {
@@ -342,6 +377,8 @@ namespace Tatti3.GameData
             public uint Field { get; set; }
             public uint Index { get; set; }
         }
+
+        public event EventHandler<EventArgs>? EntryCountChanged;
 
         public uint Entries { get; private set; }
         public List<RefField> RefFields { get; private set; }
@@ -409,7 +446,7 @@ namespace Tatti3.GameData
         public bool ZeroIsNone { get; }
     }
 
-    class DatValue 
+    class DatValue
     {
         public DatValue(List<byte> data, DatFieldFormat format)
         {
@@ -423,7 +460,7 @@ namespace Tatti3.GameData
             DataFormat = other.DataFormat;
         }
 
-        public List<byte> Data { get; } 
+        public List<byte> Data { get; }
         public DatFieldFormat DataFormat { get; }
 
         public override bool Equals(object? obj)
@@ -449,7 +486,7 @@ namespace Tatti3.GameData
         }
     }
 
-    enum DatFieldFormat 
+    enum DatFieldFormat
     {
         Uint8,
         Uint16,
@@ -467,16 +504,16 @@ namespace Tatti3.GameData.BinaryWriterExt
         public static void WriteU16(this BinaryWriter output, UInt16 val)
         {
             output.Write(val);
-        } 
+        }
 
         public static void WriteU32(this BinaryWriter output, UInt32 val)
         {
             output.Write(val);
-        } 
+        }
 
         public static void WriteI32(this BinaryWriter output, Int32 val)
         {
             output.Write(val);
-        } 
+        }
     }
 }

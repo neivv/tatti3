@@ -24,6 +24,7 @@ namespace Tatti3
     public partial class MainWindow : Window
     {
         public static RoutedCommand JumpCommand = new RoutedCommand();
+        public static RoutedCommand NewEntryCommand = new RoutedCommand();
 
         public MainWindow()
         {
@@ -122,7 +123,7 @@ namespace Tatti3
             JumpToEntry(type, index);
         }
 
-        void JumpToEntry(ArrayFileType type, uint index) 
+        void JumpToEntry(ArrayFileType type, uint index)
         {
             int tab;
             switch (type)
@@ -157,7 +158,7 @@ namespace Tatti3
             entryList.ScrollIntoView(entryList.Items[(int)index]);
         }
 
-        void Opened(string root) 
+        void Opened(string root)
         {
             this.root = root;
         }
@@ -216,7 +217,7 @@ namespace Tatti3
         {
             string text = idJumpBox.Text;
             int index;
-            try 
+            try
             {
                 index = text.StartsWith("0x") ?
                     Int32.Parse(text.Substring(2), NumberStyles.HexNumber) :
@@ -226,7 +227,7 @@ namespace Tatti3
             {
                 return;
             }
-            // These names happen to tell whether the entry is disabled 
+            // These names happen to tell whether the entry is disabled
             var names = state.IndexPrefixedArrayFileNames(state.CurrentDat);
             if (names.Count <= index || !names[index].Enabled)
             {
@@ -312,7 +313,7 @@ namespace Tatti3
             }
             if (root != "" && state.IsDirty)
             {
-                try 
+                try
                 {
                     state.Save(root);
                     UpdateTitle();
@@ -336,6 +337,25 @@ namespace Tatti3
         }
 
         void JumpCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        void NewEntryCmdExecuted(object target, ExecutedRoutedEventArgs e)
+        {
+            var sourceEntry = (uint)entryList.SelectedIndex;
+            var dat = state.GetDat(state.CurrentDat);
+            if (dat == null)
+            {
+                return;
+            }
+            dat.DuplicateEntry(sourceEntry);
+            var newIndex = entryList.Items.Count - 1;
+            entryList.SelectedIndex = newIndex;
+            entryList.ScrollIntoView(entryList.Items[newIndex]);
+        }
+
+        void NewEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
