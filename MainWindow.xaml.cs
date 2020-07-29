@@ -123,8 +123,15 @@ namespace Tatti3
             JumpToEntry(type, index);
         }
 
-        void JumpToEntry(ArrayFileType type, uint index)
+        void JumpToEntry(ArrayFileType type, uint index_)
         {
+            var index = (int)index_;
+            // These names happen to tell whether the entry is disabled
+            var names = state.IndexPrefixedArrayFileNames(type);
+            if (names.Count <= index || !names[index].Enabled)
+            {
+                return;
+            }
             int tab;
             switch (type)
             {
@@ -153,9 +160,9 @@ namespace Tatti3
                     return;
             }
             rootTab.SelectedIndex = tab;
-            entryList.SelectedIndex = (int)index;
+            entryList.SelectedIndex = index;
             entryList.Focus();
-            entryList.ScrollIntoView(entryList.Items[(int)index]);
+            entryList.ScrollIntoView(entryList.Items[index]);
         }
 
         void Opened(string root)
