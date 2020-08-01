@@ -14,6 +14,7 @@ namespace Tatti3.GameData
         DatTable(LegacyDatDecl decl)
         {
             fields = new Dictionary<uint, DatValue>();
+            listFields = new Dictionary<uint, ListFieldState>();
             Entries = 0;
             RefFields = new List<RefField>(decl.RefFields);
             invalidIndexStart = decl.InvalidIndexStart;
@@ -23,6 +24,8 @@ namespace Tatti3.GameData
 
         public DatTable(DatTable other)
         {
+            fields = DictClone(other.fields, v => new DatValue(v));
+            listFields = DictClone(other.listFields, v => new ListFieldState(v));
             fields = new Dictionary<uint, DatValue>(other.fields.Count);
             foreach ((uint k, DatValue v) in other.fields)
             {
@@ -33,6 +36,17 @@ namespace Tatti3.GameData
             invalidIndexStart = other.invalidIndexStart;
             invalidIndexCount = other.invalidIndexCount;
             legacyDecl = other.legacyDecl;
+        }
+
+        static Dictionary<K, V> DictClone<K, V>(Dictionary<K, V> input, Func<V, V> cloneValue)
+        where K: notnull
+        {
+            var copy = new Dictionary<K, V>(input.Count);
+            foreach ((K k, V v) in input)
+            {
+                copy.Add(k, cloneValue(v));
+            }
+            return copy;
         }
 
         /// Initializes DatTable from data in the original .dat format
@@ -74,6 +88,7 @@ namespace Tatti3.GameData
                 self.fields.Add(index, new DatValue(data, field.format));
                 index += 1;
             }
+            InitListFields(self, decl);
             if (reader.BaseStream.Position != decl.FileSize)
             {
                 throw new InvalidDataException(
@@ -145,7 +160,21 @@ namespace Tatti3.GameData
                 reader.Read(bytes, 0, field.Length);
                 self.fields.Add(field.FieldId, new DatValue(new List<byte>(bytes), field.Format));
             }
+            InitListFields(self, decl);
             return self;
+        }
+
+        static private void InitListFields(DatTable self, LegacyDatDecl decl)
+        {
+            foreach (var listField in decl.ListFields)
+            {
+                if (self.fields.ContainsKey(listField.DataFieldId))
+                {
+                    self.fields[listField.DataFieldId].DataFormat = DatFieldFormat.VariableLengthData;
+                }
+                self.listFields[listField.OffsetFieldId] = new
+                    ListFieldState(listField.OffsetFieldId, listField.DataFieldId);
+            }
         }
 
         public void Write(Stream output)
@@ -353,17 +382,149 @@ namespace Tatti3.GameData
             EntryCountChanged?.Invoke(this, new EventArgs());
         }
 
+        public List<Requirement> GetRequirements(uint index, uint fieldId)
+        {
+            var raw = GetRequirementsRaw(index, fieldId);
+            return Requirement.ListFromRaw(raw);
+        }
+
+        private UInt16[] GetRequirementsRaw(uint index, uint fieldId)
+        {
+            var field = listFields[fieldId];
+            if (field.ChangedEntries.ContainsKey(index))
+            {
+                return ValueArrayDeepCopy(field.ChangedEntries[index]);
+            }
+            else
+            {
+                return GetRequirementsFromData(index, field);
+            }
+        }
+
+        // Reads requirements from .dat, skipping the mutation store layer
+        private UInt16[] GetRequirementsFromData(uint index, ListFieldState field)
+        {
+            var offset = GetFieldUint(index, field.OffsetFieldId);
+            if (offset == 0)
+            {
+                return new UInt16[]{};
+            }
+            var data = fields[field.DataFieldId];
+            if (data.DataFormat != DatFieldFormat.VariableLengthData)
+            {
+                throw new InvalidDataException(
+                    $"List field {field.OffsetFieldId:x}:{field.DataFieldId}" +
+                    $"had invalid format {data.DataFormat.ToString()}"
+                );
+            }
+            uint len = RequirementsLength(data.Data, offset);
+            UInt16[] result = new UInt16[(int)len];
+            for (uint i = 0; i < len; i++)
+            {
+                result[(int)i] = ReadU16(data.Data, offset + i);
+            }
+            return result;
+        }
+
+        private uint RequirementsLength(List<byte> data, uint offset)
+        {
+            uint len = 0;
+            bool upgradeLevelJumpSeen = false;
+            while (true)
+            {
+                var opcode = ReadU16(data, offset + len);
+                if (opcode == 0xffff)
+                {
+                    if (!upgradeLevelJumpSeen || (offset + len + 1) * 2 == data.Count)
+                    {
+                        break;
+                    }
+                    var next = ReadU16(data, offset + len + 1);
+                    if (next != 0xff20 && next != 0xff21)
+                    {
+                        break;
+                    }
+                }
+                if (opcode == 0xff1f)
+                {
+                    upgradeLevelJumpSeen = true;
+                }
+                if (opcode == 0xff21)
+                {
+                    upgradeLevelJumpSeen = false;
+                }
+                len += 1;
+            }
+            return len;
+        }
+
+        public void SetRequirements(uint index, uint fieldId, UInt16[] value)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Enumerable of (firegraft id, offset field id)
+        // Firegraft datreqs that weren't saved in dat yet.
+        public IEnumerable<(uint, uint)> MissingRequirements()
+        {
+            return legacyDecl.ListFields
+                .Where(x => !fields.ContainsKey(x.DataFieldId))
+                .Select(x => (x.FiregraftId, x.OffsetFieldId));
+        }
+
+        public void ResetListField(uint fieldId, byte[] offsets, byte[] data)
+        {
+            var field = listFields[fieldId];
+            field.ChangedEntries.Clear();
+            fields[fieldId].Data = new List<byte>(offsets);
+            fields[field.DataFieldId] = new DatValue(
+                new List<byte>(data),
+                DatFieldFormat.VariableLengthData
+            );
+        }
+
         public override bool Equals(object? obj)
         {
             return obj is DatTable table &&
                    Entries == table.Entries &&
-                   fields.Count == table.fields.Count &&
-                   fields.Keys.All(k => table.fields.ContainsKey(k) && fields[k] == table.fields[k]);
+                   DictEquals(fields, table.fields) &&
+                   DictEquals(listFields, table.listFields);
+        }
+
+        static bool DictEquals<K, V> (Dictionary<K, V> a, Dictionary<K, V> b)
+        where K: notnull
+        {
+            return a.Count == b.Count &&
+                a.Keys.All(k => {
+                    if (!b.ContainsKey(k))
+                    {
+                        return false;
+                    }
+                    var first = a[k];
+                    var second = b[k];
+                    return (first == null && second == null) || (first != null && first.Equals(second));
+                });
+        }
+
+        static bool DictEqualsWith<K, V> (Dictionary<K, V> a, Dictionary<K, V> b, Func<V, V, bool> Compare)
+        where K: notnull
+        {
+            return a.Count == b.Count &&
+                a.Keys.All(k => {
+                    if (!b.ContainsKey(k))
+                    {
+                        return false;
+                    }
+                    var first = a[k];
+                    var second = b[k];
+                    return (first == null && second == null) ||
+                        (first != null && Compare(first, second));
+                });
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Entries, fields);
+            return HashCode.Combine(Entries, fields, listFields);
         }
 
         public event EventHandler<FieldChangedEventArgs>? FieldChanged;
@@ -384,6 +545,8 @@ namespace Tatti3.GameData
         public List<RefField> RefFields { get; private set; }
 
         Dictionary<uint, DatValue> fields;
+        // Key is offset field id
+        Dictionary<uint, ListFieldState> listFields;
         uint invalidIndexStart;
         uint invalidIndexCount;
         LegacyDatDecl legacyDecl;
@@ -430,6 +593,49 @@ namespace Tatti3.GameData
             public uint FieldId { get; }
             public DatFieldFormat Format { get; }
         }
+
+        // State for fields where data is a variable.length list (e.g. requirements)
+        // Any mutated lists are stored to ChangedEntries and the actual data is only
+        // rebuilt on file save.
+        class ListFieldState
+        {
+            public ListFieldState(uint offset, uint data)
+            {
+                OffsetFieldId = offset;
+                DataFieldId = data;
+                ChangedEntries = new Dictionary<uint, UInt16[]>();
+            }
+
+            public ListFieldState(ListFieldState other)
+            {
+                OffsetFieldId = other.OffsetFieldId;
+                DataFieldId = other.DataFieldId;
+                ChangedEntries = DictClone(other.ChangedEntries, x => x.Select(y => y).ToArray());
+            }
+
+            public uint OffsetFieldId { get; set; }
+            public uint DataFieldId { get; set; }
+            public Dictionary<uint, UInt16[]> ChangedEntries { get; }
+
+            public override bool Equals(object? obj)
+            {
+                return obj is ListFieldState state &&
+                    OffsetFieldId == state.OffsetFieldId &&
+                    DataFieldId == state.DataFieldId &&
+                    DictEqualsWith(ChangedEntries, state.ChangedEntries, (a, b) => a.SequenceEqual(b));
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(OffsetFieldId, DataFieldId, ChangedEntries);
+            }
+        }
+
+        static T[] ValueArrayDeepCopy<T>(T[] input)
+        where T: notnull
+        {
+            return input.Select(x => x).ToArray();
+        }
     }
 
     public struct RefField
@@ -446,6 +652,20 @@ namespace Tatti3.GameData
         public bool ZeroIsNone { get; }
     }
 
+    public struct ListField
+    {
+        public ListField(uint offset, uint data, UInt32 firegraft)
+        {
+            OffsetFieldId = offset;
+            DataFieldId = data;
+            FiregraftId = firegraft;
+        }
+
+        public uint OffsetFieldId { get; }
+        public uint DataFieldId { get; }
+        public uint FiregraftId { get; }
+    }
+
     class DatValue
     {
         public DatValue(List<byte> data, DatFieldFormat format)
@@ -460,8 +680,8 @@ namespace Tatti3.GameData
             DataFormat = other.DataFormat;
         }
 
-        public List<byte> Data { get; }
-        public DatFieldFormat DataFormat { get; }
+        public List<byte> Data { get; set; }
+        public DatFieldFormat DataFormat { get; set; }
 
         public override bool Equals(object? obj)
         {
@@ -492,6 +712,7 @@ namespace Tatti3.GameData
         Uint16,
         Uint32,
         Uint64,
+        VariableLengthData,
     }
 }
 

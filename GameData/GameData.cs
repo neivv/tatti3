@@ -10,14 +10,15 @@ namespace Tatti3.GameData
     {
         GameData(string root)
         {
-            Units = LoadDatTable(Path.Join(root, "arr/units.dat"), LegacyDatDecl.Units);
-            Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons);
+            var firegraft = new FiregraftData(root);
+            Units = LoadDatTable(Path.Join(root, "arr/units.dat"), LegacyDatDecl.Units, firegraft);
+            Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
             Upgrades =
-                LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades);
-            TechData = LoadDatTable(Path.Join(root, "arr/techdata.dat"), LegacyDatDecl.TechData);
-            Flingy = LoadDatTable(Path.Join(root, "arr/flingy.dat"), LegacyDatDecl.Flingy);
-            Sprites = LoadDatTable(Path.Join(root, "arr/sprites.dat"), LegacyDatDecl.Sprites);
-            Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images);
+                LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);
+            TechData = LoadDatTable(Path.Join(root, "arr/techdata.dat"), LegacyDatDecl.TechData, firegraft);
+            Flingy = LoadDatTable(Path.Join(root, "arr/flingy.dat"), LegacyDatDecl.Flingy, firegraft);
+            Sprites = LoadDatTable(Path.Join(root, "arr/sprites.dat"), LegacyDatDecl.Sprites, firegraft);
+            Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             CmdIcons = LoadDdsGrp(
                 Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
@@ -39,7 +40,7 @@ namespace Tatti3.GameData
             CmdIcons = other.CmdIcons;
         }
 
-        public static GameData Open(string root) 
+        public static GameData Open(string root)
         {
             return new GameData(root);
         }
@@ -62,27 +63,34 @@ namespace Tatti3.GameData
             }
         }
 
-        static DatTable LoadDatTable(string path, LegacyDatDecl legacyDecl) 
+        static DatTable LoadDatTable(string path, LegacyDatDecl legacyDecl, FiregraftData firegraft)
         {
+            DatTable table;
             try
             {
-                using (var file = File.OpenRead(path)) 
+                using (var file = File.OpenRead(path))
                 {
                     if (file.Length == legacyDecl.FileSize)
                     {
-                        return DatTable.LoadLegacy(file, legacyDecl);
+                        table = DatTable.LoadLegacy(file, legacyDecl);
                     }
-                    else 
+                    else
                     {
-                        return DatTable.LoadNew(file, legacyDecl);
+                        table = DatTable.LoadNew(file, legacyDecl);
                     }
                 }
             }
             catch (FileNotFoundException)
             {
                 var stream = new MemoryStream(legacyDecl.defaultFile);
-                return DatTable.LoadLegacy(stream, legacyDecl);
+                table = DatTable.LoadLegacy(stream, legacyDecl);
             }
+            foreach ((var firegraftId, var fieldId) in table.MissingRequirements())
+            {
+                var data = firegraft.GetRequirements(firegraftId, table.Entries);
+                table.ResetListField(fieldId, data.Offsets, data.Data);
+            }
+            return table;
         }
 
         /// Path must be without extension. Tries both json/xml

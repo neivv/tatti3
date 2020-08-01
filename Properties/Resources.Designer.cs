@@ -203,6 +203,16 @@ namespace Tatti3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] firegraft_default_fgp {
+            get {
+                object obj = ResourceManager.GetObject("firegraft_default_fgp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] rez_stat_txt_json {
             get {
                 object obj = ResourceManager.GetObject("rez_stat_txt_json", resourceCulture);

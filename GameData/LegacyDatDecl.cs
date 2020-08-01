@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 
@@ -24,6 +25,7 @@ namespace Tatti3.GameData
 
         public Field[] fields;
         public RefField[] RefFields;
+        public ListField[] ListFields;
         public uint entries;
         public uint FileSize;
         public uint InvalidIndexStart;
@@ -48,6 +50,14 @@ namespace Tatti3.GameData
             Func<ArrayFileType, uint, RefField> MakeRefField = (a, b) => new RefField(a, b, false);
             Func<ArrayFileType, uint, RefField> MakeRefFieldZeroOptional =
                 (a, b) => new RefField(a, b, true);
+            Func<string, UInt32> U32Code = input => {
+                UInt32 result = 0;
+                foreach (char x in input.Reverse())
+                {
+                    result = (result << 8) | ((byte)x);
+                }
+                return result;
+            };
             byte[] u8Zero = { 0 };
             byte[] u16Zero = { 0, 0, };
             byte[] u32Zero = { 0, 0, 0, 0 };
@@ -188,6 +198,7 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.SfxData, 0x22),
                         MakeRefField(ArrayFileType.SfxData, 0x23),
                     },
+                    ListFields = new ListField[] {},
                 };
             }
 
@@ -259,6 +270,7 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.StatTxt, 0x16),
                         MakeRefField(ArrayFileType.CmdIcon, 0x17),
                     },
+                    ListFields = new ListField[] {},
                 };
             }
 
@@ -292,6 +304,7 @@ namespace Tatti3.GameData
                     RefFields = new RefField[] {
                         MakeRefField(ArrayFileType.Sprites, 0x00),
                     },
+                    ListFields = new ListField[] {},
                 };
             }
 
@@ -323,6 +336,7 @@ namespace Tatti3.GameData
                     RefFields = new RefField[] {
                         MakeRefField(ArrayFileType.Images, 0x00),
                     },
+                    ListFields = new ListField[] {},
                 };
             }
 
@@ -367,8 +381,8 @@ namespace Tatti3.GameData
                         // 0x0d Liftoff Overlay
                         Uint32(),
                     },
-                    RefFields = new RefField[] {
-                    },
+                    RefFields = new RefField[] {},
+                    ListFields = new ListField[] {},
                 };
             }
 
@@ -378,10 +392,10 @@ namespace Tatti3.GameData
                 Func<Field> Uint32 = () => MakeField(4, 0, 61, u32Zero, DatFieldFormat.Uint32);
                 Upgrades = new LegacyDatDecl
                 {
-                    entries = 61,
+                    entries = 62,
                     FileSize = 1281,
-                    InvalidIndexStart = 0,
-                    InvalidIndexCount = 0,
+                    InvalidIndexStart = 61,
+                    InvalidIndexCount = 1,
                     defaultFile = Properties.Resources.arr_upgrades_dat,
                     fields = new Field[] {
                         // 0x00 Mineral cost
@@ -413,6 +427,9 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.CmdIcon, 0x07),
                         MakeRefField(ArrayFileType.StatTxt, 0x08),
                     },
+                    ListFields = new ListField[] {
+                        new ListField(0x06, 0x10, U32Code("UpgR")),
+                    },
                 };
             }
 
@@ -422,10 +439,10 @@ namespace Tatti3.GameData
                 Func<Field> Uint32 = () => MakeField(4, 0, 44, u32Zero, DatFieldFormat.Uint32);
                 TechData = new LegacyDatDecl
                 {
-                    entries = 44,
+                    entries = 45,
                     FileSize = 836,
-                    InvalidIndexStart = 0,
-                    InvalidIndexCount = 0,
+                    InvalidIndexStart = 44,
+                    InvalidIndexCount = 1,
                     defaultFile = Properties.Resources.arr_techdata_dat,
                     fields = new Field[] {
                         // 0x00 Mineral cost
@@ -454,6 +471,10 @@ namespace Tatti3.GameData
                     RefFields = new RefField[] {
                         MakeRefField(ArrayFileType.CmdIcon, 0x06),
                         MakeRefField(ArrayFileType.StatTxt, 0x07),
+                    },
+                    ListFields = new ListField[] {
+                        new ListField(0x04, 0x10, U32Code("TecR")),
+                        new ListField(0x05, 0x11, U32Code("TecU")),
                     },
                 };
             }

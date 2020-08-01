@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows;
 
 using ArrayFileType = Tatti3.GameData.ArrayFileType;
+using Requirement = Tatti3.GameData.Requirement;
 
 namespace Tatti3
 {
@@ -142,6 +143,71 @@ namespace Tatti3
                 uint entryIndex;
             }
 
+            public class RequirementsRef
+            {
+                public RequirementsRef(DatTableRef parent, uint offsetFieldId, uint dataFieldId)
+                {
+                    this.parent = parent;
+                    this.offsetFieldId = offsetFieldId;
+                    this.dataFieldId = dataFieldId;
+                    this.entryIndex = 0;
+                    this.Requirements = new ObservableCollection<Requirement>();
+                    UpdateReqs();
+
+                    if (parent.table != null)
+                    {
+                        parent.table.FieldChanged += (table, args) => {
+                            if (
+                                ReferenceEquals(table, parent.table) &&
+                                (args.Field == this.offsetFieldId || args.Field == this.dataFieldId)
+                            )
+                            {
+                                UpdateReqs();
+                            }
+                        };
+                        if (parent.selectionIndex != -1)
+                        {
+                            parent.state.PropertyChanged += (obj, args) => {
+                                if (obj != parent.state)
+                                {
+                                    return;
+                                }
+                                if (args.PropertyName == "Selections")
+                                {
+                                    var selected = parent.state.Selections[parent.selectionIndex];
+                                    if ((uint)selected != entryIndex)
+                                    {
+                                        UpdateReqs();
+                                    }
+                                }
+                            };
+                        }
+                    }
+                    // TODO event for table changed
+                }
+
+                void UpdateReqs()
+                {
+                    Requirements.Clear();
+                    if (parent.table != null)
+                    {
+                        entryIndex = (uint)parent.state.selections[parent.selectionIndex];
+                        var reqs = parent.table.GetRequirements(entryIndex, offsetFieldId);
+                        foreach (var req in reqs)
+                        {
+                            Requirements.Add(req);
+                        }
+                    }
+                }
+
+                public ObservableCollection<Requirement> Requirements { get; }
+
+                DatTableRef parent;
+                uint offsetFieldId;
+                uint dataFieldId;
+                uint entryIndex;
+            }
+
             public event PropertyChangedEventHandler? PropertyChanged;
 
             public DatTableRef(AppState state, ArrayFileType type)
@@ -183,6 +249,8 @@ namespace Tatti3
             }
             public AppState Root { get => state; }
             Dictionary<uint, FieldRef> fieldRefs = new Dictionary<uint, FieldRef>();
+            Dictionary<(uint, uint), RequirementsRef> requirementRefs =
+                new Dictionary<(uint, uint), RequirementsRef>();
 
             FieldRef GetFieldRef(uint index)
             {
@@ -191,6 +259,17 @@ namespace Tatti3
                 {
                     val = new FieldRef(this, index);
                     fieldRefs[index] = val;
+                }
+                return val;
+            }
+
+            public RequirementsRef GetRequirementsRef(uint offsets, uint data)
+            {
+                RequirementsRef? val;
+                if (!requirementRefs.TryGetValue((offsets, data), out val))
+                {
+                    val = new RequirementsRef(this, offsets, data);
+                    requirementRefs[(offsets, data)] = val;
                 }
                 return val;
             }
@@ -456,6 +535,12 @@ namespace Tatti3
                 case ArrayFileType.Weapons:
                     result[(int)WeaponNoneEntry].Enabled = false;
                     break;
+                case ArrayFileType.Upgrades:
+                    result[(int)UpgradeNoneEntry].Enabled = false;
+                    break;
+                case ArrayFileType.TechData:
+                    result[(int)TechNoneEntry].Enabled = false;
+                    break;
                 default:
                     break;
             }
@@ -535,6 +620,11 @@ namespace Tatti3
                             }
                             entries.Add(name);
                         }
+                        while (entries.Count <= (int)UpgradeNoneEntry)
+                        {
+                            entries.Add($"Invalid");
+                        }
+                        entries[(int)UpgradeNoneEntry] = "None";
                         break;
                     case ArrayFileType.TechData:
                         for (uint i = 0; i < dat.Entries; i++)
@@ -551,6 +641,11 @@ namespace Tatti3
                             }
                             entries.Add(name);
                         }
+                        while (entries.Count <= (int)TechNoneEntry)
+                        {
+                            entries.Add($"Invalid");
+                        }
+                        entries[(int)TechNoneEntry] = "None";
                         break;
                     default:
                         break;
@@ -873,6 +968,8 @@ namespace Tatti3
         const uint UnitFactoriesEntry = 232;
         const uint WeaponNameField = 0x0;
         const uint WeaponNoneEntry = 130;
+        const uint UpgradeNoneEntry = 61;
+        const uint TechNoneEntry = 44;
         const uint UpgradeNameField = 0x8;
         const uint TechNameField = 0x7;
     }
