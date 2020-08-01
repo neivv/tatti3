@@ -349,37 +349,60 @@ namespace Tatti3.GameData
 
         public void DuplicateEntry(uint sourceIndex)
         {
+            var destIndex = Entries;
             Entries += 1;
+            var listFieldIds = new HashSet<uint>();
+            foreach (var listField in listFields.Values)
+            {
+                listFieldIds.Add(listField.DataFieldId);
+                listFieldIds.Add(listField.OffsetFieldId);
+                var opcodes = GetRequirementsRaw(sourceIndex, listField.OffsetFieldId);
+                var field = fields[listField.OffsetFieldId];
+                AppendToField(field, 0);
+                SetRequirementsRaw(destIndex, listField.OffsetFieldId, opcodes);
+            }
             foreach (var pair in fields)
             {
                 var fieldId = pair.Key;
                 var field = pair.Value;
+                if (listFieldIds.Contains(fieldId))
+                {
+                    // Lists were handled above
+                    continue;
+                }
                 var old = GetFieldUint(sourceIndex, fieldId);
-                int len = 0;
-                switch (field.DataFormat)
-                {
-                    case DatFieldFormat.Uint8:
-                        len = 1;
-                        break;
-                    case DatFieldFormat.Uint16:
-                        len = 2;
-                        break;
-                    case DatFieldFormat.Uint32:
-                        len = 4;
-                        break;
-                    case DatFieldFormat.Uint64:
-                        len = 8;
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-                for (int i = 0; i < len; i++)
-                {
-                    field.Data.Add((byte)old);
-                    old = old >> 8;
-                }
+                AppendToField(field, old);
             }
             EntryCountChanged?.Invoke(this, new EventArgs());
+        }
+
+        // Duplicate helper.
+        // Adds the field value for the new entry.
+        private static void AppendToField(DatValue field, uint value)
+        {
+            int len = 0;
+            switch (field.DataFormat)
+            {
+                case DatFieldFormat.Uint8:
+                    len = 1;
+                    break;
+                case DatFieldFormat.Uint16:
+                    len = 2;
+                    break;
+                case DatFieldFormat.Uint32:
+                    len = 4;
+                    break;
+                case DatFieldFormat.Uint64:
+                    len = 8;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            for (int i = 0; i < len; i++)
+            {
+                field.Data.Add((byte)value);
+                value = value >> 8;
+            }
         }
 
         public List<Requirement> GetRequirements(uint index, uint fieldId)
@@ -461,6 +484,19 @@ namespace Tatti3.GameData
         public void SetRequirements(uint index, uint fieldId, UInt16[] value)
         {
             throw new NotImplementedException();
+        }
+
+        private void SetRequirementsRaw(uint index, uint fieldId, UInt16[] value)
+        {
+            var field = listFields[fieldId];
+            if (!GetRequirementsFromData(index, field).SequenceEqual(value))
+            {
+                field.ChangedEntries.Add(index, value);
+            }
+            else
+            {
+                field.ChangedEntries.Remove(index);
+            }
         }
 
         // Enumerable of (firegraft id, offset field id)
