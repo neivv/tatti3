@@ -151,7 +151,7 @@ namespace Tatti3
                     this.offsetFieldId = offsetFieldId;
                     this.dataFieldId = dataFieldId;
                     this.entryIndex = 0;
-                    this.Requirements = new ObservableCollection<Requirement>();
+                    this.Requirements = new RequirementList();
                     UpdateReqs();
 
                     if (parent.table != null)
@@ -183,24 +183,31 @@ namespace Tatti3
                             };
                         }
                     }
+                    this.Requirements.Mutated += (obj, args) => {
+                        if (parent.table != null)
+                        {
+                            parent.table.SetRequirements(entryIndex, offsetFieldId, Requirements.ToArray());
+                        }
+                    };
                     // TODO event for table changed
                 }
 
                 void UpdateReqs()
                 {
-                    Requirements.Clear();
-                    if (parent.table != null)
-                    {
-                        entryIndex = (uint)parent.state.selections[parent.selectionIndex];
-                        var reqs = parent.table.GetRequirements(entryIndex, offsetFieldId);
-                        foreach (var req in reqs)
+                    Requirements.Rebuild(add => {
+                        if (parent.table != null)
                         {
-                            Requirements.Add(req);
+                            entryIndex = (uint)parent.state.selections[parent.selectionIndex];
+                            var reqs = parent.table.GetRequirements(entryIndex, offsetFieldId);
+                            foreach (var req in reqs)
+                            {
+                                add(req);
+                            }
                         }
-                    }
+                    });
                 }
 
-                public ObservableCollection<Requirement> Requirements { get; }
+                public RequirementList Requirements { get; }
 
                 DatTableRef parent;
                 uint offsetFieldId;

@@ -3,16 +3,66 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:local="clr-namespace:Tatti3"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:TupleIndexConverter x:Key="TupleIndexConverter" />
+    </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
-        <ListBox x:Name="requirementList" MinHeight="300" MinWidth="400">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <local:DatRequirementLine RequirementData="{Binding}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <DockPanel>
+            <ComboBox x:Name="selectRequirement" DockPanel.Dock="Bottom">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <Binding Converter="{StaticResource TupleIndexConverter}">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>1</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ListBox x:Name="requirementList" MinHeight="300" MinWidth="400">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <local:DatRequirementLine RequirementData="{Binding Path=Value}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+        <StackPanel Orientation="Vertical">
+            <Button Click="OnAddClick">
+                <Button.Content>
+                    <TextBlock Text="Add" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+            <Button Click="OnCopyClick">
+                <Button.Content>
+                    <TextBlock Text="Copy" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+            <Separator />
+            <Button Click="OnMoveUpClick">
+                <Button.Content>
+                    <TextBlock Text="Move up" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+            <Button Click="OnMoveDownClick">
+                <Button.Content>
+                    <TextBlock Text="Move down" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+            <Separator />
+            <Button Click="OnRemoveClick">
+                <Button.Content>
+                    <TextBlock Text="Remove" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+        </StackPanel>
     </StackPanel>
 </UserControl>

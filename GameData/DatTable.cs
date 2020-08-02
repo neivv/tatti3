@@ -481,9 +481,15 @@ namespace Tatti3.GameData
             return len;
         }
 
-        public void SetRequirements(uint index, uint fieldId, UInt16[] value)
+        public void SetRequirements(uint index, uint fieldId, Requirement[] value)
         {
-            throw new NotImplementedException();
+            if (index >= Entries || index > 0xffff)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            var raw = Requirement.ToRaw(value, (UInt16)index);
+            SetRequirementsRaw(index, fieldId, raw);
+            FieldChanged?.Invoke(this, new FieldChangedEventArgs(fieldId, index));
         }
 
         private void SetRequirementsRaw(uint index, uint fieldId, UInt16[] value)
@@ -491,7 +497,7 @@ namespace Tatti3.GameData
             var field = listFields[fieldId];
             if (!GetRequirementsFromData(index, field).SequenceEqual(value))
             {
-                field.ChangedEntries.Add(index, value);
+                field.ChangedEntries[index] = value;
             }
             else
             {

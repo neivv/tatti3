@@ -23,9 +23,9 @@
     <Grid Background="#FFE5E5E5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="250px"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300px"/>
@@ -80,8 +80,10 @@
                 </ListBox.ContextMenu>
             </ListBox>
         </DockPanel>
+        <!--
         <GridSplitter Grid.Column="1" Grid.Row="2" Height="5" VerticalAlignment="Top"
             HorizontalAlignment="Stretch" />
+            -->
         <GroupBox Grid.Column="1" Grid.Row="3">
             <GroupBox.Header>
                 <TextBlock Text="Used by:" />
@@ -412,6 +414,9 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <GroupBox>
                         <GroupBox.Header>
                             <TextBlock Text="General Properties" />
@@ -440,6 +445,9 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <GroupBox>
                         <GroupBox.Header>
                             <TextBlock Text="Sprite Properties" />
@@ -474,6 +482,9 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <DockPanel>
                         <GroupBox DockPanel.Dock="Top">
                             <GroupBox.Header>
@@ -516,13 +527,16 @@
                 <TabItem.DataContext>
                     <Binding Path="Dat[Upgrades]" />
                 </TabItem.DataContext>
-                <Grid Background="#FFE5E5E5">
+                <DockPanel Background="#FFE5E5E5">
                     <TabControl>
-                        <TabItem Header="Stats">
+                        <TabItem Header="Properties">
                             <Grid Background="#FFE5E5E5">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
                                 <DockPanel>
                                     <GroupBox DockPanel.Dock="Top">
                                         <GroupBox.Header>
@@ -591,19 +605,22 @@
                             </Grid>
                         </TabItem>
                     </TabControl>
-                </Grid>
+                </DockPanel>
             </TabItem>
             <TabItem Header="Tech">
                 <TabItem.DataContext>
                     <Binding Path="Dat[TechData]" />
                 </TabItem.DataContext>
-                <Grid Background="#FFE5E5E5">
+                <DockPanel Background="#FFE5E5E5">
                     <TabControl>
-                        <TabItem Header="Stats">
+                        <TabItem Header="Properties">
                             <Grid Background="#FFE5E5E5">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
                                 <DockPanel>
                                     <GroupBox DockPanel.Dock="Top">
                                         <GroupBox.Header>
@@ -672,7 +689,7 @@
                             </Grid>
                         </TabItem>
                     </TabControl>
-                </Grid>
+                </DockPanel>
             </TabItem>
         </TabControl>
     </Grid>

@@ -36,5 +36,57 @@ namespace Tatti3.GameData
             }
             return result;
         }
+
+        // Returns an array with entry prefixed, but without last 0xffff
+        public static UInt16[] ToRaw(Requirement[] reqs, UInt16 id)
+        {
+            var result = new List<UInt16>();
+            result.Add(id);
+            foreach (var req in reqs)
+            {
+                result.Add(req.Opcode);
+                switch (req.Opcode)
+                {
+                    case 0xff02: case 0xff03: case 0xff04: case 0xff25:
+                        result.Add(req.Param);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return result.ToArray();
+        }
+
+        public bool IsUpgradeLevelOpcode()
+        {
+            return Opcode >= 0xff1f && Opcode <= 0xff21;
+        }
+
+        public bool IsEnd()
+        {
+            return Opcode == 0xffff;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Requirement value &&
+                Opcode == value.Opcode &&
+                Param == value.Param;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Opcode, Param);
+        }
+
+        public static bool operator ==(Requirement left, Requirement right)
+        {
+            return EqualityComparer<Requirement>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(Requirement left, Requirement right)
+        {
+            return !(left == right);
+        }
     }
 }

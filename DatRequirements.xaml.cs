@@ -22,6 +22,53 @@ namespace Tatti3
         {
             InitializeComponent();
             this.DataContextChanged += (o, e) => this.UpdateBinding();
+            this.selectRequirement.ItemsSource = OpcodeNames;
+            this.requirementList.SelectionChanged += (e, args) => {
+                if (requirementList.SelectedIndex == -1)
+                {
+                    return;
+                }
+                var req = ((RequirementList.RequirementWrap)
+                    requirementList.Items[requirementList.SelectedIndex]).Value;
+                var op = req.Opcode < 0xff00 ? 0 : req.Opcode;
+                var index = OpcodeNames.FindIndex(x => x.Item1 == op);
+                selectRequirement.SelectedIndex = index;
+            };
+            this.selectRequirement.SelectionChanged += (e, args) => {
+                if (selectRequirement.SelectedIndex == -1 || requirementList.SelectedIndex == -1)
+                {
+                    return;
+                }
+                var reqListIndex = requirementList.SelectedIndex;
+                var opcode = OpcodeNames[selectRequirement.SelectedIndex].Item1;
+                var req = new Requirement
+                {
+                    Opcode = opcode,
+                    Param = 0,
+                };
+                var dat = (AppState.DatTableRef)this.DataContext;
+                if (dat == null)
+                {
+                    return;
+                }
+                var reqs = dat.GetRequirementsRef(offsetField, dataField).Requirements;
+                var oldOpcode = reqs[reqListIndex].Opcode;
+                if (oldOpcode == 0xffff)
+                {
+                    // Not allowing to edit "End"
+                    return;
+                }
+                if (oldOpcode < 0xff00)
+                {
+                    oldOpcode = 0;
+                }
+                if (oldOpcode != req.Opcode)
+                {
+                    reqs[reqListIndex] = new RequirementList.RequirementWrap(req);
+                }
+                // Keep index selected even if the req changed
+                requirementList.SelectedIndex = reqListIndex;
+            };
         }
 
         public uint OffsetFieldId
@@ -56,6 +103,99 @@ namespace Tatti3
             BindingOperations.SetBinding(requirementList, ListBox.ItemsSourceProperty, binding);
         }
 
+        void OnAddClick(object sender, RoutedEventArgs e)
+        {
+            var pos = selectRequirement.SelectedIndex;
+            UInt16 opcode = 0;
+            if (pos != -1)
+            {
+                opcode = OpcodeNames[pos].Item1;
+            }
+            var list = (RequirementList)requirementList.DataContext;
+            var req = new Requirement
+            {
+                Opcode = opcode,
+                Param = 0,
+            };
+            list.Insert(list.Count, new RequirementList.RequirementWrap(req));
+        }
+
+        void OnCopyClick(object sender, RoutedEventArgs e)
+        {
+            var pos = requirementList.SelectedIndex;
+            if (pos == -1)
+            {
+                return;
+            }
+            var list = (RequirementList)requirementList.DataContext;
+            var copy = list[pos].Value;
+            list.Insert(pos + 1, new RequirementList.RequirementWrap(copy));
+            requirementList.SelectedIndex = pos;
+        }
+
+        void OnMoveUpClick(object sender, RoutedEventArgs e)
+        {
+            // Swaps selected and one above it.
+            // Don't allow swapping upgrade + end
+            var pos = requirementList.SelectedIndex;
+            if (pos < 1)
+            {
+                return;
+            }
+            if (Swap(pos - 1))
+            {
+                requirementList.SelectedIndex = pos - 1;
+            }
+        }
+
+        void OnMoveDownClick(object sender, RoutedEventArgs e)
+        {
+            var pos = requirementList.SelectedIndex;
+            if (pos == -1 || pos == requirementList.Items.Count - 1)
+            {
+                return;
+            }
+            if (Swap(pos))
+            {
+                requirementList.SelectedIndex = pos + 1;
+            }
+        }
+
+        void OnRemoveClick(object sender, RoutedEventArgs e)
+        {
+            var pos = requirementList.SelectedIndex;
+            if (pos == -1)
+            {
+                return;
+            }
+            var list = (RequirementList)requirementList.DataContext;
+            list.RemoveAt(pos);
+            if (requirementList.Items.Count > pos)
+            {
+                requirementList.SelectedIndex = pos;
+            }
+            else if (requirementList.Items.Count > pos - 1)
+            {
+                requirementList.SelectedIndex = pos - 1;
+            }
+        }
+
+        bool Swap(int pos)
+        {
+            var above = ((RequirementList.RequirementWrap)
+                requirementList.Items[pos]).Value;
+            var below = ((RequirementList.RequirementWrap)
+                requirementList.Items[pos + 1]).Value;
+            if ((above.IsEnd() && below.IsUpgradeLevelOpcode()) ||
+                (above.IsUpgradeLevelOpcode() && below.IsEnd()))
+            {
+                return false;
+            }
+            var list = (RequirementList)requirementList.DataContext;
+            list.Swap(pos, pos + 1);
+            return true;
+        }
+
         uint offsetField = 0;
         uint dataField = 0;
 
@@ -67,6 +207,7 @@ namespace Tatti3
             OpcodeNames = new List<(UInt16, string)>();
             OpcodeNameDict = new Dictionary<UInt16, string>();
 
+            OpcodeNames.Add((0x0000, "Has unit..."));
             OpcodeNames.Add((0xff01, "*Or*"));
             OpcodeNames.Add((0xff02, "Current unit is..."));
             OpcodeNames.Add((0xff03, "Has unit [...] (Accept incomplete)"));
@@ -107,7 +248,10 @@ namespace Tatti3
             OpcodeNames.Add((0xff26, "Is burrowed"));
             foreach ((var op, var text) in OpcodeNames)
             {
-                OpcodeNameDict[op] = text;
+                if (op != 0)
+                {
+                    OpcodeNameDict[op] = text;
+                }
             }
         }
     }
@@ -131,14 +275,25 @@ namespace Tatti3
 
         void UpdateData()
         {
-            panel.Children.Clear();
             if (RequirementData == null)
             {
                 return;
             }
-            Requirement data = (Requirement)RequirementData;
-            foreach (var part in Parts(data))
+            var newParts = Parts((Requirement)RequirementData);
+            if (newParts.Count != currentParts.Count)
             {
+                currentParts = new List<Part>();
+                panel.Children.Clear();
+            }
+            Requirement data = (Requirement)RequirementData;
+            for (int i = 0; i < newParts.Count; i++)
+            {
+                var part = newParts[i];
+                if (currentParts.Count > i && currentParts[i] == part)
+                {
+                    // No need to update
+                    continue;
+                }
                 if (part.Text != null)
                 {
                     TextDecorationCollection? decorations = null;
@@ -152,12 +307,12 @@ namespace Tatti3
                         VerticalAlignment = VerticalAlignment.Center,
                         TextDecorations = decorations,
                     };
-                    panel.Children.Add(text);
+                    AddChild(i, text);
                 }
                 if (part.Dat != null)
                 {
                     var dropdown = new ComboBox();
-                    panel.Children.Add(dropdown);
+                    AddChild(i, dropdown);
 
                     var namesPath = $"DataContext.Root.Dat[{part.Dat}].Names";
                     var binding = new Binding
@@ -170,9 +325,59 @@ namespace Tatti3
                         Mode = BindingMode.OneWay,
                         NotifyOnTargetUpdated = true,
                     };
+
+                    EventHandler<DataTransferEventArgs> UpdateDropdownIndex = (obj, args) => {
+                        if (this.RequirementData == null)
+                        {
+                            return;
+                        }
+                        var data = (Requirement)this.RequirementData;
+                        dropdown.SelectedIndex = data.Opcode < 0xff00 ? data.Opcode : data.Param;
+                    };
+                    Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);
+
                     BindingOperations.SetBinding(dropdown, ComboBox.ItemsSourceProperty, binding);
                     dropdown.SelectedIndex = data.Opcode < 0xff00 ? data.Opcode : data.Param;
+                    dropdown.SelectionChanged += (o, e) => {
+                        var selection = dropdown.SelectedIndex;
+                        if (selection != -1)
+                        {
+                            if (RequirementData is Requirement old)
+                            {
+                                var newReq = old.Opcode < 0xff00 ? (
+                                    new Requirement()
+                                    {
+                                        Opcode = (UInt16)selection,
+                                        Param = 0,
+                                    }
+                                ) : (
+                                    new Requirement()
+                                    {
+                                        Opcode = old.Opcode,
+                                        Param = (UInt16)selection,
+                                    }
+                                );
+                                if (old != newReq)
+                                {
+                                    RequirementData = newReq;
+                                }
+                            }
+                        }
+                    };
                 }
+            }
+            currentParts = newParts;
+        }
+
+        void AddChild(int i, UIElement child)
+        {
+            if (panel.Children.Count > i)
+            {
+                panel.Children[i] = child;
+            }
+            else
+            {
+                panel.Children.Add(child);
             }
         }
 
@@ -232,7 +437,28 @@ namespace Tatti3
         {
             public string? Text;
             public ArrayFileType? Dat;
+
+            public override bool Equals(object? obj)
+            {
+                return obj is Part value && this == value;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Text, Dat);
+            }
+
+            public static bool operator ==(Part x, Part y)
+            {
+                return x.Text == y.Text && x.Dat == y.Dat;
+            }
+            public static bool operator !=(Part x, Part y)
+            {
+                return !(x == y);
+            }
         }
+
+        List<Part> currentParts = new List<Part>();
 
         public static readonly DependencyProperty RequirementDataProperty = DependencyProperty.Register(
             "RequirementData",
@@ -240,16 +466,23 @@ namespace Tatti3
             typeof(DatRequirementLine),
             new FrameworkPropertyMetadata(
                 null,
-                FrameworkPropertyMetadataOptions.AffectsRender,
+                FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 (o, args) => {
                     ((DatRequirementLine)o).DataUpdated(args);
-                }
+                },
+                (d, baseValue) => baseValue,
+                false,
+                UpdateSourceTrigger.PropertyChanged
             )
         );
         public Requirement? RequirementData
         {
             get { return (Requirement?)GetValue(RequirementDataProperty); }
-            set { SetValue(RequirementDataProperty, value); }
+            set
+            {
+                SetValue(RequirementDataProperty, value);
+            }
         }
 
         StackPanel panel;
