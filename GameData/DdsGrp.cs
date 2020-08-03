@@ -56,16 +56,14 @@ namespace Tatti3.GameData
                 default:
                     throw new Exception($"Can't handle {dds.Format}");
             }
-            string msg = String.Join(", ", ddsBytes[0..256]);
-            string msg2 = String.Join(", ", dds.Data[0..2048]);
             return new Frame(dds.Data, decl.Width, decl.Height, dds.Stride, format);
         }
-        
+
         public int Count { get => frames.Count; }
         List<FrameDecl> frames;
         BinaryReader reader;
 
-        readonly struct FrameDecl 
+        readonly struct FrameDecl
         {
             public FrameDecl(long offset, uint size, ushort width, ushort height)
             {
@@ -81,7 +79,7 @@ namespace Tatti3.GameData
             public ushort Height { get; }
         }
 
-        public readonly struct Frame 
+        public readonly struct Frame
         {
             public Frame(byte[] data, ushort width, ushort height, int stride, PixelFormat format)
             {

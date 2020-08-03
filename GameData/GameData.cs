@@ -51,15 +51,24 @@ namespace Tatti3.GameData
             {
                 SaveDatTable(tempFiles, Weapons, Path.Join(root, "arr/weapons.dat"));
                 SaveDatTable(tempFiles, Flingy, Path.Join(root, "arr/flingy.dat"));
+                SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
+                SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
                 tempFiles.Commit();
             }
         }
 
         void SaveDatTable(WriteTempFiles tempFiles, DatTable dat, string path)
         {
-            using (var file = tempFiles.NewFile(path))
+            try
             {
-                dat.Write(file);
+                using (var file = tempFiles.NewFile(path))
+                {
+                    dat.Write(file);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to save {path}", e);
             }
         }
 

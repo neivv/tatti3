@@ -24,6 +24,14 @@ namespace Tatti3.GameData
 
         public DatTable(DatTable other)
         {
+            fields = new Dictionary<uint, DatValue>();
+            listFields = new Dictionary<uint, ListFieldState>();
+            RefFields = new List<RefField>();
+            Assign(other);
+        }
+
+        public void Assign(DatTable other)
+        {
             fields = DictClone(other.fields, v => new DatValue(v));
             listFields = DictClone(other.listFields, v => new ListFieldState(v));
             fields = new Dictionary<uint, DatValue>(other.fields.Count);
@@ -179,29 +187,75 @@ namespace Tatti3.GameData
 
         public void Write(Stream output)
         {
-            var stream = new MemoryStream();
-            DoWrite(stream);
-            // To avoid corruption bugs, verify that the saved file would
-            // load to a file equal to this, and that it would again save
-            // to a file equal to first save.
-            var bytes = stream.ToArray();
-            var newTable = DatTable.LoadNew(new MemoryStream(bytes), legacyDecl);
-            if (this != newTable)
+            var old = new DatTable(this);
+            try
             {
-                throw new Exception("Saved file does not produce an equivalent dat table");
+                var stream = new MemoryStream();
+                DoWrite(stream);
+                // To avoid corruption bugs, verify that the saved file would
+                // load to a file equal to this, and that it would again save
+                // to a file equal to first save.
+                var bytes = stream.ToArray();
+                var newTable = DatTable.LoadNew(new MemoryStream(bytes), legacyDecl);
+                if (old != newTable)
+                {
+                    throw new Exception("Saved file does not produce an equivalent dat table");
+                }
+                var stream2 = new MemoryStream();
+                newTable.DoWrite(stream2);
+                var bytes2 = stream2.ToArray();
+                if (!bytes.SequenceEqual(bytes2))
+                {
+                    throw new Exception("Saved file changes when saved again");
+                }
+                output.Write(bytes, 0, bytes.Length);
             }
-            var stream2 = new MemoryStream();
-            newTable.DoWrite(stream2);
-            var bytes2 = stream2.ToArray();
-            if (!bytes.SequenceEqual(bytes2))
+            catch (Exception)
             {
-                throw new Exception("Saved file changes when saved again");
+                Assign(old);
+                throw;
             }
-            output.Write(bytes, 0, bytes.Length);
         }
 
         void DoWrite(Stream output)
         {
+            // Regenerate requirement data for changed lists (Mutating this)
+            foreach (var field in listFields.Values)
+            {
+                if (field.ChangedEntries.Count != 0)
+                {
+                    var dataMem = new MemoryStream();
+                    var offsetsMem = new MemoryStream();
+                    var data = new BinaryWriter(dataMem);
+                    var offsets = new BinaryWriter(offsetsMem);
+                    data.WriteU16(0);
+                    for (uint i = 0; i < Entries; i++)
+                    {
+                        var reqs = GetRequirementsRaw(i, field.OffsetFieldId);
+                        if (reqs.Length == 0)
+                        {
+                            offsets.WriteU16(0);
+                        }
+                        else
+                        {
+                            long pos = dataMem.Position / 2;
+                            if (pos > 0xffff)
+                            {
+                                throw new Exception("Too many dat requirements");
+                            }
+                            offsets.WriteU16((UInt16)pos);
+                            foreach (var op in reqs)
+                            {
+                                data.WriteU16(op);
+                            }
+                            data.WriteU16(0xffff);
+                        }
+                    }
+                    data.WriteU16(0xffff);
+                    ResetListField(field.OffsetFieldId, offsetsMem.ToArray(), dataMem.ToArray());
+                }
+            }
+
             using (var writer = new BinaryWriter(output, Encoding.UTF8, true))
             {
                 writer.WriteU16(1);
@@ -527,10 +581,65 @@ namespace Tatti3.GameData
 
         public override bool Equals(object? obj)
         {
-            return obj is DatTable table &&
-                   Entries == table.Entries &&
-                   DictEquals(fields, table.fields) &&
-                   DictEquals(listFields, table.listFields);
+            if (obj is DatTable other && Entries == other.Entries)
+            {
+                if (fields.Count != other.fields.Count)
+                {
+                    return false;
+                }
+                // Compare fields
+                foreach (var k in fields.Keys)
+                {
+                    var field = fields[k];
+                    DatValue? otherField;
+                    if (!other.fields.TryGetValue(k, out otherField))
+                    {
+                        return false;
+                    }
+
+                    if (listFields.TryGetValue(k, out var listField))
+                    {
+                        var data = fields[listField.DataFieldId];
+                        DatValue? otherData;
+                        ListFieldState? otherListField;
+                        if (!other.listFields.TryGetValue(k, out otherListField))
+                        {
+                            return false;
+                        }
+                        if (!other.fields.TryGetValue(listField.DataFieldId, out otherData))
+                        {
+                            return false;
+                        }
+
+                        bool quickEq = field == otherField && data == otherData &&
+                            listField.ChangedEntries.Count == 0 &&
+                            otherListField.ChangedEntries.Count == 0;
+                        if (!quickEq)
+                        {
+                            // Compare list fields one entry at a time
+                            for (uint i = 0; i < Entries; i++)
+                            {
+                                var ownReqs = GetRequirementsRaw(i, k);
+                                var otherReqs = other.GetRequirementsRaw(i, k);
+                                if (!ownReqs.SequenceEqual(otherReqs))
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    else if (field.DataFormat != DatFieldFormat.VariableLengthData)
+                    {
+                        // Normal binary array compare
+                        if (field != otherField)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         static bool DictEquals<K, V> (Dictionary<K, V> a, Dictionary<K, V> b)

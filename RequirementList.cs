@@ -59,7 +59,6 @@ namespace Tatti3
             get => ((IList<RequirementWrap>)this)[index];
             set
             {
-                Console.WriteLine("Ass 2");
                 ((IList<RequirementWrap>)this)[index] = (RequirementWrap)value!;
             }
         }
@@ -75,7 +74,6 @@ namespace Tatti3
                 value.PropertyChanged += (o, args) => {
                     Mutated?.Invoke(this, new EventArgs());
                 };
-                Console.WriteLine($"{old.Opcode} => {newValue.Opcode}");
                 if (old.Equals(newValue))
                 {
                     return;
