@@ -238,6 +238,9 @@ namespace Tatti3.GameData
                         }
                         else
                         {
+                            // Writing the entry id, to keep same format as BW uses,
+                            // even though it isn't really used by anything
+                            data.WriteU16((UInt16)i);
                             long pos = dataMem.Position / 2;
                             if (pos > 0xffff)
                             {
@@ -541,7 +544,7 @@ namespace Tatti3.GameData
             {
                 throw new ArgumentOutOfRangeException();
             }
-            var raw = Requirement.ToRaw(value, (UInt16)index);
+            var raw = Requirement.ToRaw(value);
             SetRequirementsRaw(index, fieldId, raw);
             FieldChanged?.Invoke(this, new FieldChangedEventArgs(fieldId, index));
         }

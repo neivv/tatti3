@@ -49,6 +49,9 @@ namespace Tatti3.GameData
                 var enabled = span[pos + 2 + reqCount * 2] != 0;
                 if (enabled)
                 {
+                    // This entry id prefix isn't really necessary if bw doesn't need to
+                    // build the offsets at runtime, but going to keep it anyway
+                    reqData.WriteU16((UInt16)entryId);
                     var offset = reqData.BaseStream.Position / 2;
                     if (offset > 0xffff)
                     {
@@ -62,9 +65,6 @@ namespace Tatti3.GameData
                     }
 
                     WriteUInt16LittleEndian(new Span<byte>(offsetData, entryId * 2, 2), (UInt16)offset);
-                    // This entry id prefix isn't really necessary if bw doesn't need to
-                    // build the offsets at runtime, but going to keep it anyway
-                    reqData.WriteU16((UInt16)entryId);
                     var opcodes = span[(pos + 2)..][..(reqCount * 2)];
                     reqData.Write(opcodes);
                     // I hope firegraft usually ends with 0xffff, but if it doesn't, handle that

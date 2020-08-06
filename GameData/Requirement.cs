@@ -12,8 +12,7 @@ namespace Tatti3.GameData
 
         public static List<Requirement> ListFromRaw(UInt16[] raw)
         {
-            // Skip past entry id
-            var i = 1;
+            var i = 0;
             var result = new List<Requirement>();
             while (i < raw.Length)
             {
@@ -37,11 +36,10 @@ namespace Tatti3.GameData
             return result;
         }
 
-        // Returns an array with entry prefixed, but without last 0xffff
-        public static UInt16[] ToRaw(Requirement[] reqs, UInt16 id)
+        // Returns without last 0xffff
+        public static UInt16[] ToRaw(Requirement[] reqs)
         {
             var result = new List<UInt16>();
-            result.Add(id);
             foreach (var req in reqs)
             {
                 result.Add(req.Opcode);
