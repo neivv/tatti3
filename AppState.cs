@@ -576,7 +576,7 @@ namespace Tatti3
             switch (type)
             {
                 case ArrayFileType.Units:
-                    for (int j = (int)UnitNoneEntry; j <= (int)UnitFactoriesEntry; j++)
+                    for (int j = (int)UnitNoneEntry; j <= (int)UnitLastReserved; j++)
                     {
                         result[j].Enabled = false;
                     }
@@ -621,15 +621,35 @@ namespace Tatti3
                             var name = statTxt.GetByIndex(i + 1) ?? $"(Invalid)";
                             entries.Add(name);
                         }
-                        while (entries.Count <= (int)UnitFactoriesEntry)
+                        while (entries.Count <= (int)UnitLastReserved)
                         {
-                            entries.Add($"Invalid");
+                            entries.Add($"(Invalid)");
                         }
                         entries[(int)UnitNoneEntry] = "None";
                         entries[(int)UnitNoneEntry + 1] = "(Trigger) Any unit";
                         entries[(int)UnitNoneEntry + 2] = "(Trigger) Men";
                         entries[(int)UnitNoneEntry + 3] = "(Trigger) Buildings";
                         entries[(int)UnitNoneEntry + 4] = "(Trigger) Factories";
+                        entries[(int)UnitNoneEntry + 5] = "(Buttons) Cancel Mutation";
+                        entries[(int)UnitNoneEntry + 6] = "(Buttons) Cancel Mutation + Rally";
+                        entries[(int)UnitNoneEntry + 7] = "(Buttons) Cancel Infestation";
+                        entries[(int)UnitNoneEntry + 8] = "(Buttons) Morphing Hatchery";
+                        entries[(int)UnitNoneEntry + 9] = "(Buttons) Cancel Nuclear Strike";
+                        entries[(int)UnitNoneEntry + 10] = "(Buttons) Basic Zerg Buildings";
+                        entries[(int)UnitNoneEntry + 11] = "(Buttons) Basic Terran Buildings";
+                        entries[(int)UnitNoneEntry + 12] = "(Buttons) Basic Protoss Buildings";
+                        entries[(int)UnitNoneEntry + 13] = "(Buttons) Advanced Zerg Buildings";
+                        entries[(int)UnitNoneEntry + 14] = "(Buttons) Advanced Terran Buildings";
+                        entries[(int)UnitNoneEntry + 15] = "(Buttons) Advanced Protoss Buildings";
+                        entries[(int)UnitNoneEntry + 16] = "(Buttons) Group";
+                        entries[(int)UnitNoneEntry + 17] = "(Buttons) Group - Workers";
+                        entries[(int)UnitNoneEntry + 18] = "(Buttons) Group - Cloakers";
+                        entries[(int)UnitNoneEntry + 19] = "(Buttons) Group - Burrowers";
+                        entries[(int)UnitNoneEntry + 20] = "(Buttons) Replay Paused";
+                        entries[(int)UnitNoneEntry + 21] = "(Buttons) Replay Playing";
+                        for (uint i = UnitNoneEntry + 22; i <= UnitLastReserved; i++) {
+                            entries[(int)i] = "(Reserved)";
+                        }
                         break;
                     case ArrayFileType.Weapons:
                         for (uint i = 0; i < dat.Entries; i++)
@@ -1041,7 +1061,8 @@ namespace Tatti3
         // For checking if the data has been changed
         GameData.GameData? OriginalData;
         const uint UnitNoneEntry = 228;
-        const uint UnitFactoriesEntry = 232;
+        // This is higher than what actually is needed just in case a patch adds more buttons..
+        const uint UnitLastReserved = 260;
         const uint WeaponNameField = 0x0;
         const uint WeaponNoneEntry = 130;
         const uint UpgradeNoneEntry = 61;

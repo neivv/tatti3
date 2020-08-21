@@ -85,10 +85,10 @@ namespace Tatti3.GameData
                 Func<Field> Uint32 = () => MakeField(4, 0, 228, u32Zero, DatFieldFormat.Uint32);
                 Units = new LegacyDatDecl
                 {
-                    entries = 228 + 5,
+                    entries = 228 + 33,
                     FileSize = 19876,
                     InvalidIndexStart = 228,
-                    InvalidIndexCount = 5,
+                    InvalidIndexCount = 33,
                     defaultFile = Properties.Resources.arr_units_dat,
                     fields = new Field[] {
                         // 0x00 Flingy
