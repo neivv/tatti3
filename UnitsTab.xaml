@@ -86,8 +86,8 @@
                                 <TextBlock Text="Space" />
                             </GroupBox.Header>
                             <local:StatGroup>
-                                <local:IntStat Text="Required" FieldId="0x30"/>
-                                <local:IntStat Text="Provided" FieldId="0x2f"/>
+                                <local:IntStat Text="Required" FieldId="0x2f"/>
+                                <local:IntStat Text="Provided" FieldId="0x30"/>
                             </local:StatGroup>
                         </GroupBox>
                         <GroupBox DockPanel.Dock="Left">
