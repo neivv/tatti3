@@ -452,8 +452,11 @@ namespace Tatti3.GameData
                     // Lists were handled above
                     continue;
                 }
-                var old = GetFieldUint(sourceIndex, fieldId);
-                AppendToField(field, old);
+                for (uint i = 0; i < field.SubIndexCount; i++)
+                {
+                    var old = GetFieldSubIndexUint(sourceIndex, fieldId, i);
+                    AppendToField(field, old);
+                }
             }
             EntryCountChanged?.Invoke(this, new EventArgs());
         }
