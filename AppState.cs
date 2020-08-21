@@ -330,6 +330,7 @@ namespace Tatti3
                 ArrayFileType.Images => GameData?.Images,
                 ArrayFileType.Upgrades => GameData?.Upgrades,
                 ArrayFileType.TechData => GameData?.TechData,
+                ArrayFileType.Orders => GameData?.Orders,
                 _ => throw new ArgumentException($"There is no dat table for {type.ToString()}"),
             };
         }
@@ -340,7 +341,7 @@ namespace Tatti3
             {
                 ArrayFileType.Units, ArrayFileType.Weapons, ArrayFileType.Flingy,
                 ArrayFileType.Sprites, ArrayFileType.Images, ArrayFileType.Upgrades,
-                ArrayFileType.TechData,
+                ArrayFileType.TechData, ArrayFileType.Orders,
             };
             foreach (var type in dats)
             {
@@ -363,6 +364,7 @@ namespace Tatti3
                 case ArrayFileType.Images:
                 case ArrayFileType.Upgrades:
                 case ArrayFileType.TechData:
+                case ArrayFileType.Orders:
                     return true;
                 default:
                     return false;
@@ -401,6 +403,16 @@ namespace Tatti3
                     if (args.Field == WeaponNameField && ReferenceEquals(obj, weapons))
                     {
                         OnNamesChanged(ArrayFileType.Weapons);
+                    }
+                };
+            }
+            var orders = GetDat(ArrayFileType.Orders);
+            if (orders != null)
+            {
+                orders.FieldChanged += (obj, args) => {
+                    if (args.Field == OrderNameField && ReferenceEquals(obj, orders))
+                    {
+                        OnNamesChanged(ArrayFileType.Orders);
                     }
                 };
             }
@@ -654,6 +666,15 @@ namespace Tatti3
                         }
                         entries[(int)TechNoneEntry] = "None";
                         break;
+                    case ArrayFileType.Orders:
+                        for (uint i = 0; i < dat.Entries; i++)
+                        {
+                            uint label = dat.GetFieldUint(i, OrderNameField);
+                            var name = statTxt.GetByIndex(label) ?? "(Invalid)";
+                            name = RemoveHotkeyControlChars(name);
+                            entries.Add(name);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -860,6 +881,7 @@ namespace Tatti3
                 ArrayFileType.Images => 4,
                 ArrayFileType.Upgrades => 5,
                 ArrayFileType.TechData => 6,
+                ArrayFileType.Orders => 7,
                 _ => -1
             };
         }
@@ -979,5 +1001,6 @@ namespace Tatti3
         const uint TechNoneEntry = 44;
         const uint UpgradeNameField = 0x8;
         const uint TechNameField = 0x7;
+        const uint OrderNameField = 0x0;
     }
 }

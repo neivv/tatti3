@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Orientation="Horizontal">
-        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="35"
+        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="40"
          />
         <!-- Note: Loading 1500 stattxt lines would be too slow without virtualization,
             virtualization looks bad if width is let to be variable-->

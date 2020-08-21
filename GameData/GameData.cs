@@ -19,6 +19,7 @@ namespace Tatti3.GameData
             Flingy = LoadDatTable(Path.Join(root, "arr/flingy.dat"), LegacyDatDecl.Flingy, firegraft);
             Sprites = LoadDatTable(Path.Join(root, "arr/sprites.dat"), LegacyDatDecl.Sprites, firegraft);
             Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images, firegraft);
+            Orders = LoadDatTable(Path.Join(root, "arr/orders.dat"), LegacyDatDecl.Orders, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             CmdIcons = LoadDdsGrp(
                 Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
@@ -35,6 +36,7 @@ namespace Tatti3.GameData
             Flingy = new DatTable(other.Flingy);
             Sprites = new DatTable(other.Sprites);
             Images = new DatTable(other.Images);
+            Orders = new DatTable(other.Orders);
             // Ok as long as this program doesn't support TBL editing
             StatTxt = other.StatTxt;
             CmdIcons = other.CmdIcons;
@@ -53,6 +55,7 @@ namespace Tatti3.GameData
                 SaveDatTable(tempFiles, Flingy, Path.Join(root, "arr/flingy.dat"));
                 SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
                 SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
+                SaveDatTable(tempFiles, Orders, Path.Join(root, "arr/orders.dat"));
                 tempFiles.Commit();
             }
         }
@@ -147,12 +150,14 @@ namespace Tatti3.GameData
                    EqualityComparer<DatTable>.Default.Equals(TechData, data.TechData) &&
                    EqualityComparer<DatTable>.Default.Equals(Flingy, data.Flingy) &&
                    EqualityComparer<DatTable>.Default.Equals(Sprites, data.Sprites) &&
-                   EqualityComparer<DatTable>.Default.Equals(Images, data.Images);
+                   EqualityComparer<DatTable>.Default.Equals(Images, data.Images) &&
+                   EqualityComparer<DatTable>.Default.Equals(Orders, data.Orders);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Units, Weapons, Upgrades, TechData, Flingy, Sprites, Images);
+            return HashCode.Combine(Units, Weapons, Upgrades, TechData, Flingy, Sprites, Images,
+                    Orders);
         }
 
         public DatTable Units { get; }
@@ -162,6 +167,7 @@ namespace Tatti3.GameData
         public DatTable Flingy { get; }
         public DatTable Sprites { get; }
         public DatTable Images { get; }
+        public DatTable Orders { get; }
         public StringTable StatTxt { get; }
         public DdsGrp CmdIcons { get; }
 

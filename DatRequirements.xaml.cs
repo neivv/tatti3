@@ -236,7 +236,7 @@ namespace Tatti3
             OpcodeNames.Add((0xff1a, "Is subunit turret"));
             OpcodeNames.Add((0xff1b, "Has spider mines"));
             OpcodeNames.Add((0xff1c, "Is hero"));
-            OpcodeNames.Add((0xff1d, "Can rally or rightclick"));
+            OpcodeNames.Add((0xff1d, "Can rally or right click"));
             OpcodeNames.Add((0xff1e, "*Allow on hallucinations*"));
             OpcodeNames.Add((0xff1f, "*Upgrade level 1 conditions*"));
             OpcodeNames.Add((0xff20, "*Upgrade level 2 conditions*"));

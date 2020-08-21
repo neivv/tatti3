@@ -125,10 +125,17 @@ namespace Tatti3
             // Prevents mouse moving from scrolling the list
             // (From https://stackoverflow.com/questions/29638148/ )
             if (Keyboard.IsKeyDown(Key.Down) || Keyboard.IsKeyDown(Key.Up))
+            {
                 return;
-
+            }
+            if (dropdown.SelectedItem == null)
+            {
+                return;
+            }
             if (((Item)target.Content).Index == ((Item)dropdown.SelectedItem).Index)
+            {
                 return;
+            }
 
             e.Handled = true;
         }

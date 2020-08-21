@@ -478,6 +478,69 @@ namespace Tatti3.GameData
                     },
                 };
             }
+
+            {
+                Func<Field> Uint8 = () => MakeField(1, 0, 189, u8Zero, DatFieldFormat.Uint8);
+                Func<Field> Uint16 = () => MakeField(2, 0, 189, u16Zero, DatFieldFormat.Uint16);
+                Func<Field> Uint32 = () => MakeField(4, 0, 189, u32Zero, DatFieldFormat.Uint32);
+                Orders = new LegacyDatDecl
+                {
+                    entries = 189,
+                    FileSize = 4158,
+                    InvalidIndexStart = 0,
+                    InvalidIndexCount = 0,
+                    defaultFile = Properties.Resources.arr_orders_dat,
+                    fields = new Field[] {
+                        // 0x00 Label
+                        Uint16(),
+                        // 0x01 Use weapon targeting
+                        Uint8(),
+                        // 0x02 Secondary order (unused)
+                        Uint8(),
+                        // 0x03 Non-subunit (unused)
+                        Uint8(),
+                        // 0x04 Subunit inherits
+                        Uint8(),
+                        // 0x05 Subunit can use (unused)
+                        Uint8(),
+                        // 0x06 Interruptable
+                        Uint8(),
+                        // 0x07 Stop moving before next queued
+                        Uint8(),
+                        // 0x08 Can be queued
+                        Uint8(),
+                        // 0x09 Keep target while disabled
+                        Uint8(),
+                        // 0x0a Clip to walkable terrain
+                        Uint8(),
+                        // 0x0b Fleeable
+                        Uint8(),
+                        // 0x0c Requires moving (unused)
+                        Uint8(),
+                        // 0x0d Order weapon
+                        Uint8(),
+                        // 0x0e Order tech
+                        Uint8(),
+                        // 0x0f Animation
+                        Uint8(),
+                        // 0x10 Icon
+                        Uint16(),
+                        // 0x11 Requirement offset
+                        Uint16(),
+                        // 0x12 Obscured order
+                        Uint8(),
+                    },
+                    RefFields = new RefField[] {
+                        MakeRefField(ArrayFileType.Weapons, 0x0d),
+                        MakeRefField(ArrayFileType.TechData, 0x0e),
+                        MakeRefField(ArrayFileType.CmdIcon, 0x10),
+                        MakeRefField(ArrayFileType.Orders, 0x12),
+                    },
+                    ListFields = new ListField[] {
+                        new ListField(0x11, 0x20, U32Code("OrdR")),
+                    },
+                };
+            }
         }
 
         public static readonly LegacyDatDecl Units;
@@ -487,5 +550,6 @@ namespace Tatti3.GameData
         public static readonly LegacyDatDecl Images;
         public static readonly LegacyDatDecl Upgrades;
         public static readonly LegacyDatDecl TechData;
+        public static readonly LegacyDatDecl Orders;
     }
 }

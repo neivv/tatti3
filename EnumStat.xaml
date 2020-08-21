@@ -8,7 +8,7 @@
              d:DesignHeight="20" d:DesignWidth="800"
     xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
     <StackPanel Orientation="Horizontal">
-        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="30"
+        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="40"
          />
         <ComboBox x:Name="dropdown" Width="160" Padding="5,1,5,0">
             <ComboBox.ItemsSource>

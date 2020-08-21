@@ -691,6 +691,108 @@
                     </TabControl>
                 </DockPanel>
             </TabItem>
+            <TabItem Header="Orders">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[Orders]" />
+                </TabItem.DataContext>
+                <DockPanel Background="#FFE5E5E5">
+                    <TabControl>
+                        <TabItem Header="Properties">
+                            <Grid Background="#FFE5E5E5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <DockPanel>
+                                    <GroupBox DockPanel.Dock="Top">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Order Properties" />
+                                        </GroupBox.Header>
+                                        <local:StatGroup>
+                                            <local:DatRefStat Text="Targeting" Dat="Weapons" FieldId="0xd"/> 
+                                            <local:DatRefStat Text="Energy" Dat="TechData" FieldId="0xe"/> 
+                                            <local:DatRefStat Text="Obscured" Dat="Orders" FieldId="0x12"/> 
+                                            <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x00"/> 
+                                            <local:EnumStat Text="Animation" FieldId="0xf">
+                                                <system:String>Init</system:String>
+                                                <system:String>Death</system:String>
+                                                <system:String>GndAttkInit</system:String>
+                                                <system:String>AirAttkInit</system:String>
+                                                <system:String>Unused1</system:String>
+                                                <system:String>GndAttkRpt</system:String>
+                                                <system:String>AirAttkRpt</system:String>
+                                                <system:String>CastSpell</system:String>
+                                                <system:String>GndAttkToIdle</system:String>
+                                                <system:String>AirAttkToIdle</system:String>
+                                                <system:String>Unused2</system:String>
+                                                <system:String>Walking</system:String>
+                                                <system:String>WalkingToIdle</system:String>
+                                                <system:String>SpecialState1</system:String>
+                                                <system:String>SpecialState2</system:String>
+                                                <system:String>AlmostBuilt</system:String>
+                                                <system:String>Built</system:String>
+                                                <system:String>Landing</system:String>
+                                                <system:String>LiftOff</system:String>
+                                                <system:String>IsWorking</system:String>
+                                                <system:String>WorkingToIdle</system:String>
+                                                <system:String>WarpIn</system:String>
+                                                <system:String>Unused3</system:String>
+                                                <system:String>StarEditInit</system:String>
+                                                <system:String>Disable</system:String>
+                                                <system:String>Burrow</system:String>
+                                                <system:String>Unburrow</system:String>
+                                                <system:String>Enable</system:String>
+                                                <system:String>(None)</system:String>
+                                            </local:EnumStat>
+                                            <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x10" />
+                                        </local:StatGroup>
+                                    </GroupBox>
+                                    <GroupBox DockPanel.Dock="Top">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="Flags" />
+                                        </GroupBox.Header>
+                                        <DockPanel>
+                                            <local:StatGroup DockPanel.Dock="Left" Flags="true">
+                                                <local:BoolStat Text="Use Weapon Targeting" FieldId="0x1:0x1"/>
+                                                <local:BoolStat Text="Secondary Order (Unused)" FieldId="0x2:0x1"/>
+                                                <local:BoolStat Text="Non-subunit (Unused)" FieldId="0x3:0x1"/>
+                                                <local:BoolStat Text="Overrides Subunit Order" FieldId="0x4:0x1"/>
+                                            </local:StatGroup>
+                                            <local:StatGroup DockPanel.Dock="Left" Flags="true">
+                                                <local:BoolStat Text="Subunit Can Use (Unused)" FieldId="0x5:0x1"/>
+                                                <local:BoolStat Text="Can be Interrupted" FieldId="0x6:0x1"/>
+                                                <local:BoolStat Text="Deaccelerate to Waypoint" FieldId="0x7:0x1"/>
+                                                <local:BoolStat Text="Can be Queued" FieldId="0x8:0x1"/>
+                                            </local:StatGroup>
+                                            <local:StatGroup DockPanel.Dock="Left" Flags="true">
+                                                <local:BoolStat Text="Keep Target While Disabled" FieldId="0x9:0x1"/>
+                                                <local:BoolStat Text="Clip to Walkable Terrain" FieldId="0xa:0x1"/>
+                                                <local:BoolStat Text="Fleeing Can Interrupt" FieldId="0xb:0x1"/>
+                                                <local:BoolStat Text="Requires Moving (Unused)" FieldId="0xc:0x1"/>
+                                            </local:StatGroup>
+                                        </DockPanel>
+                                    </GroupBox>
+                                </DockPanel>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Issuing Requirements">
+                            <Grid Background="#FFE5E5E5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <GroupBox DockPanel.Dock="Left">
+                                    <GroupBox.Header>
+                                        <TextBlock Text="Issuing Requirements" />
+                                    </GroupBox.Header>
+                                    <local:DatRequirements OffsetFieldId="0x11" DataFieldId="0x20" />
+                                </GroupBox>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </DockPanel>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

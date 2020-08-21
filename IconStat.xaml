@@ -1,17 +1,17 @@
 <UserControl x:Class="Tatti3.IconStat"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tatti3"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Orientation="Horizontal">
-        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="35" 
+        <TextBox x:Name="numeric" TextWrapping="Wrap" MaxLength="10" Width="40"
          VerticalAlignment="Top" Height="20"/>
         <!-- Note: Loading hundreds of icons would be too slow without virtualization,
             virtualization looks bad if width is let to be variable
-            Dropdown 
+            Dropdown
         -->
         <ComboBox x:Name="dropdown" Width="220" Padding="5,1,5,0" MaxDropDownHeight="600">
             <ComboBox.ItemTemplate>
