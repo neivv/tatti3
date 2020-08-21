@@ -93,7 +93,7 @@ namespace Tatti3.GameData
                     data.AddRange(field.DefaultValue);
                 }
 
-                self.fields.Add(index, new DatValue(data, field.format));
+                self.fields.Add(index, new DatValue(data, field.format, field.SubIndexCount));
                 index += 1;
             }
             InitListFields(self, decl);
@@ -166,7 +166,12 @@ namespace Tatti3.GameData
                 reader.BaseStream.Seek(field.Offset, SeekOrigin.Begin);
                 byte[] bytes = new byte[field.Length];
                 reader.Read(bytes, 0, field.Length);
-                self.fields.Add(field.FieldId, new DatValue(new List<byte>(bytes), field.Format));
+                uint subIndexCount = field.FieldId < decl.fields.Length ?
+                    decl.fields[(int)field.FieldId].SubIndexCount : 0;
+                self.fields.Add(
+                    field.FieldId,
+                    new DatValue(new List<byte>(bytes), field.Format, subIndexCount)
+                );
             }
             InitListFields(self, decl);
             return self;
@@ -320,17 +325,27 @@ namespace Tatti3.GameData
 
         public uint GetFieldUint(uint index, uint fieldId)
         {
+            return GetFieldSubIndexUint(index, fieldId, 0);
+        }
+
+        public uint GetFieldSubIndexUint(uint index, uint fieldId, uint subIndex)
+        {
             if (index >= Entries)
             {
                 throw new ArgumentOutOfRangeException($"Index {index} is greater than maximum index {Entries}");
             }
             var field = fields[fieldId];
+            if (field.SubIndexCount <= subIndex)
+            {
+                throw new ArgumentOutOfRangeException($"Invalid subindex {subIndex:x} for field {fieldId:x}");
+            }
+            uint offset = index * field.SubIndexCount + subIndex;
             return field.DataFormat switch
             {
-                DatFieldFormat.Uint8 => field.Data[(int)index],
-                DatFieldFormat.Uint16 => ReadU16(field.Data, index),
-                DatFieldFormat.Uint32 => ReadU32(field.Data, index),
-                _ => throw new ArgumentException($"Dat field 0x{index:x} cannot be read as uint"),
+                DatFieldFormat.Uint8 => field.Data[(int)offset],
+                DatFieldFormat.Uint16 => ReadU16(field.Data, offset),
+                DatFieldFormat.Uint32 => ReadU32(field.Data, offset),
+                _ => throw new ArgumentException($"Dat field 0x{fieldId:x} cannot be read as uint"),
             };
         }
 
@@ -350,27 +365,37 @@ namespace Tatti3.GameData
 
         public void SetFieldUint(uint index, uint fieldId, uint value)
         {
+            SetFieldSubIndexUint(index, fieldId, 0, value);
+        }
+
+        public void SetFieldSubIndexUint(uint index, uint fieldId, uint subIndex, uint value)
+        {
             if (index >= Entries)
             {
                 throw new ArgumentOutOfRangeException();
             }
             var field = fields[fieldId];
+            if (field.SubIndexCount <= subIndex)
+            {
+                throw new ArgumentOutOfRangeException($"Invalid subindex {subIndex:x} for field {fieldId:x}");
+            }
+            uint offset = index * field.SubIndexCount + subIndex;
             switch (field.DataFormat)
             {
                 case DatFieldFormat.Uint8:
-                    field.Data[(int)index] = (byte)value;
+                    field.Data[(int)offset] = (byte)value;
                     break;
                 case DatFieldFormat.Uint16:
-                    WriteU16(field.Data, index, value);
+                    WriteU16(field.Data, offset, value);
                     break;
                 case DatFieldFormat.Uint32:
-                    WriteU32(field.Data, index, value);
+                    WriteU32(field.Data, offset, value);
                     break;
                 case DatFieldFormat.Uint64:
-                    WriteU64(field.Data, index, value);
+                    WriteU64(field.Data, offset, value);
                     break;
                 default:
-                    throw new ArgumentException($"Dat field 0x{index:x} cannot be written as uint");
+                    throw new ArgumentException($"Dat field 0x{fieldId:x} cannot be written as uint");
             }
             FieldChanged?.Invoke(this, new FieldChangedEventArgs(fieldId, index));
         }
@@ -578,7 +603,8 @@ namespace Tatti3.GameData
             fields[fieldId].Data = new List<byte>(offsets);
             fields[field.DataFieldId] = new DatValue(
                 new List<byte>(data),
-                DatFieldFormat.VariableLengthData
+                DatFieldFormat.VariableLengthData,
+                1
             );
         }
 
@@ -822,31 +848,35 @@ namespace Tatti3.GameData
 
     class DatValue
     {
-        public DatValue(List<byte> data, DatFieldFormat format)
+        public DatValue(List<byte> data, DatFieldFormat format, uint subIndexCount)
         {
             Data = data;
             DataFormat = format;
+            SubIndexCount = subIndexCount;
         }
 
         public DatValue(DatValue other)
         {
             Data = new List<byte>(other.Data);
             DataFormat = other.DataFormat;
+            SubIndexCount = other.SubIndexCount;
         }
 
         public List<byte> Data { get; set; }
         public DatFieldFormat DataFormat { get; set; }
+        public uint SubIndexCount { get; private set; }
 
         public override bool Equals(object? obj)
         {
             return obj is DatValue value &&
                    Data.SequenceEqual(value.Data) &&
+                   SubIndexCount == value.SubIndexCount &&
                    DataFormat == value.DataFormat;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Data, DataFormat);
+            return HashCode.Combine(Data, DataFormat, SubIndexCount);
         }
 
         public static bool operator ==(DatValue? left, DatValue? right)

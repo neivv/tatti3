@@ -14,6 +14,7 @@ namespace Tatti3.GameData
         MapData,
         Orders,
         StatTxt,
+        StatTxtRank,
         CmdIcon,
         ImagesTbl,
     }

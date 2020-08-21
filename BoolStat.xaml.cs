@@ -34,7 +34,7 @@ namespace Tatti3
                 System.Globalization.CultureInfo culture
             ) {
                 var (bits, _) = ((uint, bool))value;
-                return (bits& mask) != 0;
+                return (bits & mask) == mask;
             }
 
             object? IValueConverter.ConvertBack(

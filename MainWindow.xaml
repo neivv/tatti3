@@ -222,7 +222,7 @@
                                     </local:StatGroup>
                                 </DockPanel>
                                 <local:StatGroup>
-                                    <local:DatRefStat Text="Graphics" Dat="Flingy" FieldId="0x1"/>
+                                    <local:DatRefStat Text="Flingy" Dat="Flingy" FieldId="0x1"/>
                                     <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x17"/>
                                 </local:StatGroup>
                                 <DockPanel>

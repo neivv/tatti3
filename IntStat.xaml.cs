@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -71,17 +72,31 @@ namespace Tatti3
             }
         }
 
-        public uint FieldId
+        public string FieldId
         {
-            get => field;
             set
             {
-                field = value;
+                var tokens = value.Split('~');
+                Field = ParseUint(tokens[0]);
+                SubIndex = tokens.Length > 1 ? ParseUint(tokens[1]) : 0;
                 UpdateBinding();
             }
         }
+
+        static uint ParseUint(string val)
+        {
+            if (val.StartsWith("0x"))
+            {
+                return UInt32.Parse(val.Substring(2), NumberStyles.HexNumber);
+            }
+            else
+            {
+                return UInt32.Parse(val);
+            }
+        }
+
         public uint Scale
-        { 
+        {
             get => scale;
             set
             {
@@ -92,7 +107,7 @@ namespace Tatti3
 
         void UpdateBinding()
         {
-            var path = $"Fields[{FieldId}].Item";
+            var path = $"Fields[{Field}~{SubIndex}].Item";
             IValueConverter? converter = null;
             if (Scale != 1)
             {
@@ -106,7 +121,8 @@ namespace Tatti3
             BindingOperations.SetBinding(entry, TextBox.TextProperty, binding);
         }
 
-        uint field = 0;
+        uint Field = 0;
+        uint SubIndex = 0;
         uint scale = 1;
 
         FrameworkElement IStatControl.LabelText

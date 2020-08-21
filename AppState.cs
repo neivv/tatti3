@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -41,8 +42,35 @@ namespace Tatti3
 
                 public FieldRef this[uint index]
                 {
-                    get => parent.GetFieldRef(index);
+                    get
+                    {
+                        return parent.GetFieldRef(index, 0);
+                    }
                     set => throw new InvalidOperationException();
+                }
+
+                public FieldRef this[string key]
+                {
+                    get
+                    {
+                        var tokens = key.Split('~');
+                        var index = ParseUint(tokens[0]);
+                        var subIndex = tokens.Length > 1 ? ParseUint(tokens[1]) : 0;
+                        return parent.GetFieldRef(index, subIndex);
+                    }
+                    set => throw new InvalidOperationException();
+                }
+
+                static uint ParseUint(string val)
+                {
+                    if (val.StartsWith("0x"))
+                    {
+                        return UInt32.Parse(val.Substring(2), NumberStyles.HexNumber);
+                    }
+                    else
+                    {
+                        return UInt32.Parse(val);
+                    }
                 }
 
                 DatTableRef parent;
@@ -52,10 +80,11 @@ namespace Tatti3
             {
                 public event PropertyChangedEventHandler? PropertyChanged;
 
-                public FieldRef(DatTableRef parent, uint fieldIndex)
+                public FieldRef(DatTableRef parent, uint fieldIndex, uint subIndex)
                 {
                     this.parent = parent;
                     this.fieldIndex = fieldIndex;
+                    this.subIndex = subIndex;
                     this.item = 0;
                     this.entryIndex = 0;
                     UpdateItem();
@@ -95,7 +124,7 @@ namespace Tatti3
                     {
                         if (parent.table != null && item != value)
                         {
-                            parent.table.SetFieldUint(entryIndex, fieldIndex, value);
+                            parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, value);
                             item = value;
                         }
                     }
@@ -114,7 +143,7 @@ namespace Tatti3
                             var combined = value.Item2 ? (bit | item) : (~bit & item);
                             if (item != combined)
                             {
-                                parent.table.SetFieldUint(entryIndex, fieldIndex, combined);
+                                parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, combined);
                                 item = combined;
                             }
                         }
@@ -127,7 +156,7 @@ namespace Tatti3
                     if (parent.table != null)
                     {
                         entryIndex = (uint)parent.state.selections[parent.selectionIndex];
-                        var newItem = parent.table.GetFieldUint(entryIndex, fieldIndex);
+                        var newItem = parent.table.GetFieldSubIndexUint(entryIndex, fieldIndex, subIndex);
                         if (newItem != item)
                         {
                             item = newItem;
@@ -139,6 +168,7 @@ namespace Tatti3
 
                 DatTableRef parent;
                 uint fieldIndex;
+                uint subIndex;
                 uint item;
                 uint entryIndex;
             }
@@ -255,17 +285,17 @@ namespace Tatti3
                 }
             }
             public AppState Root { get => state; }
-            Dictionary<uint, FieldRef> fieldRefs = new Dictionary<uint, FieldRef>();
+            Dictionary<(uint, uint), FieldRef> fieldRefs = new Dictionary<(uint, uint), FieldRef>();
             Dictionary<(uint, uint), RequirementsRef> requirementRefs =
                 new Dictionary<(uint, uint), RequirementsRef>();
 
-            FieldRef GetFieldRef(uint index)
+            FieldRef GetFieldRef(uint index, uint subIndex)
             {
                 FieldRef? val;
-                if (!fieldRefs.TryGetValue(index, out val))
+                if (!fieldRefs.TryGetValue((index, subIndex), out val))
                 {
-                    val = new FieldRef(this, index);
-                    fieldRefs[index] = val;
+                    val = new FieldRef(this, index, subIndex);
+                    fieldRefs[(index, subIndex)] = val;
                 }
                 return val;
             }
@@ -684,12 +714,29 @@ namespace Tatti3
                 switch (type)
                 {
                     case ArrayFileType.StatTxt:
+                    {
                         var statTxt = GameData?.StatTxt;
                         if (statTxt != null)
                         {
                             entries = statTxt.ListByIndex();
                         }
                         break;
+                    }
+                    case ArrayFileType.StatTxtRank:
+                    {
+                        var statTxt = GameData?.StatTxt;
+                        if (statTxt != null)
+                        {
+                            entries = statTxt.ListByIndex();
+                            entries.RemoveRange(0, 1302);
+                            entries[0] = "None";
+                            if (entries.Count > 256)
+                            {
+                                entries.RemoveRange(256, entries.Count - 256);
+                            }
+                        }
+                        break;
+                    }
                     case ArrayFileType.CmdIcon:
                         if (GameData != null)
                         {

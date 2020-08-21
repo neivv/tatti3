@@ -111,7 +111,7 @@ namespace Tatti3
                 // See comment at App.xaml.cs
                 System.Runtime.InteropServices.Marshal.CleanupUnusedObjectsInCurrentContext();
             };
-            rootTab.SelectedIndex = 1;
+            rootTab.SelectedIndex = 0;
         }
 
         void GotoBackRef(object sender, MouseButtonEventArgs e)

@@ -38,6 +38,14 @@ namespace Tatti3
             };
         }
 
+        public double DropdownWidth
+        {
+            set
+            {
+                dropdown.Width = value;
+            }
+        }
+
         private TextBlock label;
         public string Text
         {

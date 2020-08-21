@@ -17,6 +17,7 @@ namespace Tatti3.GameData
             /// tell the valid range of values
             public uint startIndex;
             public uint length;
+            public uint SubIndexCount;
             /// Default value for fields which aren't defined for each entry. Must be
             /// same size as `Size`
             public byte[] DefaultValue;
@@ -45,6 +46,20 @@ namespace Tatti3.GameData
                     length = length,
                     DefaultValue = defaultValue,
                     format = format,
+                    SubIndexCount = 1,
+                };
+            };
+            Func<uint, uint, uint, byte[], DatFieldFormat, uint, Field> MakeSubIndexField =
+                (size, start, length, defaultValue, format, subIndexCount) =>
+            {
+                return new Field
+                {
+                    Size = size,
+                    startIndex = start,
+                    length = length,
+                    DefaultValue = defaultValue,
+                    format = format,
+                    SubIndexCount = subIndexCount,
                 };
             };
             Func<ArrayFileType, uint, RefField> MakeRefField = (a, b) => new RefField(a, b, false);
@@ -61,6 +76,7 @@ namespace Tatti3.GameData
             byte[] u8Zero = { 0 };
             byte[] u16Zero = { 0, 0, };
             byte[] u32Zero = { 0, 0, 0, 0 };
+            byte[] unitNone = { 228, 0 };
             byte[] weaponNone = { 130 };
             byte[] upgradeDefault = { 60 };
             {
@@ -79,10 +95,10 @@ namespace Tatti3.GameData
                         Uint8(),
                         // 0x01 Subunit
                         Uint16(),
-                        // 0x02 ???
+                        // 0x02 Subunit 2
                         Uint16(),
-                        // 0x03 Addon position
-                        MakeField(2, 106, 96, u16Zero, DatFieldFormat.Uint16),
+                        // 0x03 Infestation
+                        MakeField(2, 106, 96, unitNone, DatFieldFormat.Uint16),
                         // 0x04 Construction image
                         Uint32(),
                         // 0x05 Direction
@@ -148,11 +164,13 @@ namespace Tatti3.GameData
                         // 0x23 Last yes sound
                         MakeField(2, 0, 106, u16Zero, DatFieldFormat.Uint16),
                         // 0x24 Placement box
-                        Uint32(),
-                        // 0x25 ???
-                        MakeField(2, 0, 0xc0, u16Zero, DatFieldFormat.Uint16),
+                        MakeSubIndexField(4, 0, 228, u32Zero, DatFieldFormat.Uint16, 2),
+                        // 0x25 Addon position
+                        MakeSubIndexField(4, 0, 96, u32Zero, DatFieldFormat.Uint16, 2),
                         // 0x26 Dimension box
-                        MakeField(8, 0, 228, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 }, DatFieldFormat.Uint16),
+                        MakeSubIndexField(
+                            8, 0, 228, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 }, DatFieldFormat.Uint16, 4
+                        ),
                         // 0x27 Portrait
                         Uint16(),
                         // 0x28 Mineral cost
@@ -186,6 +204,8 @@ namespace Tatti3.GameData
                     },
                     RefFields = new RefField[] {
                         MakeRefField(ArrayFileType.Units, 0x01),
+                        MakeRefField(ArrayFileType.Units, 0x02),
+                        MakeRefField(ArrayFileType.Units, 0x03),
                         MakeRefField(ArrayFileType.Weapons, 0x11),
                         MakeRefField(ArrayFileType.Weapons, 0x13),
                         MakeRefField(ArrayFileType.Flingy, 0x00),
@@ -198,7 +218,9 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.SfxData, 0x22),
                         MakeRefField(ArrayFileType.SfxData, 0x23),
                     },
-                    ListFields = new ListField[] {},
+                    ListFields = new ListField[] {
+                        new ListField(0x2b, 0x40, U32Code("UntR")),
+                    },
                 };
             }
 
