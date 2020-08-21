@@ -618,7 +618,22 @@ namespace Tatti3
                     case ArrayFileType.Units:
                         for (uint i = 0; i < dat.Entries; i++)
                         {
-                            var name = statTxt.GetByIndex(i + 1) ?? $"(Invalid)";
+                            string[] keys = i switch
+                            {
+                                0 => new string[] { "FIRST_UNIT_STRING" },
+                                227 => new string[] { "LAST_UNIT_STRING" },
+                                _ => new string[] { $"FIRST_UNIT_STRING-{i}", $"FIRST_UNIT_STRING_{i}" },
+                            };
+                            string name = $"(Missing name {keys[0]})";
+                            foreach (string key in keys)
+                            {
+                                var val = statTxt.GetByKey(key);
+                                if (val != null)
+                                {
+                                    name = val;
+                                    break;
+                                }
+                            }
                             entries.Add(name);
                         }
                         while (entries.Count <= (int)UnitLastReserved)

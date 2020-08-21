@@ -10,7 +10,7 @@ namespace Tatti3.GameData
 {
     class StringTable
     {
-        StringTable() 
+        StringTable()
         {
             keyToIndex = new Dictionary<string, uint>();
             byIndex = new List<string>();
@@ -21,7 +21,7 @@ namespace Tatti3.GameData
             var self = new StringTable();
             var json = JsonDocument.Parse(input);
             self.byIndex.Add("(None)");
-            foreach (var str in json.RootElement.EnumerateArray()) 
+            foreach (var str in json.RootElement.EnumerateArray())
             {
                 var key = str.GetProperty("Key").GetString();
                 var value = str.GetProperty("Value").GetString();
@@ -87,6 +87,18 @@ namespace Tatti3.GameData
         public string? GetByIndex(uint index)
         {
             return byIndex.Count <= index ? null : byIndex[(int)index];
+        }
+
+        public string? GetByKey(string key)
+        {
+            if (keyToIndex.TryGetValue(key, out uint index))
+            {
+                return GetByIndex(index);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public List<string> ListByIndex()
