@@ -51,6 +51,7 @@ namespace Tatti3.GameData
         {
             using (var tempFiles = new WriteTempFiles())
             {
+                SaveDatTable(tempFiles, Units, Path.Join(root, "arr/units.dat"));
                 SaveDatTable(tempFiles, Weapons, Path.Join(root, "arr/weapons.dat"));
                 SaveDatTable(tempFiles, Flingy, Path.Join(root, "arr/flingy.dat"));
                 SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
