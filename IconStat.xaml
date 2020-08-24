@@ -17,7 +17,8 @@
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Width="400">
-                        <Image Height="32" Source="{Binding Path=Image}" Margin="2,2,2,2" />
+                        <Image Height="32" Width="32" Source="{Binding Path=Image}" Margin="2,2,2,2"
+                            />
                         <TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center" Margin="2">
                         </TextBlock>
                     </StackPanel>
