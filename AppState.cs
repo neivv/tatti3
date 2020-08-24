@@ -328,7 +328,7 @@ namespace Tatti3
             }
             Dat = new RootDatRef(this);
             GameData = gameData;
-            CmdIcons = new LazyDdsGrp(null);
+            CmdIcons = new LazyDdsGrp(null, (0.0f, 0.0f, 0.0f));
             GameDataUpdated();
             SelectDat(ArrayFileType.Units);
             selections.CollectionChanged += (obj, args) => {
@@ -526,7 +526,7 @@ namespace Tatti3
                     OnEntryCountChanged(type);
                 };
             }
-            CmdIcons = new LazyDdsGrp(GameData?.CmdIcons);
+            CmdIcons = new LazyDdsGrp(GameData?.CmdIcons, (1.0f, 1.0f, 0.0f));
         }
 
         void OnEntryCountChanged(ArrayFileType type)
