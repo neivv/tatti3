@@ -240,19 +240,28 @@
                                 <TextBlock Text="Sprite Properties" />
                             </GroupBox.Header>
                             <DockPanel>
-                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="100">
                                     <local:DatRefStat Text="Flingy" Dat="Flingy" FieldId="0x0" />
                                     <local:DatRefStat Text="Construction" Dat="Images" FieldId="0x4" />
                                     <local:DatRefStat Text="Portrait" Dat="PortData" FieldId="0x27" />
                                 </local:StatGroup>
                                 <DockPanel DockPanel.Dock="Top">
-                                    <local:StatGroup DockPanel.Dock="Left" LabelWidth="80">
+                                    <local:StatGroup DockPanel.Dock="Left" LabelWidth="100">
                                         <local:IntStat Text="Elevation Level" FieldId="0x9"/>
+                                        <local:EnumStat Text="Wireframe Mode" FieldId="0x41"
+                                            DropdownWidth="100">
+                                            <system:String>Segmented</system:String>
+                                            <system:String>Gradual</system:String>
+                                        </local:EnumStat>
                                     </local:StatGroup>
-                                    <local:StatGroup DockPanel.Dock="Left">
+                                    <local:StatGroup DockPanel.Dock="Left" LabelWidth="80">
                                         <local:IntStat Text="Direction" FieldId="0x5"/>
+                                        <local:IntStat Text="Wireframe ID" FieldId="0x42"/>
                                     </local:StatGroup>
                                 </DockPanel>
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="100">
+                                    <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x43"/>
+                                </local:StatGroup>
                             </DockPanel>
                         </GroupBox>
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">

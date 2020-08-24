@@ -167,7 +167,7 @@ namespace Tatti3.GameData
                 byte[] bytes = new byte[field.Length];
                 reader.Read(bytes, 0, field.Length);
                 uint subIndexCount = field.FieldId < decl.fields.Length ?
-                    decl.fields[(int)field.FieldId].SubIndexCount : 0;
+                    decl.fields[(int)field.FieldId].SubIndexCount : 1;
                 self.fields.Add(
                     field.FieldId,
                     new DatValue(new List<byte>(bytes), field.Format, subIndexCount)
@@ -609,6 +609,16 @@ namespace Tatti3.GameData
                 DatFieldFormat.VariableLengthData,
                 1
             );
+        }
+
+        public bool HasField(uint fieldId)
+        {
+            return fields.ContainsKey(fieldId);
+        }
+
+        public void AddField(uint fieldId, DatFieldFormat format, List<byte> data)
+        {
+            fields[fieldId] = new DatValue(data, format, 1);
         }
 
         public override bool Equals(object? obj)

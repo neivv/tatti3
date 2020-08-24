@@ -217,6 +217,7 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.SfxData, 0x21),
                         MakeRefField(ArrayFileType.SfxData, 0x22),
                         MakeRefField(ArrayFileType.SfxData, 0x23),
+                        MakeRefField(ArrayFileType.CmdIcon, 0x43),
                     },
                     ListFields = new ListField[] {
                         new ListField(0x2b, 0x40, U32Code("UntR")),

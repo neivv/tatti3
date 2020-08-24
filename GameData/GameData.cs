@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -12,6 +14,46 @@ namespace Tatti3.GameData
         {
             var firegraft = new FiregraftData(root);
             Units = LoadDatTable(Path.Join(root, "arr/units.dat"), LegacyDatDecl.Units, firegraft);
+            // Wireframe mode, wireframe ID
+            if (!Units.HasField(0x41))
+            {
+                var data = new List<byte>(Enumerable.Repeat((byte)0, (int)Units.Entries));
+                var alternateWireframes = (new int[] {
+                        0x3b, 0x3e, 0x3f, 0x44, 0x4c, 0x67, 0xad, 0xbb,
+                        0xbc, 0xc2, 0xc5, 0xc9, 0xd8, 0xdc, 0xe2, 0xe3,
+                    })
+                    .Concat(Enumerable.Range(0x23, 0x3a - 0x23))
+                    .Concat(Enumerable.Range(0x59, 0x62 - 0x59))
+                    .Concat(Enumerable.Range(0x82, 0x99 - 0x82))
+                    .Concat(Enumerable.Range(0xb0, 0xb3 - 0xb0));
+                foreach (int i in alternateWireframes)
+                {
+                    data[i] = 1;
+                }
+                Units.AddField(0x41, DatFieldFormat.Uint8, data);
+                var data2 = new List<byte>(
+                    Enumerable.Range(0, (int)Units.Entries)
+                        .SelectMany(x => {
+                            byte[] vars = { 0, 0 };
+                            BinaryPrimitives.WriteUInt16LittleEndian(vars, (UInt16)x);
+                            return vars;
+                        })
+                );
+                Units.AddField(0x42, DatFieldFormat.Uint16, data2);
+            }
+            // Icon ID
+            if (!Units.HasField(0x43))
+            {
+                var data2 = new List<byte>(
+                    Enumerable.Range(0, (int)Units.Entries)
+                        .SelectMany(x => {
+                            byte[] vars = { 0, 0 };
+                            BinaryPrimitives.WriteUInt16LittleEndian(vars, (UInt16)x);
+                            return vars;
+                        })
+                );
+                Units.AddField(0x43, DatFieldFormat.Uint16, data2);
+            }
             Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
             Upgrades =
                 LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);
