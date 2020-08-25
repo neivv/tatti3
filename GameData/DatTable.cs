@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 using Tatti3.GameData.BinaryWriterExt;
 
@@ -433,31 +434,21 @@ namespace Tatti3.GameData
         {
             var destIndex = Entries;
             Entries += 1;
-            var listFieldIds = new HashSet<uint>();
-            foreach (var listField in listFields.Values)
-            {
-                listFieldIds.Add(listField.DataFieldId);
-                listFieldIds.Add(listField.OffsetFieldId);
-                var opcodes = GetRequirementsRaw(sourceIndex, listField.OffsetFieldId);
-                var field = fields[listField.OffsetFieldId];
-                AppendToField(field, 0);
-                SetRequirementsRaw(destIndex, listField.OffsetFieldId, opcodes);
-            }
-            foreach (var pair in fields)
-            {
-                var fieldId = pair.Key;
-                var field = pair.Value;
-                if (listFieldIds.Contains(fieldId))
-                {
-                    // Lists were handled above
-                    continue;
+            IterFields(
+                listField => {
+                    var opcodes = GetRequirementsRaw(sourceIndex, listField.OffsetFieldId);
+                    var field = fields[listField.OffsetFieldId];
+                    AppendToField(field, 0);
+                    SetRequirementsRaw(destIndex, listField.OffsetFieldId, opcodes);
+                },
+                (fieldId, field) => {
+                    for (uint i = 0; i < field.SubIndexCount; i++)
+                    {
+                        var old = GetFieldSubIndexUint(sourceIndex, fieldId, i);
+                        AppendToField(field, old);
+                    }
                 }
-                for (uint i = 0; i < field.SubIndexCount; i++)
-                {
-                    var old = GetFieldSubIndexUint(sourceIndex, fieldId, i);
-                    AppendToField(field, old);
-                }
-            }
+            );
             EntryCountChanged?.Invoke(this, new EventArgs());
         }
 
@@ -487,6 +478,169 @@ namespace Tatti3.GameData
             {
                 field.Data.Add((byte)value);
                 value = value >> 8;
+            }
+        }
+
+        public string SerializeEntryToJson(uint entry)
+        {
+            var result = new Dictionary<string, object>();
+            var buffer = new List<uint>();
+            IterFields(
+                listField => {
+                    var opcodes = GetRequirementsRaw(entry, listField.OffsetFieldId);
+                    result.Add($"field_{listField.OffsetFieldId}", opcodes);
+                },
+                (fieldId, field) => {
+                    if (field.SubIndexCount == 1)
+                    {
+                        result.Add($"field_{fieldId}", GetFieldSubIndexUint(entry, fieldId, 0));
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                        for (uint i = 0; i < field.SubIndexCount; i++)
+                        {
+                            buffer.Add(GetFieldSubIndexUint(entry, fieldId, i));
+                        }
+                        result.Add($"field_{fieldId}", buffer.ToArray());
+                    }
+                }
+            );
+            return JsonSerializer.Serialize(
+                result,
+                typeof(Dictionary<string, object>),
+                new JsonSerializerOptions() {
+                    WriteIndented = true,
+                }
+            );
+        }
+
+        public bool IsValidEntryJson(string json)
+        {
+            Dictionary<string, JsonElement> data;
+            try
+            {
+                data = (Dictionary<string, JsonElement>)
+                    JsonSerializer.Deserialize(json, typeof(Dictionary<string, JsonElement>));
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
+            Func<JsonElement, bool> IsJsonU16Array = val => {
+                try
+                {
+                    return val.EnumerateArray().All(x => x.TryGetUInt16(out _));
+                }
+                catch (InvalidOperationException)
+                {
+                    return false;
+                }
+            };
+            Func<JsonElement, bool> IsJsonU32Array = val => {
+                try
+                {
+                    return val.EnumerateArray().All(x => x.TryGetUInt32(out _));
+                }
+                catch (InvalidOperationException)
+                {
+                    return false;
+                }
+            };
+            Func<JsonElement, uint> JsonArrayLength = val => {
+                try
+                {
+                    return (uint)val.GetArrayLength();
+                }
+                catch (InvalidOperationException)
+                {
+                    return 0;
+                }
+            };
+            bool result = true;
+            IterFields(
+                listField => {
+                    if (data.TryGetValue($"field_{listField.OffsetFieldId}", out JsonElement val))
+                    {
+                        if (!IsJsonU16Array(val))
+                        {
+                            result = false;
+                        }
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                },
+                (fieldId, field) => {
+                    if (data.TryGetValue($"field_{fieldId}", out JsonElement val))
+                    {
+                        if ((field.SubIndexCount == 1 && !val.TryGetUInt32(out _)) ||
+                            (field.SubIndexCount != 1 && !IsJsonU32Array(val)) ||
+                            (field.SubIndexCount != 1 && JsonArrayLength(val) != field.SubIndexCount))
+                        {
+                            result = false;
+                        }
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                }
+            );
+            return result;
+        }
+
+        public void DeserializeEntryFromJson(uint entry, string json)
+        {
+            Dictionary<string, JsonElement> data;
+            data = (Dictionary<string, JsonElement>)
+                JsonSerializer.Deserialize(json, typeof(Dictionary<string, JsonElement>));
+            IterFields(
+                listField => {
+                    JsonElement val = data[$"field_{listField.OffsetFieldId}"];
+                    UInt16[] opcodes = val.EnumerateArray().Select(x => x.GetUInt16()).ToArray();
+                    SetRequirementsRaw(entry, listField.OffsetFieldId, opcodes);
+                },
+                (fieldId, field) => {
+                    JsonElement val = data[$"field_{fieldId}"];
+                    if (field.SubIndexCount == 1)
+                    {
+                        SetFieldSubIndexUint(entry, fieldId, 0, val.GetUInt32());
+                    }
+                    else
+                    {
+                        uint i = 0;
+                        foreach (uint value in val.EnumerateArray().Select(x => x.GetUInt32()))
+                        {
+                            SetFieldSubIndexUint(entry, fieldId, i, value);
+                            i += 1;
+                        }
+                    }
+                }
+            );
+        }
+
+        /// Calls the callbacks for each field; list fields get the first callback
+        /// and other get the second called.
+        void IterFields(Action<ListFieldState> listCb, Action<uint, DatValue> normalCb)
+        {
+            var result = new Dictionary<string, object>();
+            var listFieldIds = new HashSet<uint>();
+            foreach (var listField in listFields.Values)
+            {
+                listFieldIds.Add(listField.DataFieldId);
+                listFieldIds.Add(listField.OffsetFieldId);
+                listCb(listField);
+            }
+            foreach (var pair in fields)
+            {
+                if (listFieldIds.Contains(pair.Key))
+                {
+                    // Lists were handled above
+                    continue;
+                }
+                normalCb(pair.Key, pair.Value);
             }
         }
 

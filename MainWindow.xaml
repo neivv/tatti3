@@ -19,6 +19,10 @@
             CanExecute="JumpCmdCanExecute"/>
         <CommandBinding Command="{x:Static local:MainWindow.NewEntryCommand}"
             Executed="NewEntryCmdExecuted" CanExecute="NewEntryCmdCanExecute"/>
+        <CommandBinding Command="{x:Static local:MainWindow.CopyEntryCommand}"
+            Executed="CopyEntryCmdExecuted" CanExecute="CopyEntryCmdCanExecute"/>
+        <CommandBinding Command="{x:Static local:MainWindow.PasteEntryCommand}"
+            Executed="PasteEntryCmdExecuted" CanExecute="PasteEntryCmdCanExecute"/>
     </Window.CommandBindings>
     <Grid Background="#FFE5E5E5">
         <Grid.RowDefinitions>
@@ -76,8 +80,20 @@
                     <ContextMenu>
                         <MenuItem Header="Duplicate as a new entry"
                             Command="{x:Static local:MainWindow.NewEntryCommand}" />
+                        <MenuItem Header="Copy entry"
+                            Command="{x:Static local:MainWindow.CopyEntryCommand}"
+                            InputGestureText="Ctrl+Shift+C" />
+                        <MenuItem Header="Paste entry"
+                            Command="{x:Static local:MainWindow.PasteEntryCommand}"
+                            InputGestureText="Ctrl+Shift+V" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
+                <ListBox.InputBindings>
+                    <KeyBinding Command="{x:Static local:MainWindow.CopyEntryCommand}"
+                        Gesture="Ctrl+Shift+C" />
+                    <KeyBinding Command="{x:Static local:MainWindow.PasteEntryCommand}"
+                        Gesture="Ctrl+Shift+V" />
+                </ListBox.InputBindings>
             </ListBox>
         </DockPanel>
         <!--

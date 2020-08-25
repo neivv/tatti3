@@ -25,6 +25,8 @@ namespace Tatti3
     {
         public static RoutedCommand JumpCommand = new RoutedCommand();
         public static RoutedCommand NewEntryCommand = new RoutedCommand();
+        public static RoutedCommand CopyEntryCommand = new RoutedCommand();
+        public static RoutedCommand PasteEntryCommand = new RoutedCommand();
 
         public MainWindow()
         {
@@ -371,6 +373,50 @@ namespace Tatti3
         void NewEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
+        }
+
+        void CopyEntryCmdExecuted(object target, ExecutedRoutedEventArgs e)
+        {
+            var sourceEntry = (uint)entryList.SelectedIndex;
+            var dat = state.GetDat(state.CurrentDat);
+            if (dat == null)
+            {
+                return;
+            }
+            var text = dat.SerializeEntryToJson(sourceEntry);
+            Clipboard.SetText(text);
+        }
+
+        void CopyEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        void PasteEntryCmdExecuted(object target, ExecutedRoutedEventArgs e)
+        {
+            var entry = (uint)entryList.SelectedIndex;
+            var dat = state.GetDat(state.CurrentDat);
+            if (dat == null)
+            {
+                return;
+            }
+            var text = Clipboard.GetText();
+            if (dat.IsValidEntryJson(text))
+            {
+                dat.DeserializeEntryFromJson(entry, text);
+            }
+        }
+
+        void PasteEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = false;
+            var dat = state.GetDat(state.CurrentDat);
+            if (dat == null)
+            {
+                return;
+            }
+            var text = Clipboard.GetText();
+            e.CanExecute = dat.IsValidEntryJson(text);
         }
     }
 }
