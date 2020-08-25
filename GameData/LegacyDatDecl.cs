@@ -166,7 +166,7 @@ namespace Tatti3.GameData
                         // 0x24 Placement box
                         MakeSubIndexField(4, 0, 228, u32Zero, DatFieldFormat.Uint16, 2),
                         // 0x25 Addon position
-                        MakeSubIndexField(4, 0, 96, u32Zero, DatFieldFormat.Uint16, 2),
+                        MakeSubIndexField(4, 106, 96, u32Zero, DatFieldFormat.Uint16, 2),
                         // 0x26 Dimension box
                         MakeSubIndexField(
                             8, 0, 228, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 }, DatFieldFormat.Uint16, 4
