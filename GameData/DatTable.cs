@@ -772,6 +772,11 @@ namespace Tatti3.GameData
             );
         }
 
+        public DatFieldFormat FieldFormat(uint fieldId)
+        {
+            return fields[fieldId].DataFormat;
+        }
+
         public bool HasField(uint fieldId)
         {
             return fields.ContainsKey(fieldId);

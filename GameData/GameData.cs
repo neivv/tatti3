@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
+using Tatti3.GameData.BinaryWriterExt;
+
 namespace Tatti3.GameData
 {
     class GameData
@@ -67,6 +69,14 @@ namespace Tatti3.GameData
                 Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
                 Properties.Resources.cmdicons_dds_grp
             );
+            // Widen some arrays to 32bit
+            WidenDatField(Units, 0x00);
+            WidenDatField(Units, 0x11);
+            WidenDatField(Units, 0x13);
+            WidenDatField(Units, 0x19);
+            WidenDatField(Weapons, 0x06);
+            WidenDatField(Orders, 0x0d);
+            WidenDatField(Orders, 0x0e);
         }
 
         public GameData(GameData other)
@@ -182,6 +192,20 @@ namespace Tatti3.GameData
             catch (FileNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
             return new DdsGrp(stream);
+        }
+
+        void WidenDatField(DatTable table, uint field)
+        {
+            if (table.FieldFormat(field) != DatFieldFormat.Uint32)
+            {
+                var stream = new MemoryStream();
+                var writer = new BinaryWriter(stream);
+                for (uint i = 0; i < table.Entries; i++)
+                {
+                    writer.WriteU32(table.GetFieldUint(i, field));
+                }
+                table.AddField(field, DatFieldFormat.Uint32, new List<byte>(stream.ToArray()));
+            }
         }
 
         public override bool Equals(object? obj)
