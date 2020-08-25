@@ -137,6 +137,12 @@ namespace Tatti3.GameData
             //      trailing data they cannot understand unused/unread.
             var reader = new BinaryReader(data);
             var self = new DatTable(decl);
+            var magic = reader.ReadUInt32();
+            if (magic != 0x2b746144)
+            {
+                // Support files without magic
+                reader.BaseStream.Seek(0, SeekOrigin.Begin);
+            }
             var major = reader.ReadUInt16();
             var minor = reader.ReadUInt16();
             if (major != 1 || minor == 0)
@@ -267,6 +273,7 @@ namespace Tatti3.GameData
 
             using (var writer = new BinaryWriter(output, Encoding.UTF8, true))
             {
+                writer.WriteU32(0x2b746144);
                 writer.WriteU16(1);
                 writer.WriteU16(1);
                 writer.WriteU32(Entries);
