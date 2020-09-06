@@ -218,9 +218,11 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.SfxData, 0x22),
                         MakeRefField(ArrayFileType.SfxData, 0x23),
                         MakeRefField(ArrayFileType.CmdIcon, 0x43),
+                        MakeRefField(ArrayFileType.Buttons, 0x44),
+                        MakeRefField(ArrayFileType.Units, 0x45),
                     },
                     ListFields = new ListField[] {
-                        new ListField(0x2b, 0x40, U32Code("UntR")),
+                        new ListField(0x2b, new uint[] { 0x40 }, U32Code("UntR"), 0),
                     },
                 };
             }
@@ -451,7 +453,7 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.StatTxt, 0x08),
                     },
                     ListFields = new ListField[] {
-                        new ListField(0x06, 0x10, U32Code("UpgR")),
+                        new ListField(0x06, new uint[] { 0x10 }, U32Code("UpgR"), 0),
                     },
                 };
             }
@@ -496,8 +498,8 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.StatTxt, 0x07),
                     },
                     ListFields = new ListField[] {
-                        new ListField(0x04, 0x10, U32Code("TecR")),
-                        new ListField(0x05, 0x11, U32Code("TecU")),
+                        new ListField(0x04, new uint[] { 0x10 }, U32Code("TecR"), 0),
+                        new ListField(0x05, new uint[] { 0x11 }, U32Code("TecU"), 0),
                     },
                 };
             }
@@ -560,7 +562,52 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.Orders, 0x12),
                     },
                     ListFields = new ListField[] {
-                        new ListField(0x11, 0x20, U32Code("OrdR")),
+                        new ListField(0x11, new uint[] { 0x20 }, U32Code("OrdR"), 0),
+                    },
+                };
+            }
+            {
+                Func<Field> Uint8 = () => MakeField(1, 0, 0, u8Zero, DatFieldFormat.Uint8);
+                Func<Field> Uint16 = () => MakeField(2, 0, 0, u16Zero, DatFieldFormat.Uint16);
+                Func<Field> Uint32 = () => MakeField(4, 0, 0, u32Zero, DatFieldFormat.Uint32);
+                Buttons = new LegacyDatDecl
+                {
+                    entries = 0,
+                    FileSize = 0,
+                    InvalidIndexStart = 0,
+                    InvalidIndexCount = 1,
+                    defaultFile = new byte[] {},
+                    fields = new Field[] {
+                        // 0x00 Varlen start index
+                        Uint32(),
+                        // 0x01 Varlen length (Button count)
+                        Uint8(),
+                        // -- Varlen buffers from this forward --
+                        // 0x02 Position
+                        Uint8(),
+                        // 0x03 Icon
+                        Uint16(),
+                        // 0x04 Disabled string
+                        Uint16(),
+                        // 0x05 Enabled string
+                        Uint16(),
+                        // 0x06 Condition
+                        Uint16(),
+                        // 0x07 Condition param
+                        Uint16(),
+                        // 0x08 Action
+                        Uint16(),
+                        // 0x09 Action param
+                        Uint16(),
+                    },
+                    RefFields = new RefField[] {
+                    },
+                    ListFields = new ListField[] {
+                        new ListField(0x0,
+                            new uint[] { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 },
+                            0,
+                            1
+                        ),
                     },
                 };
             }
@@ -574,5 +621,6 @@ namespace Tatti3.GameData
         public static readonly LegacyDatDecl Upgrades;
         public static readonly LegacyDatDecl TechData;
         public static readonly LegacyDatDecl Orders;
+        public static readonly LegacyDatDecl Buttons;
     }
 }

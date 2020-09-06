@@ -64,6 +64,7 @@ namespace Tatti3.GameData
             Sprites = LoadDatTable(Path.Join(root, "arr/sprites.dat"), LegacyDatDecl.Sprites, firegraft);
             Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images, firegraft);
             Orders = LoadDatTable(Path.Join(root, "arr/orders.dat"), LegacyDatDecl.Orders, firegraft);
+            Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             CmdIcons = LoadDdsGrp(
                 Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
@@ -89,6 +90,7 @@ namespace Tatti3.GameData
             Sprites = new DatTable(other.Sprites);
             Images = new DatTable(other.Images);
             Orders = new DatTable(other.Orders);
+            Buttons = new DatTable(other.Buttons);
             // Ok as long as this program doesn't support TBL editing
             StatTxt = other.StatTxt;
             CmdIcons = other.CmdIcons;
@@ -153,7 +155,168 @@ namespace Tatti3.GameData
             foreach ((var firegraftId, var fieldId) in table.MissingRequirements())
             {
                 var data = firegraft.GetRequirements(firegraftId, table.Entries);
-                table.ResetListField(fieldId, data.Offsets, data.Data);
+                table.ResetListField(fieldId, data.Offsets, new byte[][] { data.Data });
+            }
+            return table;
+        }
+
+        static DatTable LoadButtons(
+            string path,
+            LegacyDatDecl legacyDecl,
+            DatTable units,
+            FiregraftData firegraft
+        ) {
+            // Buttons are loaded from extended dat, or as a fallback, converted from firegraft
+            // arrays Unit / Buts. Unit array will be updated to have a button entry if loaded
+            // from firegraft.
+            DatTable table;
+            try
+            {
+                using (var file = File.OpenRead(path))
+                {
+                    table = DatTable.LoadNew(file, legacyDecl);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                // Firegraft data only contains buttons that have been changed; load base
+                // buttons first and then patch firegraft data on that.
+                var startOffsets = new BinaryWriter(new MemoryStream());
+                var buttonCounts = new List<byte>();
+                var buttonData = Enumerable.Range(0, 8)
+                    .Select(x => new BinaryWriter(new MemoryStream()))
+                    .ToArray();
+                var unitButtons = Enumerable.Range(0, (int)units.Entries)
+                    .SelectMany(x => new byte[] { 0, 0 })
+                    .ToArray();
+                var unitLinked = Enumerable.Range(0, (int)units.Entries)
+                    .SelectMany(x => new byte[] { 0xff, 0xff })
+                    .ToArray();
+                var buttonsStream = new BinaryReader(new MemoryStream(Properties.Resources.buttons_bin));
+                var baseSets = (int)buttonsStream.ReadUInt16();
+                var baseButtons = (int)buttonsStream.ReadUInt16();
+                for (int i = 0; i < 0xfa; i++)
+                {
+                    var span = new Span<byte>(unitButtons, i * 2, 2);
+                    BinaryPrimitives.WriteUInt16LittleEndian(span, (UInt16)buttonsStream.ReadByte());
+                }
+                for (int i = 0; i < 0xfa; i++)
+                {
+                    var linked = buttonsStream.ReadUInt16();
+                    var span = new Span<byte>(unitLinked, i * 2, 2);
+                    BinaryPrimitives.WriteUInt16LittleEndian(span, linked);
+                }
+                for (int i = 0; i < baseSets; i++)
+                {
+                    var off = buttonsStream.ReadUInt16();
+                    startOffsets.WriteU32((UInt32)off);
+                }
+                for (int i = 0; i < baseSets; i++)
+                {
+                    var count = buttonsStream.ReadByte();
+                    buttonCounts.Add(count);
+                }
+                for (int field = 0; field < 8; field++)
+                {
+                    for (int i = 0; i < baseButtons; i++)
+                    {
+                        if (field == 0)
+                        {
+                            var val = buttonsStream.ReadByte();
+                            buttonData[field].WriteU8(val);
+                        }
+                        else
+                        {
+                            var val = buttonsStream.ReadUInt16();
+                            buttonData[field].WriteU16(val);
+                        }
+                    }
+                }
+                // Create arrays
+                table = DatTable.Empty((uint)baseSets, legacyDecl);
+                table.AddField(
+                    0x00,
+                    DatFieldFormat.Uint32,
+                    new List<byte>(((MemoryStream)startOffsets.BaseStream).ToArray())
+                );
+                table.AddField(0x01, DatFieldFormat.Uint8, buttonCounts);
+                for (int j = 0; j < buttonData.Length; j++)
+                {
+                    var format = j == 0 ? DatFieldFormat.Uint8 : DatFieldFormat.Uint16;
+                    var bytes = new List<byte>(((MemoryStream)buttonData[j].BaseStream).ToArray());
+                    table.AddField((uint)j + 2, format, bytes);
+                }
+                units.AddField(0x44, DatFieldFormat.Uint16, new List<byte>(unitButtons));
+                units.AddField(0x45, DatFieldFormat.Uint16, new List<byte>(unitLinked));
+
+                // Add firegraft data; Override buttonset if all its users had been set in the
+                // firegraft data, otherwise add a new one.
+                {
+                    var overriddenButtons = new HashSet<uint>();
+                    var buttonsetIdToButtonIndex = new Dictionary<uint, int>();
+                    buttonsetIdToButtonIndex[0] = 0;
+                    int i = baseSets;
+                    var fgUnits = firegraft.Units();
+                    foreach (var set in firegraft.Buttons())
+                    {
+                        uint? firstUnit = fgUnits
+                            .Where(x => x.ButtonSetId == set.ButtonSetId + 1)
+                            .Select(x => x.UnitId)
+                            .FirstOrDefault();
+                        if (firstUnit == null)
+                        {
+                            // ?? Odd that FG has an unused buttonset
+                            continue;
+                        }
+
+                        uint[][] newButtons = Enumerable.Range(0, 8)
+                            .Select(j => {
+                                return set.Buttons.Select(x => {
+                                    return j switch
+                                    {
+                                        0 => (uint)x.Position,
+                                        1 => (uint)x.Icon,
+                                        2 => (uint)x.DisabledString,
+                                        3 => (uint)x.EnabledString,
+                                        4 => (uint)x.Condition,
+                                        5 => (uint)x.ConditionParam,
+                                        6 => (uint)x.Action,
+                                        7 => (uint)x.ActionParam,
+                                        _ => throw new Exception("Unreachable"),
+                                    };
+                                }).ToArray();
+                            }).ToArray();
+
+                        var oldSetId = units.GetFieldUint((uint)firstUnit, 0x44);
+                        if (!overriddenButtons.Contains(oldSetId))
+                        {
+                            overriddenButtons.Add(oldSetId);
+                            var oldSetUsers = Enumerable.Range(0, (int)units.Entries)
+                                .Where(x => units.GetFieldUint((uint)x, 0x44) == oldSetId)
+                                .Select(x => (uint)x)
+                                .ToArray();
+                            if (oldSetUsers.All(x => fgUnits.Any(y => y.UnitId == x)))
+                            {
+                                // Can override old
+                                buttonsetIdToButtonIndex[set.ButtonSetId + 1] = (int)oldSetId;
+                                table.SetListRaw(oldSetId, 0x00, newButtons);
+                                continue;
+                            }
+                        }
+                        // Create new entry
+                        buttonsetIdToButtonIndex[set.ButtonSetId + 1] = i;
+                        table.DuplicateEntry(0);
+                        table.SetListRaw((uint)i, 0x00, newButtons);
+                        i += 1;
+                    }
+                    foreach (var unit in firegraft.Units())
+                    {
+                        int index = 0;
+                        buttonsetIdToButtonIndex.TryGetValue(unit.ButtonSetId, out index);
+                        units.SetFieldUint(unit.UnitId, 0x44, (uint)index);
+                        units.SetFieldUint(unit.UnitId, 0x45, unit.Linked);
+                    }
+                }
             }
             return table;
         }
@@ -218,13 +381,16 @@ namespace Tatti3.GameData
                    EqualityComparer<DatTable>.Default.Equals(Flingy, data.Flingy) &&
                    EqualityComparer<DatTable>.Default.Equals(Sprites, data.Sprites) &&
                    EqualityComparer<DatTable>.Default.Equals(Images, data.Images) &&
-                   EqualityComparer<DatTable>.Default.Equals(Orders, data.Orders);
+                   EqualityComparer<DatTable>.Default.Equals(Orders, data.Orders) &&
+                   EqualityComparer<DatTable>.Default.Equals(Buttons, data.Buttons);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Units, Weapons, Upgrades, TechData, Flingy, Sprites, Images,
-                    Orders);
+            return HashCode.Combine(
+                HashCode.Combine(Units, Weapons, Upgrades, TechData, Flingy, Sprites, Images),
+                HashCode.Combine(Orders, Buttons)
+            );
         }
 
         public DatTable Units { get; }
@@ -235,6 +401,7 @@ namespace Tatti3.GameData
         public DatTable Sprites { get; }
         public DatTable Images { get; }
         public DatTable Orders { get; }
+        public DatTable Buttons { get; }
         public StringTable StatTxt { get; }
         public DdsGrp CmdIcons { get; }
 

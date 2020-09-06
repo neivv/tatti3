@@ -1,8 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -30,8 +33,16 @@ namespace Tatti3
             AppState state;
         }
 
+        // Abstracts over DatTableRef and Button DatTableRef, which both
+        // can read/write from a currently selected field.
+        public interface IDatEntryView
+        {
+            public uint GetField(uint field);
+            public void SetField(uint field, uint value);
+        }
+
         // Just to allow syntactic sugar for xaml
-        public class DatTableRef : INotifyPropertyChanged
+        public class DatTableRef : INotifyPropertyChanged, IDatEntryView
         {
             public class FieldsRef
             {
@@ -86,35 +97,7 @@ namespace Tatti3
                     this.fieldIndex = fieldIndex;
                     this.subIndex = subIndex;
                     this.item = 0;
-                    this.entryIndex = 0;
                     UpdateItem();
-                    if (parent.table != null)
-                    {
-                        parent.table.FieldChanged += (table, args) => {
-                            if (ReferenceEquals(table, parent.table) && args.Field == this.fieldIndex)
-                            {
-                                UpdateItem();
-                            }
-                        };
-                        if (parent.selectionIndex != -1)
-                        {
-                            parent.state.PropertyChanged += (obj, args) => {
-                                if (obj != parent.state)
-                                {
-                                    return;
-                                }
-                                if (args.PropertyName == "Selections")
-                                {
-                                    var selected = parent.state.Selections[parent.selectionIndex];
-                                    if ((uint)selected != entryIndex)
-                                    {
-                                        UpdateItem();
-                                    }
-                                }
-                            };
-                        }
-                    }
-                    // TODO event for table changed
                 }
 
                 public uint Item
@@ -124,6 +107,7 @@ namespace Tatti3
                     {
                         if (parent.table != null && item != value)
                         {
+                            uint entryIndex = (uint)parent.entryIndex;
                             parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, value);
                             item = value;
                         }
@@ -143,6 +127,7 @@ namespace Tatti3
                             var combined = value.Item2 ? (bit | item) : (~bit & item);
                             if (item != combined)
                             {
+                                uint entryIndex = (uint)parent.entryIndex;
                                 parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, combined);
                                 item = combined;
                             }
@@ -150,14 +135,13 @@ namespace Tatti3
                     }
                 }
 
-                // Expected to be called when the numeric values of dat may have changed
-                void UpdateItem()
+                public void UpdateItem()
                 {
                     if (parent.table != null)
                     {
-                        entryIndex = (uint)parent.state.selections[parent.selectionIndex];
+                        uint entryIndex = (uint)parent.entryIndex;
                         var newItem = parent.table.GetFieldSubIndexUint(entryIndex, fieldIndex, subIndex);
-                        if (newItem != item)
+                        if (item != newItem)
                         {
                             item = newItem;
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
@@ -170,7 +154,6 @@ namespace Tatti3
                 uint fieldIndex;
                 uint subIndex;
                 uint item;
-                uint entryIndex;
             }
 
             public class RequirementsRef
@@ -245,6 +228,113 @@ namespace Tatti3
                 uint entryIndex;
             }
 
+            public class ListFieldRef : INotifyPropertyChanged
+            {
+                public event PropertyChangedEventHandler? PropertyChanged;
+
+                public ListFieldRef(DatTableRef parent, uint fieldIndex)
+                {
+                    this.parent = parent;
+                    this.fieldIndex = fieldIndex;
+                    UpdateItem();
+                    view.CollectionChanged += (v, args) => {
+                        if (ReferenceEquals(v, this.view))
+                        {
+                            entryIndex = (uint)this.parent.state.selections[this.parent.selectionIndex];
+                            if (this.parent.table != null)
+                            {
+                                this.parent.table.SetListRaw(entryIndex, fieldIndex, view.Arrays);
+                            }
+                        }
+                    };
+                    if (parent.table != null)
+                    {
+                        parent.table.FieldChanged += (table, args) => {
+                            if (ReferenceEquals(table, parent.table) && args.Field == this.fieldIndex)
+                            {
+                                UpdateItem();
+                            }
+                        };
+                        if (parent.selectionIndex != -1)
+                        {
+                            parent.state.PropertyChanged += (obj, args) => {
+                                if (obj != parent.state)
+                                {
+                                    return;
+                                }
+                                if (args.PropertyName == "Selections")
+                                {
+                                    var selected = parent.state.Selections[parent.selectionIndex];
+                                    if ((uint)selected != entryIndex)
+                                    {
+                                        UpdateItem();
+                                    }
+                                }
+                            };
+                        }
+                    }
+                    // TODO event for table changed
+                }
+
+                public SoaView Item
+                {
+                    get => view;
+                    set
+                    {
+
+                    }
+                }
+
+                // Expected to be called when the numeric values of dat may have changed
+                void UpdateItem()
+                {
+                    if (parent.table != null)
+                    {
+                        entryIndex = (uint)parent.state.selections[parent.selectionIndex];
+                        var newItem = parent.table.GetListRaw(entryIndex, fieldIndex);
+                        if (!Tatti3.GameData.ValueHelpers.Helpers.NestedArrayEqual(newItem, view.Arrays))
+                        {
+                            view.Arrays = newItem;
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
+                        }
+                    }
+                }
+
+                public void Insert(int index, uint[] value)
+                {
+                    if (parent.table != null)
+                    {
+                        entryIndex = (uint)parent.state.selections[parent.selectionIndex];
+                        var oldArr = parent.table.GetListRaw(entryIndex, fieldIndex);
+                        var newArr = oldArr.Select((x, i) => {
+                            return x.Take(index)
+                                .Append(value[i])
+                                .Concat(x.Skip(index))
+                                .ToArray();
+                        }).ToArray();
+                        parent.table.SetListRaw(entryIndex, fieldIndex, newArr);
+                    }
+                }
+
+                public void Remove(int index)
+                {
+                    if (parent.table != null)
+                    {
+                        entryIndex = (uint)parent.state.selections[parent.selectionIndex];
+                        var oldArr = parent.table.GetListRaw(entryIndex, fieldIndex);
+                        var newArr = oldArr.Select(x => {
+                            return x.Where((val, i) => i != index).ToArray();
+                        }).ToArray();
+                        parent.table.SetListRaw(entryIndex, fieldIndex, newArr);
+                    }
+                }
+
+                DatTableRef parent;
+                uint fieldIndex;
+                uint entryIndex;
+                SoaView view = new SoaView();
+            }
+
             public event PropertyChangedEventHandler? PropertyChanged;
 
             public DatTableRef(AppState state, ArrayFileType type)
@@ -265,6 +355,43 @@ namespace Tatti3
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Names"));
                     }
                 };
+                if (table != null)
+                {
+                    table.FieldChanged += (table, args) => {
+                        if (ReferenceEquals(table, this.table) && (int)args.Index == this.entryIndex)
+                        {
+                            foreach (var pair in fieldRefs)
+                            {
+                                if (pair.Key.Item1 == args.Field)
+                                {
+                                    pair.Value.UpdateItem();
+                                }
+                            }
+                        }
+                    };
+                    if (selectionIndex != -1)
+                    {
+                        entryIndex = state.Selections[selectionIndex];
+                        state.PropertyChanged += (obj, args) => {
+                            if (obj != state)
+                            {
+                                return;
+                            }
+                            if (args.PropertyName == "Selections")
+                            {
+                                var selected = state.Selections[selectionIndex];
+                                if (selected != this.entryIndex)
+                                {
+                                    this.entryIndex = selected;
+                                    foreach (var val in fieldRefs.Values)
+                                    {
+                                        val.UpdateItem();
+                                    }
+                                }
+                            }
+                        };
+                    }
+                }
                 // TODO event for state changed
             }
 
@@ -288,6 +415,7 @@ namespace Tatti3
             Dictionary<(uint, uint), FieldRef> fieldRefs = new Dictionary<(uint, uint), FieldRef>();
             Dictionary<(uint, uint), RequirementsRef> requirementRefs =
                 new Dictionary<(uint, uint), RequirementsRef>();
+            Dictionary<uint, ListFieldRef> listFieldRefs = new Dictionary<uint, ListFieldRef>();
 
             FieldRef GetFieldRef(uint index, uint subIndex)
             {
@@ -311,10 +439,32 @@ namespace Tatti3
                 return val;
             }
 
+            public ListFieldRef GetListFieldRef(uint index)
+            {
+                ListFieldRef? val;
+                if (!listFieldRefs.TryGetValue(index, out val))
+                {
+                    val = new ListFieldRef(this, index);
+                    listFieldRefs[index] = val;
+                }
+                return val;
+            }
+
+            uint IDatEntryView.GetField(uint field)
+            {
+                return GetFieldRef(field, 0).Item;
+            }
+
+            void IDatEntryView.SetField(uint field, uint value)
+            {
+                GetFieldRef(field, 0).Item = value;
+            }
+
             AppState state;
             GameData.DatTable? table;
             /// Is -1 for non-dat files
             int selectionIndex;
+            int entryIndex = 0;
             ArrayFileType arrayFileType;
             List<string>? names;
         }
@@ -322,7 +472,7 @@ namespace Tatti3
         public AppState(GameData.GameData? gameData)
         {
             selections = new ObservableCollection<int>();
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 16; i++)
             {
                 selections.Add(0);
             }
@@ -361,6 +511,7 @@ namespace Tatti3
                 ArrayFileType.Upgrades => GameData?.Upgrades,
                 ArrayFileType.TechData => GameData?.TechData,
                 ArrayFileType.Orders => GameData?.Orders,
+                ArrayFileType.Buttons => GameData?.Buttons,
                 _ => throw new ArgumentException($"There is no dat table for {type.ToString()}"),
             };
         }
@@ -371,7 +522,7 @@ namespace Tatti3
             {
                 ArrayFileType.Units, ArrayFileType.Weapons, ArrayFileType.Flingy,
                 ArrayFileType.Sprites, ArrayFileType.Images, ArrayFileType.Upgrades,
-                ArrayFileType.TechData, ArrayFileType.Orders,
+                ArrayFileType.TechData, ArrayFileType.Orders, ArrayFileType.Buttons,
             };
             foreach (var type in dats)
             {
@@ -395,6 +546,7 @@ namespace Tatti3
                 case ArrayFileType.Upgrades:
                 case ArrayFileType.TechData:
                 case ArrayFileType.Orders:
+                case ArrayFileType.Buttons:
                     return true;
                 default:
                     return false;
@@ -452,6 +604,7 @@ namespace Tatti3
                     case ArrayFileType.Flingy:
                     case ArrayFileType.Sprites:
                     case ArrayFileType.Images:
+                    case ArrayFileType.Buttons:
                     case ArrayFileType.CmdIcon:
                         OnNamesChanged(args.Type);
                         break;
@@ -463,6 +616,7 @@ namespace Tatti3
                 ArrayFileType.Flingy,
                 ArrayFileType.Sprites,
                 ArrayFileType.Images,
+                ArrayFileType.Buttons,
                 ArrayFileType.CmdIcon,
             };
             // When names first array of tuple change,
@@ -590,6 +744,9 @@ namespace Tatti3
                 case ArrayFileType.TechData:
                     result[(int)TechNoneEntry].Enabled = false;
                     break;
+                case ArrayFileType.Buttons:
+                    result[0].Enabled = false;
+                    break;
                 default:
                     break;
             }
@@ -641,10 +798,14 @@ namespace Tatti3
                             entries.Add($"(Invalid)");
                         }
                         entries[(int)UnitNoneEntry] = "None";
-                        entries[(int)UnitNoneEntry + 1] = "(Trigger) Any unit";
-                        entries[(int)UnitNoneEntry + 2] = "(Trigger) Men";
-                        entries[(int)UnitNoneEntry + 3] = "(Trigger) Buildings";
-                        entries[(int)UnitNoneEntry + 4] = "(Trigger) Factories";
+                        //entries[(int)UnitNoneEntry + 1] = "(Trigger) Any unit";
+                        //entries[(int)UnitNoneEntry + 2] = "(Trigger) Men";
+                        //entries[(int)UnitNoneEntry + 3] = "(Trigger) Buildings";
+                        //entries[(int)UnitNoneEntry + 4] = "(Trigger) Factories";
+                        entries[(int)UnitNoneEntry + 1] = "(Buttons) Cancel";
+                        entries[(int)UnitNoneEntry + 2] = "(Buttons) Cancel Building Placement";
+                        entries[(int)UnitNoneEntry + 3] = "(Buttons) Cancel Construction";
+                        entries[(int)UnitNoneEntry + 4] = "(Buttons) Cancel Construction + Rally";
                         entries[(int)UnitNoneEntry + 5] = "(Buttons) Cancel Mutation";
                         entries[(int)UnitNoneEntry + 6] = "(Buttons) Cancel Mutation + Rally";
                         entries[(int)UnitNoneEntry + 7] = "(Buttons) Cancel Infestation";
@@ -688,6 +849,10 @@ namespace Tatti3
                         break;
                     case ArrayFileType.Images:
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Images, i => $"Image #{i}");
+                        break;
+                    case ArrayFileType.Buttons:
+                        entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Buttons, i => $"Buttonset #{i}");
+                        entries[0] = "None";
                         break;
                     case ArrayFileType.Upgrades:
                         for (uint i = 0; i < dat.Entries; i++)
@@ -754,6 +919,14 @@ namespace Tatti3
                         if (statTxt != null)
                         {
                             entries = statTxt.ListByIndex();
+                            for (int i = 0; i < entries.Count; i++)
+                            {
+                                // Remove hotkey char & magic char if any
+                                if (entries[i].Length > 2 && entries[i][1] < 0x20)
+                                {
+                                    entries[i] = entries[i].Substring(2);
+                                }
+                            }
                         }
                         break;
                     }
@@ -891,7 +1064,9 @@ namespace Tatti3
                             uint field = refField.FieldId;
                             for (uint i = 0; i < dat.Entries; i++)
                             {
-                                if (!dat.IsInvalidIndex(i))
+                                // Show invalid indices for buttons since they are
+                                // also (Buttons) xxx etc
+                                if (!dat.IsInvalidIndex(i) || type == ArrayFileType.Buttons)
                                 {
                                     var fieldVal = dat.GetFieldUint(i, field);
                                     if (fieldVal < (uint)entries.Count)
@@ -964,6 +1139,7 @@ namespace Tatti3
                 ArrayFileType.Upgrades => 5,
                 ArrayFileType.TechData => 6,
                 ArrayFileType.Orders => 7,
+                ArrayFileType.Buttons => 8,
                 _ => -1
             };
         }
@@ -992,7 +1168,7 @@ namespace Tatti3
 
         Dictionary<ArrayFileType, DatTableRef> datTableRefs = new Dictionary<ArrayFileType, DatTableRef>();
 
-        DatTableRef GetDatTableRef(ArrayFileType type)
+        public DatTableRef GetDatTableRef(ArrayFileType type)
         {
             DatTableRef? val;
             if (!datTableRefs.TryGetValue(type, out val))

@@ -28,12 +28,15 @@ namespace Tatti3
                 var selection = this.dropdown.SelectedIndex;
                 if (selection != -1 && this.inited)
                 {
-                    var dat = (AppState.DatTableRef)this.DataContext;
-                    if (dat == null)
+                    object[] ctx = (object[])this.DataContext;
+                    if (ctx == null)
                     {
                         return;
                     }
-                    dat.Fields[FieldId].Item = (uint)selection;
+                    if (ctx[0] is AppState.IDatEntryView dat)
+                    {
+                        dat.SetField(FieldId, (uint)selection);
+                    }
                 }
             };
         }
@@ -73,14 +76,14 @@ namespace Tatti3
 
         void UpdateBinding()
         {
-            var dat = (AppState.DatTableRef)this.DataContext;
-            if (dat == null)
+            object[] ctx = (object[])this.DataContext;
+            if (ctx == null)
             {
                 return;
             }
-            var namesPath = $"Root.Dat[{this.Dat}].Names";
-            var path = $"Fields[{this.FieldId}].Item";
-            AppState root = dat.Root;
+            var root = (AppState)ctx[1];
+            var namesPath = $"[1].Dat[{this.Dat}].Names";
+            var path = $"[0].Fields[{this.FieldId}].Item";
             var binding = new Binding
             {
                 Path = new PropertyPath(path),
@@ -101,13 +104,21 @@ namespace Tatti3
             });
             var self = this;
             EventHandler<DataTransferEventArgs> UpdateDropdownIndex = (obj, args) => {
-                var ctx = (AppState.DatTableRef)self.DataContext;
+                object[] ctx = (object[])self.DataContext;
                 if (ctx == null)
                 {
                     return;
                 }
-                var names = ctx.Root.ArrayFileNames(self.Dat);
-                int index = (int)ctx.Fields[self.FieldId].Item;
+                var root = (AppState)ctx[1];
+                var names = root.ArrayFileNames(self.Dat);
+                int index = -1;
+                // This isn't ideal but DatTableRef is so hacky it's not nice to refactor :l
+                // And would also not prefer actually setting on using an interface; it
+                // should have been just designed better.
+                if (ctx[0] is AppState.IDatEntryView dat)
+                {
+                    index = (int)dat.GetField(self.FieldId);
+                }
                 dropdown.SelectedIndex = index < names.Count ? index : -1;
             };
             Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);

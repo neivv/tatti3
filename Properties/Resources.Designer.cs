@@ -193,6 +193,16 @@ namespace Tatti3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] buttons_bin {
+            get {
+                object obj = ResourceManager.GetObject("buttons_bin", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] cmdicons_dds_grp {
             get {
                 object obj = ResourceManager.GetObject("cmdicons_dds_grp", resourceCulture);

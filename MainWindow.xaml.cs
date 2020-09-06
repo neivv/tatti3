@@ -89,6 +89,9 @@ namespace Tatti3
                     case 7:
                         state.SelectDat(ArrayFileType.Orders);
                         break;
+                    case 8:
+                        state.SelectDat(ArrayFileType.Buttons);
+                        break;
                     default:
                         return;
                 }
@@ -163,6 +166,9 @@ namespace Tatti3
                     break;
                 case ArrayFileType.Orders:
                     tab = 7;
+                    break;
+                case ArrayFileType.Buttons:
+                    tab = 8;
                     break;
                 default:
                     return;

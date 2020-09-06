@@ -25,15 +25,7 @@ namespace Tatti3.GameData
 
         public Requirements GetRequirements(UInt32 id, uint entryCount)
         {
-            if (data.Length == 0)
-            {
-                LoadData();
-            }
-            var section = sections.Where(x => x.Id == id).FirstOrDefault();
-            if (section.Length == 0)
-            {
-                throw new InvalidDataException($"Firegraft section {id:x08} does not exist");
-            }
+            var section = GetSection(id);
             var span = new ReadOnlySpan<byte>(data, section.Offset, section.Length);
             var count = ReadUInt16LittleEndian(span);
             var pos = 2;
@@ -87,6 +79,107 @@ namespace Tatti3.GameData
                 Offsets = offsetData,
                 Data = reqBuffer.ToArray(),
             };
+        }
+
+        public List<ButtonSet> Buttons()
+        {
+            var section = GetSection(U32Code("Buts"));
+            var span = new ReadOnlySpan<byte>(data, section.Offset, section.Length);
+            var count = ReadUInt16LittleEndian(span);
+            var pos = 2;
+            var i = 0;
+            var result = new List<ButtonSet>((int)count);
+            while (i < count)
+            {
+                var id = (uint)span[pos];
+                var buttonCount = (int)span[pos + 1];
+                pos += 2;
+                var buttons = new ButtonSet
+                {
+                    ButtonSetId = id,
+                    Buttons = new List<Button>(buttonCount),
+                };
+                for (int j = 0; j < buttonCount; j++)
+                {
+                    var position = ReadUInt16LittleEndian(span[(pos + 0)..]);
+                    var icon = ReadUInt16LittleEndian(span[(pos + 2)..]);
+                    var condition = ReadUInt32LittleEndian(span[(pos + 4)..]);
+                    var action = ReadUInt32LittleEndian(span[(pos + 8)..]);
+                    var condition_param = ReadUInt16LittleEndian(span[(pos + 12)..]);
+                    var action_param = ReadUInt16LittleEndian(span[(pos + 14)..]);
+                    var enabled_string = ReadUInt16LittleEndian(span[(pos + 16)..]);
+                    var disabled_string = ReadUInt16LittleEndian(span[(pos + 18)..]);
+                    buttons.Buttons.Add(new Button {
+                        Position = (byte)position,
+                        Icon = icon,
+                        Condition = (UInt16)condition,
+                        Action = (UInt16)action,
+                        ConditionParam = condition_param,
+                        ActionParam = action_param,
+                        DisabledString = disabled_string,
+                        EnabledString = enabled_string,
+                    });
+                    pos += 0x14;
+                }
+                result.Add(buttons);
+                i += 1;
+            }
+            if (pos != span.Length)
+            {
+                throw new InvalidDataException($"Firegraft buttons ended too early");
+            }
+            return result;
+        }
+
+        public List<FiregraftUnit> Units()
+        {
+            var section = GetSection(U32Code("Unit"));
+            var span = new ReadOnlySpan<byte>(data, section.Offset, section.Length);
+            var count = ReadUInt16LittleEndian(span);
+            var pos = 2;
+            var i = 0;
+            var result = new List<FiregraftUnit>((int)count);
+            while (i < count)
+            {
+                var id = (uint)span[pos];
+                var buttons = (uint)span[pos + 2];
+                var linked = ReadUInt16LittleEndian(span[(pos + 3)..]);
+                result.Add(new FiregraftUnit {
+                    UnitId = id,
+                    ButtonSetId = buttons,
+                    Linked = linked,
+                });
+                pos += 9;
+                i += 1;
+            }
+            if (pos != span.Length)
+            {
+                throw new InvalidDataException($"Firegraft buttons ended too early");
+            }
+            return result;
+        }
+
+        Section GetSection(UInt32 id)
+        {
+            if (data.Length == 0)
+            {
+                LoadData();
+            }
+            var section = sections.Where(x => x.Id == id).FirstOrDefault();
+            if (section.Length == 0)
+            {
+                throw new InvalidDataException($"Firegraft section {id:x08} does not exist");
+            }
+            return section;
+        }
+
+        private UInt32 U32Code(string input) {
+            UInt32 result = 0;
+            foreach (char x in input.Reverse())
+            {
+                result = (result << 8) | ((byte)x);
+            }
+            return result;
         }
 
         private void LoadData()
@@ -150,6 +243,31 @@ namespace Tatti3.GameData
         {
             public byte[] Offsets;
             public byte[] Data;
+        }
+
+        public struct ButtonSet
+        {
+            public List<Button> Buttons;
+            public uint ButtonSetId;
+        }
+
+        public struct Button
+        {
+            public byte Position;
+            public UInt16 Icon;
+            public UInt16 Condition;
+            public UInt16 Action;
+            public UInt16 ConditionParam;
+            public UInt16 ActionParam;
+            public UInt16 DisabledString;
+            public UInt16 EnabledString;
+        }
+
+        public struct FiregraftUnit
+        {
+            public uint UnitId;
+            public uint ButtonSetId;
+            public uint Linked;
         }
     }
 }

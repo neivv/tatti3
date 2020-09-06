@@ -7,9 +7,6 @@
         xmlns:local="clr-namespace:Tatti3"
         mc:Ignorable="d"
         Width="1000" Height="750">
-    <Window.Resources>
-        <local:BackRefConverter x:Key="BackRefConverter" />
-    </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Open" Executed="OpenCmdExecuted"
             CanExecute="OpenCmdCanExecute"/>
@@ -688,6 +685,17 @@
                             </Grid>
                         </TabItem>
                     </TabControl>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Buttons">
+                <DockPanel Background="#FFE5E5E5">
+                    <GroupBox DockPanel.Dock="Left">
+                        <GroupBox.Header>
+                            <TextBlock Text="Buttons" />
+                        </GroupBox.Header>
+                        <local:Buttons>
+                        </local:Buttons>
+                    </GroupBox>
                 </DockPanel>
             </TabItem>
         </TabControl>

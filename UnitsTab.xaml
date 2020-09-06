@@ -115,10 +115,20 @@
                             <GroupBox.Header>
                                 <TextBlock Text="Other Properties" />
                             </GroupBox.Header>
-                            <local:StatGroup LabelWidth="*">
-                                <local:IntStat Text="Sight" FieldId="0x18"/>
-                                <local:IntStat Text="Target Acquisition Range" FieldId="0x17"/>
-                            </local:StatGroup>
+                            <DockPanel>
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="90">
+                                    <local:DatRefStat Text="Buttons" Dat="Buttons" FieldId="0x44"/>
+                                    <local:DatRefStat Text="Linked Buttons" Dat="Units" FieldId="0x45"/>
+                                </local:StatGroup>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <local:StatGroup DockPanel.Dock="Left" LabelWidth="90">
+                                        <local:IntStat Text="Sight" FieldId="0x18"/>
+                                    </local:StatGroup>
+                                    <local:StatGroup LabelWidth="*" Margin="5,0,0,0" DockPanel.Dock="Left">
+                                        <local:IntStat Text="Target Acquisition Range" FieldId="0x17"/>
+                                    </local:StatGroup>
+                                </DockPanel>
+                            </DockPanel>
                         </GroupBox>
                     </DockPanel>
                 </Grid>

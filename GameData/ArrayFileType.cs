@@ -17,5 +17,6 @@ namespace Tatti3.GameData
         StatTxtRank,
         CmdIcon,
         ImagesTbl,
+        Buttons,
     }
 }

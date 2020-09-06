@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:Tatti3"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <local:BackRefConverter x:Key="BackRefConverter" />
+        <local:MultiBindingToArrayConverter x:Key="MultiBindingToArrayConverter" />
     </Application.Resources>
 </Application>

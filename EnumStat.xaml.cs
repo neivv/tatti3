@@ -36,7 +36,7 @@ namespace Tatti3
                 System.Globalization.CultureInfo culture
             ) {
                 int val = (int)(uint)value;
-                if (val < 0 || val >= entries.Count) 
+                if (val < 0 || val >= entries.Count)
                 {
                     return -1;
                 }
@@ -55,11 +55,11 @@ namespace Tatti3
                 try
                 {
                     int val = (int)value;
-                    if (val < 0 || val >= entries.Count) 
+                    if (val < 0 || val >= entries.Count)
                     {
                         return Binding.DoNothing;
                     }
-                    else 
+                    else
                     {
                         return val;
                     }
