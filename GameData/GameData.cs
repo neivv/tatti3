@@ -111,6 +111,7 @@ namespace Tatti3.GameData
                 SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
                 SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
                 SaveDatTable(tempFiles, Orders, Path.Join(root, "arr/orders.dat"));
+                SaveDatTable(tempFiles, Buttons, Path.Join(root, "arr/buttons.dat"));
                 tempFiles.Commit();
             }
         }

@@ -848,8 +848,25 @@ namespace Tatti3.GameData
                     return false;
                 }
                 // Compare fields
+                HashSet<uint> listFieldIds = new HashSet<uint>();
+                foreach (var listField in listFields.Values)
+                {
+                    if (listField.LengthFieldId != null)
+                    {
+                        listFieldIds.Add((uint)listField.LengthFieldId);
+                    }
+                    foreach (uint id in listField.DataFieldIds)
+                    {
+                        listFieldIds.Add(id);
+                    }
+                }
+
                 foreach (var k in fields.Keys)
                 {
+                    if (listFieldIds.Contains(k))
+                    {
+                        continue;
+                    }
                     var field = fields[k];
                     DatValue? otherField;
                     if (!other.fields.TryGetValue(k, out otherField))

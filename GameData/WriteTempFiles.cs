@@ -61,7 +61,7 @@ namespace Tatti3.GameData
             }
         }
 
-        class TempFile 
+        class TempFile
         {
             public TempFile(string path)
             {
@@ -81,9 +81,13 @@ namespace Tatti3.GameData
             {
                 if (!moved)
                 {
-                    File.Move(realPath, origNewPath, true);
+                    try
+                    {
+                        File.Move(realPath, origNewPath, true);
+                        moved = true;
+                    }
+                    catch (Exception) { }
                     File.Move(tempPath, realPath, true);
-                    moved = true;
                 }
             }
 
