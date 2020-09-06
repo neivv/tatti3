@@ -206,6 +206,7 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.Units, 0x01),
                         MakeRefField(ArrayFileType.Units, 0x02),
                         MakeRefField(ArrayFileType.Units, 0x03),
+                        MakeRefFieldZeroOptional(ArrayFileType.Images, 0x04),
                         MakeRefField(ArrayFileType.Weapons, 0x11),
                         MakeRefField(ArrayFileType.Weapons, 0x13),
                         MakeRefField(ArrayFileType.Flingy, 0x00),

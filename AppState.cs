@@ -995,6 +995,11 @@ namespace Tatti3
                                 if (names.Count > (int)backIndex)
                                 {
                                     name = names[(int)backIndex];
+                                    // Hackfix: Add (Construction) for unit construction images
+                                    if (backType == ArrayFileType.Units && type == ArrayFileType.Images)
+                                    {
+                                        name = $"{name} (Construction)";
+                                    }
                                 }
                                 else
                                 {
