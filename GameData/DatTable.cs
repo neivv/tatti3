@@ -816,7 +816,8 @@ namespace Tatti3.GameData
             fields[fieldId].Data = new List<byte>(offsets);
             for (int i = 0; i < field.DataFieldIds.Length; i++)
             {
-                fields[(uint)i] = new DatValue(
+                var dataId = field.DataFieldIds[i];
+                fields[dataId] = new DatValue(
                     new List<byte>(data[i]),
                     DatFieldFormat.VariableLengthData,
                     1
