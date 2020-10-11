@@ -12,6 +12,7 @@ BUTTON_SETS = 0x005187E8
 # u16 unit_id_linked [0xfa]
 # u16 buttonset_first_button[buttonset_count]
 # u8 buttonset_len[buttonset_count]
+# u8 buttonset_ordering[buttonset_count]
 # u8 button_pos[button_count]
 # u16 icon[button_count]
 # u16 disabled_string[button_count]
@@ -36,6 +37,7 @@ def main():
     # (ptr, count) -> buttons index
     used_sets = {}
     unit_result = []
+    button_ptrs = [(0, 0)]
     for (ptr, count, linked) in sets:
         if count == 0:
             unit_result.append((0, linked))
@@ -45,6 +47,7 @@ def main():
             index = len(buttons_root)
             used_sets[(ptr, count)] = index
             buttons_root.append((len(buttons), count))
+            button_ptrs.append((ptr, len(button_ptrs)))
             unit_result.append((index, linked))
             for i in range(count):
                 arr = [
@@ -58,6 +61,11 @@ def main():
                     va_read_u16(va_map, ptr + i * 0x14 + 0xe),
                 ]
                 buttons.append(arr)
+
+    button_ptrs.sort()
+    button_id_to_ord = {}
+    for (i, (_, buttonset_id)) in enumerate(button_ptrs):
+        button_id_to_ord[buttonset_id] = i
 
     cond_fnptr_remap = {}
     act_fnptr_remap = {}
@@ -93,6 +101,8 @@ def main():
         buf += struct.pack('<H', start)
     for (start, length) in buttons_root:
         buf.append(length)
+    for i in range(len(buttons_root)):
+        buf.append(button_id_to_ord[i])
     for i in range(8):
         for arr in buttons:
             if i == 0:

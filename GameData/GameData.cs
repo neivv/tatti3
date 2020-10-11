@@ -196,6 +196,11 @@ namespace Tatti3.GameData
                 var buttonsStream = new BinaryReader(new MemoryStream(Properties.Resources.buttons_bin));
                 var baseSets = (int)buttonsStream.ReadUInt16();
                 var baseButtons = (int)buttonsStream.ReadUInt16();
+                // Used to map firegraft buttonset ids to buttons.dat ids.
+                // First it is initialized to contain buttonsets that weren't in
+                // firegraft, then later when firegraft-added buttonsets are processed,
+                // the mapping is updated to point to any new ids.
+                var buttonsetIdToButtonIndex = new Dictionary<uint, int>();
                 for (int i = 0; i < 0xfa; i++)
                 {
                     var span = new Span<byte>(unitButtons, i * 2, 2);
@@ -216,6 +221,11 @@ namespace Tatti3.GameData
                 {
                     var count = buttonsStream.ReadByte();
                     buttonCounts.Add(count);
+                }
+                for (int i = 0; i < baseSets; i++)
+                {
+                    var firegraftId = buttonsStream.ReadByte();
+                    buttonsetIdToButtonIndex[(uint)firegraftId] = i;
                 }
                 for (int field = 0; field < 8; field++)
                 {
@@ -254,8 +264,6 @@ namespace Tatti3.GameData
                 // firegraft data, otherwise add a new one.
                 {
                     var overriddenButtons = new HashSet<uint>();
-                    var buttonsetIdToButtonIndex = new Dictionary<uint, int>();
-                    buttonsetIdToButtonIndex[0] = 0;
                     int i = baseSets;
                     var fgUnits = firegraft.Units();
                     foreach (var set in firegraft.Buttons())
