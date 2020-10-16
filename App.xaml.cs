@@ -19,9 +19,9 @@ namespace Tatti3
     {
         App()
         {
+            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
 #if DEBUG
             AllocConsole();
-            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             this.Exit += (o, e) => {
                 this.fileTrace.Flush();
             };
@@ -52,10 +52,13 @@ namespace Tatti3
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
+#endif
 
         void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+#if DEBUG
             fileTrace.Flush();
+#endif
             using (var file = new StreamWriter(File.Create("exception.txt")))
             {
                 var exception = e.Exception;
@@ -63,7 +66,7 @@ namespace Tatti3
                 {
                     file.Write($"Exception: {exception.Message}\n\nStack:\n{exception.StackTrace}\n");
                     exception = exception.InnerException;
-                    if (exception == null) 
+                    if (exception == null)
                     {
                         break;
                     }
@@ -71,6 +74,5 @@ namespace Tatti3
                 }
             }
         }
-#endif
     }
 }
