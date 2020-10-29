@@ -293,6 +293,10 @@ namespace Tatti3
             int i = startIndex + 1;
             while (i != startIndex)
             {
+                if (i >= names.Count)
+                {
+                    i = 0;
+                }
                 if (names[i].Text.ToLowerInvariant().Contains(text))
                 {
                     entryList.SelectedIndex = i;
