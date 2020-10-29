@@ -17,7 +17,7 @@ namespace Tatti3.GameData
         StatTxtRank,
         CmdIcon,
         ImagesTbl,
-        PortdataTbl,
+        PortDataTbl,
         Buttons,
     }
 }

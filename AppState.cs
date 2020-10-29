@@ -955,6 +955,24 @@ namespace Tatti3
                         }
                         break;
                     }
+                    case ArrayFileType.ImagesTbl:
+                    {
+                        var tbl = GameData?.ImagesTbl;
+                        if (tbl != null)
+                        {
+                            entries = tbl.ListByIndex();
+                        }
+                        break;
+                    }
+                    case ArrayFileType.PortDataTbl:
+                    {
+                        var tbl = GameData?.PortDataTbl;
+                        if (tbl != null)
+                        {
+                            entries = tbl.ListByIndex();
+                        }
+                        break;
+                    }
                     case ArrayFileType.CmdIcon:
                         if (GameData != null)
                         {

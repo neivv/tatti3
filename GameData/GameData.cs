@@ -67,6 +67,8 @@ namespace Tatti3.GameData
             Orders = LoadDatTable(Path.Join(root, "arr/orders.dat"), LegacyDatDecl.Orders, firegraft);
             Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
+            ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);
+            PortDataTbl = LoadTbl(Path.Join(root, "arr/portdata.tbl"), Properties.Resources.arr_portdata_tbl);
             CmdIcons = LoadDdsGrp(
                 Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
                 Properties.Resources.cmdicons_dds_grp
@@ -96,6 +98,8 @@ namespace Tatti3.GameData
             // Ok as long as this program doesn't support TBL editing
             StatTxt = other.StatTxt;
             CmdIcons = other.CmdIcons;
+            ImagesTbl = other.ImagesTbl;
+            PortDataTbl = other.PortDataTbl;
         }
 
         public static GameData Open(string root)
@@ -355,6 +359,20 @@ namespace Tatti3.GameData
             return StringTable.FromJson(stream);
         }
 
+        static StringTable LoadTbl(string path, byte[] defaultFile)
+        {
+            try
+            {
+                using (var file = File.OpenRead(path))
+                {
+                    return StringTable.FromTbl(file);
+                }
+            }
+            catch (FileNotFoundException) { }
+            var stream = new MemoryStream(defaultFile);
+            return StringTable.FromTbl(stream);
+        }
+
         /// File will be kept open as it is lazily read.
         static DdsGrp LoadDdsGrp(string path, byte[] defaultFile)
         {
@@ -417,6 +435,8 @@ namespace Tatti3.GameData
         public DatTable Buttons { get; }
         public StringTable StatTxt { get; }
         public DdsGrp CmdIcons { get; }
+        public StringTable ImagesTbl { get; }
+        public StringTable PortDataTbl { get; }
 
         public static bool operator ==(GameData? left, GameData? right)
         {

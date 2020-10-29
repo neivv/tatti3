@@ -595,7 +595,7 @@
                             <TextBlock Text="Portrait" />
                         </GroupBox.Header>
                         <local:StatGroup LabelWidth="80">
-                            <local:DatRefStat Text="Idle Path" Dat="PortdataTbl" FieldId="0x0"/>
+                            <local:DatRefStat Text="Idle Path" Dat="PortDataTbl" FieldId="0x0"/>
                             <local:DatRefStat Text="Talking Path" Dat="PortDataTbl" FieldId="0x1"/>
                         </local:StatGroup>
                     </GroupBox>

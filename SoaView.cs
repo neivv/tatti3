@@ -70,7 +70,7 @@ namespace Tatti3
 
         public bool IsReadOnly => false;
 
-        public int Count => Arrays[0].Length;
+        public int Count => Arrays.Length == 0 ? 0 : Arrays[0].Length;
 
         public bool IsSynchronized => false;
 

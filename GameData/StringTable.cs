@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
@@ -47,6 +48,32 @@ namespace Tatti3.GameData
                     self.keyToIndex[key] = (uint)self.byIndex.Count;
                     self.byIndex.Add(value);
                 }
+            }
+            return self;
+        }
+
+        public static StringTable FromTbl(Stream input)
+        {
+            var reader = new BinaryReader(input);
+            // Actually the tbls would be 1252 but they only contain filenames so w/e
+            var encoding = Encoding.ASCII;
+            var bytes = reader.ReadBytes((int)input.Length);
+            var self = new StringTable();
+            self.byIndex.Add("(None)");
+            var count = BinaryPrimitives.ReadUInt16LittleEndian(bytes[..2]);
+            for (UInt16 i = 0; i < count; i++)
+            {
+                var start = 2 + (int)i * 2;
+                var offset = BinaryPrimitives.ReadUInt16LittleEndian(bytes[start..(start + 2)]);
+                int len = 0;
+                int pos = (int)offset;
+                while (pos < bytes.Length && bytes[pos] != 0)
+                {
+                    pos += 1;
+                    len += 1;
+                }
+                var val = encoding.GetString(bytes[offset..(offset + len)]);
+                self.byIndex.Add(val);
             }
             return self;
         }
