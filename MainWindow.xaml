@@ -394,11 +394,50 @@
                                 <GroupBox.Header>
                                     <TextBlock Text="General Properties" />
                                 </GroupBox.Header>
+                                <DockPanel LastChildFill="false">
+                                    <local:StatGroup DockPanel.Dock="Left" Flags="true">
+                                        <local:BoolStat Text="Graphic Turns" FieldId="0x1:0x1"/>
+                                        <local:BoolStat Text="Draw If Cloaked" FieldId="0x4:0x1"/>
+                                    </local:StatGroup>
+                                    <local:StatGroup DockPanel.Dock="Left" Flags="true">
+                                        <local:BoolStat Text="Clickable" FieldId="0x2:0x1"/>
+                                        <local:BoolStat Text="Use Full Iscript" FieldId="0x3:0x1"/>
+                                    </local:StatGroup>
+                                </DockPanel>
                             </GroupBox>
                             <GroupBox DockPanel.Dock="Left">
                                 <GroupBox.Header>
                                     <TextBlock Text="Drawing Properties" />
                                 </GroupBox.Header>
+                                <local:StatGroup LabelWidth="80">
+                                    <local:EnumStat Text="Function" FieldId="0x5">
+                                        <system:String>Normal Draw</system:String>
+                                        <system:String>No Remapping</system:String>
+                                        <system:String>Cloaking</system:String>
+                                        <system:String>Cloaked</system:String>
+                                        <system:String>Decloaking</system:String>
+                                        <system:String>Detected Cloaking</system:String>
+                                        <system:String>Detected Cloaked</system:String>
+                                        <system:String>Detected Decloaking</system:String>
+                                        <system:String>EMP Shockwave</system:String>
+                                        <system:String>Transparency Remapping</system:String>
+                                        <system:String>Shadow</system:String>
+                                        <system:String>HP Bar</system:String>
+                                        <system:String>Warp Texture</system:String>
+                                        <system:String>Selection Circle</system:String>
+                                        <system:String>Flag (Override Player Colors)</system:String>
+                                        <system:String>Show Size Rect</system:String>
+                                        <system:String>Hallucination</system:String>
+                                        <system:String>Warp Flash</system:String>
+                                    </local:EnumStat>
+                                    <local:EnumStat Text="Remap Palette" FieldId="0x6">
+                                        <system:String>None</system:String>
+                                        <system:String>ofire.pcx</system:String>
+                                        <system:String>gfire.pcx</system:String>
+                                        <system:String>bfire.pcx</system:String>
+                                        <system:String>bexpl.pcx</system:String>
+                                    </local:EnumStat>
+                                </local:StatGroup>
                             </GroupBox>
                         </DockPanel>
                         <GroupBox DockPanel.Dock="Top">
