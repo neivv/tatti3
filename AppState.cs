@@ -852,10 +852,27 @@ namespace Tatti3
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Flingy, i => $"Flingy #{i}");
                         break;
                     case ArrayFileType.Sprites:
-                        entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Sprites, i => $"Sprite #{i}");
+                        entries = NamesFromBackRefs(
+                            dat.Entries,
+                            ArrayFileType.Sprites,
+                            i => {
+                                uint image = dat.GetFieldUint(i, 0);
+                                uint grp = GameData?.Images.GetFieldUint(image, 0) ?? 0;
+                                string? path = GameData?.ImagesTbl.GetByIndex(grp);
+                                return path ?? $"Sprite #{i}";
+                            }
+                        );
                         break;
                     case ArrayFileType.Images:
-                        entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Images, i => $"Image #{i}");
+                        entries = NamesFromBackRefs(
+                            dat.Entries,
+                            ArrayFileType.Images,
+                            i => {
+                                uint grp = dat.GetFieldUint(i, 0);
+                                string? path = GameData?.ImagesTbl.GetByIndex(grp);
+                                return path ?? $"Image #{i}";
+                            }
+                        );
                         break;
                     case ArrayFileType.PortData:
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.PortData, i => $"Portrait #{i}");
