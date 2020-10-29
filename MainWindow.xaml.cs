@@ -87,9 +87,12 @@ namespace Tatti3
                         state.SelectDat(ArrayFileType.TechData);
                         break;
                     case 7:
-                        state.SelectDat(ArrayFileType.Orders);
+                        state.SelectDat(ArrayFileType.PortData);
                         break;
                     case 8:
+                        state.SelectDat(ArrayFileType.Orders);
+                        break;
+                    case 9:
                         state.SelectDat(ArrayFileType.Buttons);
                         break;
                     default:
@@ -164,11 +167,14 @@ namespace Tatti3
                 case ArrayFileType.TechData:
                     tab = 6;
                     break;
-                case ArrayFileType.Orders:
+                case ArrayFileType.PortData:
                     tab = 7;
                     break;
-                case ArrayFileType.Buttons:
+                case ArrayFileType.Orders:
                     tab = 8;
+                    break;
+                case ArrayFileType.Buttons:
+                    tab = 9;
                     break;
                 default:
                     return;

@@ -513,6 +513,7 @@ namespace Tatti3
                 ArrayFileType.Images => GameData?.Images,
                 ArrayFileType.Upgrades => GameData?.Upgrades,
                 ArrayFileType.TechData => GameData?.TechData,
+                ArrayFileType.PortData => GameData?.PortData,
                 ArrayFileType.Orders => GameData?.Orders,
                 ArrayFileType.Buttons => GameData?.Buttons,
                 _ => throw new ArgumentException($"There is no dat table for {type.ToString()}"),
@@ -525,7 +526,8 @@ namespace Tatti3
             {
                 ArrayFileType.Units, ArrayFileType.Weapons, ArrayFileType.Flingy,
                 ArrayFileType.Sprites, ArrayFileType.Images, ArrayFileType.Upgrades,
-                ArrayFileType.TechData, ArrayFileType.Orders, ArrayFileType.Buttons,
+                ArrayFileType.TechData, ArrayFileType.Orders, ArrayFileType.PortData,
+                ArrayFileType.Buttons,
             };
             foreach (var type in dats)
             {
@@ -548,6 +550,7 @@ namespace Tatti3
                 case ArrayFileType.Images:
                 case ArrayFileType.Upgrades:
                 case ArrayFileType.TechData:
+                case ArrayFileType.PortData:
                 case ArrayFileType.Orders:
                 case ArrayFileType.Buttons:
                     return true;
@@ -619,6 +622,7 @@ namespace Tatti3
                 ArrayFileType.Flingy,
                 ArrayFileType.Sprites,
                 ArrayFileType.Images,
+                ArrayFileType.PortData,
                 ArrayFileType.Buttons,
                 ArrayFileType.CmdIcon,
             };
@@ -852,6 +856,9 @@ namespace Tatti3
                         break;
                     case ArrayFileType.Images:
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Images, i => $"Image #{i}");
+                        break;
+                    case ArrayFileType.PortData:
+                        entries = NamesFromBackRefs(dat.Entries, ArrayFileType.PortData, i => $"Portrait #{i}");
                         break;
                     case ArrayFileType.Buttons:
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Buttons, i => $"Buttonset #{i}");
@@ -1146,8 +1153,9 @@ namespace Tatti3
                 ArrayFileType.Images => 4,
                 ArrayFileType.Upgrades => 5,
                 ArrayFileType.TechData => 6,
-                ArrayFileType.Orders => 7,
-                ArrayFileType.Buttons => 8,
+                ArrayFileType.PortData => 7,
+                ArrayFileType.Orders => 8,
+                ArrayFileType.Buttons => 9,
                 _ => -1
             };
         }

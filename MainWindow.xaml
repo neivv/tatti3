@@ -585,6 +585,42 @@
                     </TabControl>
                 </DockPanel>
             </TabItem>
+            <TabItem Header="Portraits">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[PortData]" />
+                </TabItem.DataContext>
+                <DockPanel Background="#FFE5E5E5" LastChildFill="false">
+                    <GroupBox DockPanel.Dock="Top">
+                        <GroupBox.Header>
+                            <TextBlock Text="Portrait" />
+                        </GroupBox.Header>
+                        <local:StatGroup LabelWidth="80">
+                            <local:DatRefStat Text="Idle Path" Dat="PortdataTbl" FieldId="0x0"/>
+                            <local:DatRefStat Text="Talking Path" Dat="PortDataTbl" FieldId="0x1"/>
+                        </local:StatGroup>
+                    </GroupBox>
+                    <DockPanel DockPanel.Dock="Top" LastChildFill="false">
+                        <GroupBox DockPanel.Dock="Left">
+                            <GroupBox.Header>
+                                <TextBlock Text="Idle Properties" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="80">
+                                <local:IntStat Text="SMK change" FieldId="0x2"/>
+                                <local:IntStat Text="Unknown" FieldId="0x4"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Left">
+                            <GroupBox.Header>
+                                <TextBlock Text="Talking Properties" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="80">
+                                <local:IntStat Text="SMK change" FieldId="0x3"/>
+                                <local:IntStat Text="Unknown" FieldId="0x5"/>
+                            </local:StatGroup>
+                        </GroupBox>
+                    </DockPanel>
+                </DockPanel>
+            </TabItem>
             <TabItem Header="Orders">
                 <TabItem.DataContext>
                     <Binding Path="Dat[Orders]" />

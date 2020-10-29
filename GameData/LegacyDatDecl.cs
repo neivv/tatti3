@@ -218,6 +218,7 @@ namespace Tatti3.GameData
                         MakeRefField(ArrayFileType.SfxData, 0x21),
                         MakeRefField(ArrayFileType.SfxData, 0x22),
                         MakeRefField(ArrayFileType.SfxData, 0x23),
+                        MakeRefField(ArrayFileType.PortData, 0x27),
                         MakeRefField(ArrayFileType.CmdIcon, 0x43),
                         MakeRefField(ArrayFileType.Buttons, 0x44),
                         MakeRefField(ArrayFileType.Units, 0x45),
@@ -506,6 +507,36 @@ namespace Tatti3.GameData
             }
 
             {
+                Func<Field> Uint8 = () => MakeField(1, 0, 110, u8Zero, DatFieldFormat.Uint8);
+                Func<Field> Uint16 = () => MakeField(2, 0, 110, u16Zero, DatFieldFormat.Uint16);
+                Func<Field> Uint32 = () => MakeField(4, 0, 110, u32Zero, DatFieldFormat.Uint32);
+                PortData = new LegacyDatDecl
+                {
+                    entries = 110,
+                    FileSize = 1320,
+                    InvalidIndexStart = 0,
+                    InvalidIndexCount = 0,
+                    defaultFile = Properties.Resources.arr_portdata_dat,
+                    fields = new Field[] {
+                        // 0x00 Idle path
+                        Uint32(),
+                        // 0x01 Talking path
+                        Uint32(),
+                        // 0x02 Idle SMK change
+                        Uint8(),
+                        // 0x03 Talking SMK change
+                        Uint8(),
+                        // 0x04 Idle unknown
+                        Uint8(),
+                        // 0x05 Talking unknown
+                        Uint8(),
+                    },
+                    RefFields = new RefField[] {},
+                    ListFields = new ListField[] {},
+                };
+            }
+
+            {
                 Func<Field> Uint8 = () => MakeField(1, 0, 189, u8Zero, DatFieldFormat.Uint8);
                 Func<Field> Uint16 = () => MakeField(2, 0, 189, u16Zero, DatFieldFormat.Uint16);
                 Func<Field> Uint32 = () => MakeField(4, 0, 189, u32Zero, DatFieldFormat.Uint32);
@@ -621,6 +652,7 @@ namespace Tatti3.GameData
         public static readonly LegacyDatDecl Images;
         public static readonly LegacyDatDecl Upgrades;
         public static readonly LegacyDatDecl TechData;
+        public static readonly LegacyDatDecl PortData;
         public static readonly LegacyDatDecl Orders;
         public static readonly LegacyDatDecl Buttons;
     }
