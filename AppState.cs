@@ -97,6 +97,7 @@ namespace Tatti3
                     this.fieldIndex = fieldIndex;
                     this.subIndex = subIndex;
                     this.item = 0;
+                    this.currentEntry = -1;
                     UpdateItem();
                 }
 
@@ -139,11 +140,12 @@ namespace Tatti3
                 {
                     if (parent.table != null)
                     {
-                        uint entryIndex = (uint)parent.entryIndex;
-                        var newItem = parent.table.GetFieldSubIndexUint(entryIndex, fieldIndex, subIndex);
-                        if (item != newItem)
+                        int entryIndex = parent.entryIndex;
+                        var newItem = parent.table.GetFieldSubIndexUint((uint)entryIndex, fieldIndex, subIndex);
+                        if (item != newItem || currentEntry != entryIndex)
                         {
                             item = newItem;
+                            currentEntry = entryIndex;
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemBits"));
                         }
@@ -154,6 +156,7 @@ namespace Tatti3
                 uint fieldIndex;
                 uint subIndex;
                 uint item;
+                int currentEntry;
             }
 
             public class RequirementsRef
