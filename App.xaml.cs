@@ -23,7 +23,10 @@ namespace Tatti3
 #if DEBUG
             AllocConsole();
             this.Exit += (o, e) => {
-                this.fileTrace.Flush();
+                if (this.fileTrace != null)
+                {
+                    this.fileTrace.Flush();
+                }
             };
             PresentationTraceSources.DataBindingSource.Switch.Level =
                 System.Diagnostics.SourceLevels.Warning;

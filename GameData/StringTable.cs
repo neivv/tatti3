@@ -26,8 +26,11 @@ namespace Tatti3.GameData
             {
                 var key = str.GetProperty("Key").GetString();
                 var value = str.GetProperty("Value").GetString();
-                self.keyToIndex[key] = (uint)self.byIndex.Count;
-                self.byIndex.Add(value);
+                if (key != null && value != null)
+                {
+                    self.keyToIndex[key] = (uint)self.byIndex.Count;
+                    self.byIndex.Add(value);
+                }
             }
             return self;
         }
@@ -39,14 +42,17 @@ namespace Tatti3.GameData
             var xml = new XmlDocument();
             xml.LoadXml(convertedInput);
             self.byIndex.Add("(None)");
-            foreach (var val in xml["strings"])
+            foreach (var val in xml["strings"]!)
             {
                 if (val is XmlElement xmlString)
                 {
-                    var key = xmlString["id"].InnerText;
-                    var value = xmlString["value"].InnerText;
-                    self.keyToIndex[key] = (uint)self.byIndex.Count;
-                    self.byIndex.Add(value);
+                    var key = xmlString["id"];
+                    var value = xmlString["value"];
+                    if (key != null && value != null)
+                    {
+                        self.keyToIndex[key.InnerText] = (uint)self.byIndex.Count;
+                        self.byIndex.Add(value.InnerText);
+                    }
                 }
             }
             return self;

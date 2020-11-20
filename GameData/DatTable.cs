@@ -614,7 +614,7 @@ namespace Tatti3.GameData
             try
             {
                 data = (Dictionary<string, JsonElement>)
-                    JsonSerializer.Deserialize(json, typeof(Dictionary<string, JsonElement>));
+                    JsonSerializer.Deserialize(json, typeof(Dictionary<string, JsonElement>))!;
             }
             catch (JsonException)
             {
@@ -678,7 +678,7 @@ namespace Tatti3.GameData
         {
             Dictionary<string, JsonElement> data;
             data = (Dictionary<string, JsonElement>)
-                JsonSerializer.Deserialize(json, typeof(Dictionary<string, JsonElement>));
+                JsonSerializer.Deserialize(json, typeof(Dictionary<string, JsonElement>))!;
             IterFields(
                 listField => {
                     JsonElement val = data[$"field_{listField.OffsetFieldId}"];
