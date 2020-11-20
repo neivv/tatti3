@@ -38,8 +38,20 @@
                                         <local:BoolStat Text="Enable" FieldId="0x6:1"/>
                                     </local:StatGroup>
                                 </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <local:StatGroup>
+                                        <local:IntStat Text="Armor" FieldId="0x1b"/>
+                                    </local:StatGroup>
+                                    <local:StatGroup DockPanel.Dock="Left" LabelWidth="*" Margin="5,0,0,0">
+                                        <local:EnumStat Text="Size" FieldId="0x1a" DropdownWidth="100">
+                                            <system:String>Independent</system:String>
+                                            <system:String>Small</system:String>
+                                            <system:String>Medium</system:String>
+                                            <system:String>Large</system:String>
+                                        </local:EnumStat>
+                                    </local:StatGroup>
+                                </StackPanel>
                                 <local:StatGroup>
-                                    <local:IntStat Text="Armor" FieldId="0x1b"/>
                                     <local:DatRefStat Text="Upgrade" Dat="upgrades" FieldId="0x19"/>
                                 </local:StatGroup>
                             </StackPanel>
