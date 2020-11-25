@@ -149,7 +149,16 @@ namespace Tatti3.GameData
                     ButtonSetId = buttons,
                     Linked = linked,
                 });
-                pos += 9;
+                if (span[pos + 5] == 0)
+                {
+                    // Not real unit (id >= 0xe4) for buttons. Doesn't matter here
+                    // since we don't care about status screen fns.
+                    pos += 6;
+                }
+                else
+                {
+                    pos += 9;
+                }
                 i += 1;
             }
             if (pos != span.Length)
