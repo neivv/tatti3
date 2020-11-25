@@ -199,6 +199,7 @@
                     <sys:String>Nuke Cancel</sys:String>
                     <sys:String>Heal</sys:String>
                     <sys:String>Slow Down Replay</sys:String>
+                    <sys:String>Speed Up Replay</sys:String>
                     <sys:String>Play / Pause Replay</sys:String>
                     <sys:String>Cancel</sys:String>
                     <sys:String>Cancel Building Placement</sys:String>
