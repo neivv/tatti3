@@ -44,18 +44,12 @@ namespace Tatti3.GameData
                 throw new Exception($"Excepted to read {decl.Size} bytes, read only {read}");
             }
             var dds = Pfim.Dds.Create(new MemoryStream(ddsBytes), new Pfim.PfimConfig());
-            PixelFormat format;
-            switch (dds.Format)
+            var format = dds.Format switch
             {
-                case Pfim.ImageFormat.Rgb24:
-                    format = PixelFormats.Bgr24;
-                    break;
-                case Pfim.ImageFormat.Rgba32:
-                    format = PixelFormats.Bgra32;
-                    break;
-                default:
-                    throw new Exception($"Can't handle {dds.Format}");
-            }
+                Pfim.ImageFormat.Rgb24 => PixelFormats.Bgr24,
+                Pfim.ImageFormat.Rgba32 => PixelFormats.Bgra32,
+                _ => throw new Exception($"Can't handle {dds.Format}"),
+            };
             return new Frame(dds.Data, decl.Width, decl.Height, dds.Stride, format);
         }
 

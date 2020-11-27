@@ -20,7 +20,7 @@ namespace Tatti3.GameData
         public FiregraftData(string root)
         {
             this.root = root;
-            this.data = new byte[0];
+            this.data = Array.Empty<byte>();
         }
 
         public Requirements GetRequirements(UInt32 id, uint entryCount)
@@ -182,7 +182,7 @@ namespace Tatti3.GameData
             return section;
         }
 
-        private UInt32 U32Code(string input) {
+        static private UInt32 U32Code(string input) {
             UInt32 result = 0;
             foreach (char x in input.Reverse())
             {
@@ -198,20 +198,19 @@ namespace Tatti3.GameData
                 data = new byte[file.Length];
                 file.Read(data, 0, (int)file.Length);
             }
-            using (var reader = new BinaryReader(new MemoryStream(data)))
+            using var reader = new BinaryReader(new MemoryStream(data));
+            while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                var id = reader.ReadUInt32();
+                var len = reader.ReadInt32();
+                var offset = (int)reader.BaseStream.Position;
+                reader.BaseStream.Position += len;
+                sections.Add(new Section
                 {
-                    var id = reader.ReadUInt32();
-                    var len = reader.ReadInt32();
-                    var offset = (int)reader.BaseStream.Position;
-                    reader.BaseStream.Position += len;
-                    sections.Add(new Section {
-                        Id = id,
-                        Offset = offset,
-                        Length = len,
-                    });
-                }
+                    Id = id,
+                    Offset = offset,
+                    Length = len,
+                });
             }
         }
 

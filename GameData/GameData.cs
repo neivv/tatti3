@@ -111,27 +111,23 @@ namespace Tatti3.GameData
 
         public void Save(string root)
         {
-            using (var tempFiles = new WriteTempFiles())
-            {
-                SaveDatTable(tempFiles, Units, Path.Join(root, "arr/units.dat"));
-                SaveDatTable(tempFiles, Weapons, Path.Join(root, "arr/weapons.dat"));
-                SaveDatTable(tempFiles, Flingy, Path.Join(root, "arr/flingy.dat"));
-                SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
-                SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
-                SaveDatTable(tempFiles, Orders, Path.Join(root, "arr/orders.dat"));
-                SaveDatTable(tempFiles, Buttons, Path.Join(root, "arr/buttons.dat"));
-                tempFiles.Commit();
-            }
+            using var tempFiles = new WriteTempFiles();
+            SaveDatTable(tempFiles, Units, Path.Join(root, "arr/units.dat"));
+            SaveDatTable(tempFiles, Weapons, Path.Join(root, "arr/weapons.dat"));
+            SaveDatTable(tempFiles, Flingy, Path.Join(root, "arr/flingy.dat"));
+            SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
+            SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
+            SaveDatTable(tempFiles, Orders, Path.Join(root, "arr/orders.dat"));
+            SaveDatTable(tempFiles, Buttons, Path.Join(root, "arr/buttons.dat"));
+            tempFiles.Commit();
         }
 
         void SaveDatTable(WriteTempFiles tempFiles, DatTable dat, string path)
         {
             try
             {
-                using (var file = tempFiles.NewFile(path))
-                {
-                    dat.Write(file);
-                }
+                using var file = tempFiles.NewFile(path);
+                dat.Write(file);
             }
             catch (Exception e)
             {
@@ -144,16 +140,14 @@ namespace Tatti3.GameData
             DatTable table;
             try
             {
-                using (var file = File.OpenRead(path))
+                using var file = File.OpenRead(path);
+                if (file.Length == legacyDecl.FileSize)
                 {
-                    if (file.Length == legacyDecl.FileSize)
-                    {
-                        table = DatTable.LoadLegacy(file, legacyDecl);
-                    }
-                    else
-                    {
-                        table = DatTable.LoadNew(file, legacyDecl);
-                    }
+                    table = DatTable.LoadLegacy(file, legacyDecl);
+                }
+                else
+                {
+                    table = DatTable.LoadNew(file, legacyDecl);
                 }
             }
             catch (FileNotFoundException)
@@ -181,10 +175,8 @@ namespace Tatti3.GameData
             DatTable table;
             try
             {
-                using (var file = File.OpenRead(path))
-                {
-                    table = DatTable.LoadNew(file, legacyDecl);
-                }
+                using var file = File.OpenRead(path);
+                table = DatTable.LoadNew(file, legacyDecl);
             }
             catch (FileNotFoundException)
             {
@@ -343,18 +335,14 @@ namespace Tatti3.GameData
         {
             try
             {
-                using (var file = File.OpenRead($"{path}.json"))
-                {
-                    return StringTable.FromJson(file);
-                }
+                using var file = File.OpenRead($"{path}.json");
+                return StringTable.FromJson(file);
             }
             catch (FileNotFoundException) { }
             try
             {
-                using (var file = File.OpenRead($"{path}.xml"))
-                {
-                    return StringTable.FromXml(file);
-                }
+                using var file = File.OpenRead($"{path}.xml");
+                return StringTable.FromXml(file);
             }
             catch (FileNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
@@ -365,10 +353,8 @@ namespace Tatti3.GameData
         {
             try
             {
-                using (var file = File.OpenRead(path))
-                {
-                    return StringTable.FromTbl(file);
-                }
+                using var file = File.OpenRead(path);
+                return StringTable.FromTbl(file);
             }
             catch (FileNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
@@ -379,10 +365,8 @@ namespace Tatti3.GameData
         {
             try
             {
-                using (var file = File.OpenRead(path))
-                {
-                    return SfxData.FromJson(file);
-                }
+                using var file = File.OpenRead(path);
+                return SfxData.FromJson(file);
             }
             catch (FileNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
@@ -402,7 +386,7 @@ namespace Tatti3.GameData
             return new DdsGrp(stream);
         }
 
-        void WidenDatField(DatTable table, uint field)
+        static void WidenDatField(DatTable table, uint field)
         {
             if (table.FieldFormat(field) != DatFieldFormat.Uint32)
             {

@@ -132,7 +132,6 @@ namespace Tatti3
         void OnRequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
             var target = (ComboBoxItem)e.TargetObject;
-            var item = (Item)target.Content;
             // Prevents mouse moving from scrolling the list
             // (From https://stackoverflow.com/questions/29638148/ )
             if (Keyboard.IsKeyDown(Key.Down) || Keyboard.IsKeyDown(Key.Up))

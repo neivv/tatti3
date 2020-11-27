@@ -82,7 +82,7 @@ namespace Tatti3
         {
             if (val.StartsWith("0x"))
             {
-                return UInt32.Parse(val.Substring(2), NumberStyles.HexNumber);
+                return UInt32.Parse(val[2..], NumberStyles.HexNumber);
             }
             else
             {

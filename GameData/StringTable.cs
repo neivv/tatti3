@@ -63,7 +63,7 @@ namespace Tatti3.GameData
             var reader = new BinaryReader(input);
             // Actually the tbls would be 1252 but they only contain filenames so w/e
             var encoding = Encoding.ASCII;
-            var bytes = reader.ReadBytes((int)input.Length);
+            var bytes = reader.ReadBytes((int)input.Length).AsSpan();
             var self = new StringTable();
             self.byIndex.Add("(None)");
             var count = BinaryPrimitives.ReadUInt16LittleEndian(bytes[..2]);

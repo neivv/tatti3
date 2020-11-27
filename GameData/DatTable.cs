@@ -461,7 +461,7 @@ namespace Tatti3.GameData
         {
             if (index >= Entries)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             var field = fields[fieldId];
             if (field.SubIndexCount <= subIndex)
@@ -549,24 +549,14 @@ namespace Tatti3.GameData
         // Adds the field value for the new entry.
         private static void AppendToField(DatValue field, uint value)
         {
-            int len = 0;
-            switch (field.DataFormat)
+            int len = field.DataFormat switch
             {
-                case DatFieldFormat.Uint8:
-                    len = 1;
-                    break;
-                case DatFieldFormat.Uint16:
-                    len = 2;
-                    break;
-                case DatFieldFormat.Uint32:
-                    len = 4;
-                    break;
-                case DatFieldFormat.Uint64:
-                    len = 8;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
+                DatFieldFormat.Uint8 => 1,
+                DatFieldFormat.Uint16 => 2,
+                DatFieldFormat.Uint32 => 4,
+                DatFieldFormat.Uint64 => 8,
+                _ => throw new NotImplementedException(),
+            };
             for (int i = 0; i < len; i++)
             {
                 field.Data.Add((byte)value);
@@ -620,26 +610,30 @@ namespace Tatti3.GameData
             {
                 return false;
             }
-            Func<JsonElement, Func<JsonElement, bool>, bool> ValidateArray = (val, cb) => {
+            bool ValidateArray(JsonElement val, Func<JsonElement, bool> cb)
+            {
                 if (val.ValueKind != JsonValueKind.Array)
                 {
                     return false;
                 }
                 return val.EnumerateArray().All(x => cb(x));
-            };
-            Func<JsonElement, bool> IsJsonU32 = val => {
+            }
+            bool IsJsonU32(JsonElement val)
+            {
                 return val.ValueKind == JsonValueKind.Number && val.TryGetUInt32(out _);
-            };
-            Func<JsonElement, bool> IsJsonU32Array = val => {
+            }
+            bool IsJsonU32Array(JsonElement val)
+            {
                 return ValidateArray(val, x => IsJsonU32(x));
-            };
-            Func<JsonElement, uint> JsonArrayLength = val => {
+            }
+            uint JsonArrayLength(JsonElement val)
+            {
                 if (val.ValueKind != JsonValueKind.Array)
                 {
                     return 0;
                 }
                 return (uint)val.GetArrayLength();
-            };
+            }
             bool result = true;
             IterFields(
                 listField => {
@@ -773,7 +767,7 @@ namespace Tatti3.GameData
         {
             if (index >= Entries || index > 0xffff)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             var raw = Requirement.ToRaw(value);
             UInt32[] rawu32 = raw.Select(x => (UInt32)x).ToArray();
@@ -869,8 +863,7 @@ namespace Tatti3.GameData
                         continue;
                     }
                     var field = fields[k];
-                    DatValue? otherField;
-                    if (!other.fields.TryGetValue(k, out otherField))
+                    if (!other.fields.TryGetValue(k, out DatValue? otherField))
                     {
                         return false;
                     }
@@ -880,13 +873,11 @@ namespace Tatti3.GameData
                         foreach (var dataFieldId in listField.DataFieldIds)
                         {
                             var data = fields[dataFieldId];
-                            DatValue? otherData;
-                            ListFieldState? otherListField;
-                            if (!other.listFields.TryGetValue(k, out otherListField))
+                            if (!other.listFields.TryGetValue(k, out ListFieldState? otherListField))
                             {
                                 return false;
                             }
-                            if (!other.fields.TryGetValue(dataFieldId, out otherData))
+                            if (!other.fields.TryGetValue(dataFieldId, out DatValue? otherData))
                             {
                                 return false;
                             }
@@ -921,21 +912,6 @@ namespace Tatti3.GameData
                 return true;
             }
             return false;
-        }
-
-        static bool DictEquals<K, V> (Dictionary<K, V> a, Dictionary<K, V> b)
-        where K: notnull
-        {
-            return a.Count == b.Count &&
-                a.Keys.All(k => {
-                    if (!b.ContainsKey(k))
-                    {
-                        return false;
-                    }
-                    var first = a[k];
-                    var second = b[k];
-                    return (first == null && second == null) || (first != null && first.Equals(second));
-                });
         }
 
         static bool DictEqualsWith<K, V> (Dictionary<K, V> a, Dictionary<K, V> b, Func<V, V, bool> Compare)
@@ -1001,23 +977,14 @@ namespace Tatti3.GameData
                 FieldId = id;
                 Offset = offset;
                 Length = length;
-                switch (flags & 0x3)
+                Format = (flags & 0x3) switch
                 {
-                    case 0:
-                        Format = DatFieldFormat.Uint8;
-                        break;
-                    case 1:
-                        Format = DatFieldFormat.Uint16;
-                        break;
-                    case 2:
-                        Format = DatFieldFormat.Uint32;
-                        break;
-                    case 3:
-                        Format = DatFieldFormat.Uint64;
-                        break;
-                    default:
-                        throw new Exception("Unreachable");
-                }
+                    0 => DatFieldFormat.Uint8,
+                    1 => DatFieldFormat.Uint16,
+                    2 => DatFieldFormat.Uint32,
+                    3 => DatFieldFormat.Uint64,
+                    _ => throw new Exception("Unreachable"),
+                };
             }
 
             public long Offset { get; }
@@ -1050,16 +1017,18 @@ namespace Tatti3.GameData
 
             public static ListFieldState Requirements(uint offset, uint data)
             {
-                var self = new ListFieldState(offset, new uint[]{ data });
-                self.IsRequirement = true;
-                return self;
+                return new ListFieldState(offset, new uint[] { data })
+                {
+                    IsRequirement = true
+                };
             }
 
             public static ListFieldState WithLengthField(uint offset, uint[] data, uint length)
             {
-                var self = new ListFieldState(offset, data);
-                self.LengthFieldId = length;
-                return self;
+                return new ListFieldState(offset, data)
+                {
+                    LengthFieldId = length
+                };
             }
 
             public uint OffsetFieldId { get; set; }
@@ -1093,13 +1062,13 @@ namespace Tatti3.GameData
                 {
                     if (offset == 0)
                     {
-                        return new UInt32[]{};
+                        return Array.Empty<uint>();
                     }
                     if (data.DataFormat != DatFieldFormat.VariableLengthData)
                     {
                         throw new InvalidDataException(
                             $"List field {OffsetFieldId:x}:{DataFieldIds}" +
-                            $"had invalid format {data.DataFormat.ToString()}"
+                            $"had invalid format {data.DataFormat}"
                         );
                     }
                     uint len = RequirementsLength(data.Data, offset);
@@ -1127,7 +1096,7 @@ namespace Tatti3.GameData
                 }
             }
 
-            private uint RequirementsLength(List<byte> data, uint offset)
+            static private uint RequirementsLength(List<byte> data, uint offset)
             {
                 uint len = 0;
                 bool upgradeLevelJumpSeen = false;

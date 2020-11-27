@@ -62,19 +62,17 @@ namespace Tatti3
 #if DEBUG
             fileTrace.Flush();
 #endif
-            using (var file = new StreamWriter(File.Create("exception.txt")))
+            using var file = new StreamWriter(File.Create("exception.txt"));
+            var exception = e.Exception;
+            while (true)
             {
-                var exception = e.Exception;
-                while (true)
+                file.Write($"Exception: {exception.Message}\n\nStack:\n{exception.StackTrace}\n");
+                exception = exception.InnerException;
+                if (exception == null)
                 {
-                    file.Write($"Exception: {exception.Message}\n\nStack:\n{exception.StackTrace}\n");
-                    exception = exception.InnerException;
-                    if (exception == null)
-                    {
-                        break;
-                    }
-                    file.Write("------------\nCaused by:\n");
+                    break;
                 }
+                file.Write("------------\nCaused by:\n");
             }
         }
     }

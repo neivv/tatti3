@@ -206,7 +206,7 @@ namespace Tatti3
             }
         }
 
-        string FormatException(Exception e)
+        static string FormatException(Exception e)
         {
             var result = new StringBuilder();
             while (true)
@@ -247,7 +247,7 @@ namespace Tatti3
             try
             {
                 index = text.StartsWith("0x") ?
-                    Int32.Parse(text.Substring(2), NumberStyles.HexNumber) :
+                    Int32.Parse(text[2..], NumberStyles.HexNumber) :
                     Int32.Parse(text);
             }
             catch (Exception)

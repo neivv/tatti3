@@ -76,7 +76,7 @@ namespace Tatti3
                 {
                     if (val.StartsWith("0x"))
                     {
-                        return UInt32.Parse(val.Substring(2), NumberStyles.HexNumber);
+                        return UInt32.Parse(val[2..], NumberStyles.HexNumber);
                     }
                     else
                     {
@@ -437,8 +437,7 @@ namespace Tatti3
 
             FieldRef GetFieldRef(uint index, uint subIndex)
             {
-                FieldRef? val;
-                if (!fieldRefs.TryGetValue((index, subIndex), out val))
+                if (!fieldRefs.TryGetValue((index, subIndex), out FieldRef? val))
                 {
                     val = new FieldRef(this, index, subIndex);
                     fieldRefs[(index, subIndex)] = val;
@@ -448,8 +447,7 @@ namespace Tatti3
 
             public RequirementsRef GetRequirementsRef(uint offsets, uint data)
             {
-                RequirementsRef? val;
-                if (!requirementRefs.TryGetValue((offsets, data), out val))
+                if (!requirementRefs.TryGetValue((offsets, data), out RequirementsRef? val))
                 {
                     val = new RequirementsRef(this, offsets, data);
                     requirementRefs[(offsets, data)] = val;
@@ -459,8 +457,7 @@ namespace Tatti3
 
             public ListFieldRef GetListFieldRef(uint index)
             {
-                ListFieldRef? val;
-                if (!listFieldRefs.TryGetValue(index, out val))
+                if (!listFieldRefs.TryGetValue(index, out ListFieldRef? val))
                 {
                     val = new ListFieldRef(this, index);
                     listFieldRefs[index] = val;
@@ -532,7 +529,7 @@ namespace Tatti3
                 ArrayFileType.PortData => GameData?.PortData,
                 ArrayFileType.Orders => GameData?.Orders,
                 ArrayFileType.Buttons => GameData?.Buttons,
-                _ => throw new ArgumentException($"There is no dat table for {type.ToString()}"),
+                _ => throw new ArgumentException($"There is no dat table for {type}"),
             };
         }
 
@@ -557,22 +554,13 @@ namespace Tatti3
 
         public static bool IsDatType(ArrayFileType type)
         {
-            switch (type)
+            return type switch
             {
-                case ArrayFileType.Units:
-                case ArrayFileType.Weapons:
-                case ArrayFileType.Flingy:
-                case ArrayFileType.Sprites:
-                case ArrayFileType.Images:
-                case ArrayFileType.Upgrades:
-                case ArrayFileType.TechData:
-                case ArrayFileType.PortData:
-                case ArrayFileType.Orders:
-                case ArrayFileType.Buttons:
-                    return true;
-                default:
-                    return false;
-            }
+                ArrayFileType.Units or ArrayFileType.Weapons or ArrayFileType.Flingy or ArrayFileType.Sprites or 
+                    ArrayFileType.Images or ArrayFileType.Upgrades or ArrayFileType.TechData or 
+                    ArrayFileType.PortData or ArrayFileType.Orders or ArrayFileType.Buttons => true,
+                _ => false,
+            };
         }
 
         static string RemoveHotkeyControlChars(string input)
@@ -584,7 +572,7 @@ namespace Tatti3
             }
             if (input[1] < 0x10)
             {
-                return input.Substring(2);
+                return input[2..];
             }
             else
             {
@@ -727,8 +715,7 @@ namespace Tatti3
         // on the left side entry list
         public List<EntryListData> IndexPrefixedArrayFileNames(ArrayFileType type)
         {
-            List<EntryListData>? result;
-            if (indexPrefixedEntryNames.TryGetValue(type, out result))
+            if (indexPrefixedEntryNames.TryGetValue(type, out List<EntryListData>? result))
             {
                 return result;
             }
@@ -779,8 +766,7 @@ namespace Tatti3
 
         public List<string> ArrayFileNames(ArrayFileType type)
         {
-            List<string>? entries;
-            if (entryNames.TryGetValue(type, out entries))
+            if (entryNames.TryGetValue(type, out List<string>? entries))
             {
                 return entries;
             }
@@ -967,7 +953,7 @@ namespace Tatti3
                                 // Remove hotkey char & magic char if any
                                 if (entries[i].Length > 2 && entries[i][1] < 0x20)
                                 {
-                                    entries[i] = entries[i].Substring(2);
+                                    entries[i] = entries[i][2..];
                                 }
                             }
                         }
@@ -1101,8 +1087,7 @@ namespace Tatti3
 
         List<BackRef> BackRefs(ArrayFileType type)
         {
-            List<BackRef>? entries;
-            if (backRefs.TryGetValue(type, out entries))
+            if (backRefs.TryGetValue(type, out List<BackRef>? entries))
             {
                 return entries;
             }
@@ -1114,15 +1099,11 @@ namespace Tatti3
             }
             else
             {
-                switch (type)
+                limit = type switch
                 {
-                    case ArrayFileType.CmdIcon:
-                        limit = (uint?)GameData?.CmdIcons.Count;
-                        break;
-                    default:
-                        limit = null;
-                        break;
-                }
+                    ArrayFileType.CmdIcon => (uint?)GameData?.CmdIcons.Count,
+                    _ => null,
+                };
             }
             if (limit != null)
             {
@@ -1246,8 +1227,7 @@ namespace Tatti3
 
         public DatTableRef GetDatTableRef(ArrayFileType type)
         {
-            DatTableRef? val;
-            if (!datTableRefs.TryGetValue(type, out val))
+            if (!datTableRefs.TryGetValue(type, out DatTableRef? val))
             {
                 val = new DatTableRef(this, type);
                 datTableRefs[type] = val;

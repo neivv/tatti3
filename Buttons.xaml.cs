@@ -161,7 +161,7 @@ namespace Tatti3
             // Remove hotkey char & magic char if any
             if (val.Length > 2 && val[1] < 0x20)
             {
-                return val.Substring(2);
+                return val[2..];
             }
             return val;
         }
@@ -247,8 +247,7 @@ namespace Tatti3
             Dictionary<uint, FieldRef> fieldRefs = new Dictionary<uint, FieldRef>();
             FieldRef GetFieldRef(uint index)
             {
-                FieldRef? val;
-                if (!fieldRefs.TryGetValue(index, out val))
+                if (!fieldRefs.TryGetValue(index, out FieldRef? val))
                 {
                     val = new FieldRef(data, index);
                     fieldRefs[index] = val;
@@ -260,7 +259,7 @@ namespace Tatti3
             {
                 if (val.StartsWith("0x"))
                 {
-                    return UInt32.Parse(val.Substring(2), NumberStyles.HexNumber);
+                    return UInt32.Parse(val[2..], NumberStyles.HexNumber);
                 }
                 else
                 {

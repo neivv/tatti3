@@ -16,8 +16,7 @@ namespace Tatti3
 
         public BitmapSource? Image(int id)
         {
-            BitmapSource? result = null;
-            if (cache.TryGetValue(id, out result))
+            if (cache.TryGetValue(id, out BitmapSource? result))
             {
                 return result;
             }
