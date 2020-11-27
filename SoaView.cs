@@ -37,6 +37,10 @@ namespace Tatti3
             return ret;
         }
 
+        // Meant only be called from SoaStruct.
+        // Would be nice to not have public but can't come up with a way that doesn't
+        // require declaring boilerplate class/interface/something so a comment will do.
+        // (Not feeling like moving SoaStruct inside this either)
         public void SetStruct(int index, uint[] array)
         {
             for (int i = 0; i < Arrays.Length; i++)
@@ -203,8 +207,10 @@ namespace Tatti3
     }
 
     // Fields of a single entry in list
-    class SoaStruct
+    class SoaStruct : INotifyCollectionChanged
     {
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
         public SoaStruct(SoaView parent, int parentIndex, uint[] array)
         {
             values = array;
@@ -219,6 +225,7 @@ namespace Tatti3
             {
                 values = value;
                 parent.SetStruct(parentIndex, values);
+                NotifyChanged();
             }
         }
         public uint this[int index]
@@ -230,8 +237,16 @@ namespace Tatti3
                 {
                     Values[index] = value;
                     parent.SetStruct(parentIndex, Values);
+                    NotifyChanged();
                 }
             }
+        }
+
+        void NotifyChanged()
+        {
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
+                NotifyCollectionChangedAction.Reset
+            ));
         }
 
         SoaView parent;

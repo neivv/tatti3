@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 using System.Windows;
@@ -35,7 +37,8 @@ namespace Tatti3
             var dat = state.GetDatTableRef(ArrayFileType.Buttons);
             ((StringTableLookupConverter)Resources["StatTxtLookupConverter"]).Table = state.GameData?.StatTxt;
             var view = ((CollectionViewSource)Resources["ButtonView"]);
-            view.Source = dat.GetListFieldRef(0).Item;
+            SoaView soa = dat.GetListFieldRef(0).Item;
+            view.Source = soa;
         }
 
         void OnAddClick(object sender, RoutedEventArgs e)
@@ -197,8 +200,13 @@ namespace Tatti3
             if (ReferenceEquals(value, cachedSoa)) {
                 return cached;
             }
+            if (cachedSoa != null)
+            {
+                cachedSoa.CollectionChanged -= CachedCollectionChanged;
+            }
             cached = new DatTableRef((SoaStruct)value);
             cachedSoa = (SoaStruct)value;
+            cachedSoa.CollectionChanged += CachedCollectionChanged;
             return cached;
         }
 
@@ -209,6 +217,14 @@ namespace Tatti3
             System.Globalization.CultureInfo culture
         ) {
             throw new NotSupportedException();
+        }
+
+        void CachedCollectionChanged(object? val, NotifyCollectionChangedEventArgs args)
+        {
+            if (cached != null)
+            {
+                cached.Update();
+            }
         }
 
         DatTableRef? cached = null;
@@ -278,11 +294,21 @@ namespace Tatti3
             {
                 this[field].Item = value;
             }
+
+            public void Update()
+            {
+                foreach (var fref in fieldRefs.Values)
+                {
+                    fref.Update();
+                }
+            }
         }
 
         // Duck typed to be compatible with AppState.FieldRef
-        public class FieldRef
+        public class FieldRef : INotifyPropertyChanged
         {
+            public event PropertyChangedEventHandler? PropertyChanged;
+
             public FieldRef(SoaStruct data, uint index)
             {
                 this.data = data;
@@ -299,8 +325,13 @@ namespace Tatti3
                 }
             }
 
-            SoaStruct data;
-            int index;
+            public void Update()
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
+            }
+
+            readonly SoaStruct data;
+            readonly int index;
         }
     }
 }
