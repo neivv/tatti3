@@ -314,7 +314,7 @@ namespace Tatti3
                     var dropdown = new ComboBox();
                     AddChild(i, dropdown);
 
-                    var namesPath = $"DataContext.Root.Dat[{part.Dat}].Names";
+                    var namesPath = $"DataContext.Root.Dat[{part.Dat}].IndexPrefixedNames";
                     var binding = new Binding
                     {
                         Path = new PropertyPath(namesPath),

@@ -351,11 +351,14 @@ namespace Tatti3
                 selectionIndex = AppState.DatFileTypeToIndex(type);
                 arrayFileType = type;
                 names = null;
+                indexPrefixedNames = null;
                 state.NamesChanged += (obj, args) => {
                     if (args.Type == arrayFileType)
                     {
                         names = null;
+                        indexPrefixedNames = null;
                         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Names"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IndexPrefixedNames"));
                     }
                 };
                 if (table != null)
@@ -414,6 +417,18 @@ namespace Tatti3
                     return names;
                 }
             }
+            public List<string> IndexPrefixedNames
+            {
+                get
+                {
+                    if (indexPrefixedNames == null)
+                    {
+                        var names = state.IndexPrefixedArrayFileNames(arrayFileType);
+                        indexPrefixedNames = new(names.Select(x => x.Text));
+                    }
+                    return indexPrefixedNames;
+                }
+            }
             public AppState Root { get => state; }
             Dictionary<(uint, uint), FieldRef> fieldRefs = new Dictionary<(uint, uint), FieldRef>();
             Dictionary<(uint, uint), RequirementsRef> requirementRefs =
@@ -470,6 +485,7 @@ namespace Tatti3
             int entryIndex = 0;
             ArrayFileType arrayFileType;
             List<string>? names;
+            List<string>? indexPrefixedNames;
         }
 
         public AppState(GameData.GameData? gameData)
