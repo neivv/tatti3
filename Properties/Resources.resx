@@ -166,6 +166,9 @@
   <data name="firegraft_default_fgp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\firegraft.fgp;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="rez_sfx_json" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\sfx.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="rez_stat_txt_json" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\stat_txt.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

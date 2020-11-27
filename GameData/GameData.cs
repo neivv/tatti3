@@ -69,6 +69,7 @@ namespace Tatti3.GameData
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);
             PortDataTbl = LoadTbl(Path.Join(root, "arr/portdata.tbl"), Properties.Resources.arr_portdata_tbl);
+            Sfx = LoadSfx(Path.Join(root, "rez/sfx.json"), Properties.Resources.rez_sfx_json);
             CmdIcons = LoadDdsGrp(
                 Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
                 Properties.Resources.cmdicons_dds_grp
@@ -100,6 +101,7 @@ namespace Tatti3.GameData
             CmdIcons = other.CmdIcons;
             ImagesTbl = other.ImagesTbl;
             PortDataTbl = other.PortDataTbl;
+            Sfx = other.Sfx;
         }
 
         public static GameData Open(string root)
@@ -373,6 +375,20 @@ namespace Tatti3.GameData
             return StringTable.FromTbl(stream);
         }
 
+        static SfxData LoadSfx(string path, byte[] defaultFile)
+        {
+            try
+            {
+                using (var file = File.OpenRead(path))
+                {
+                    return SfxData.FromJson(file);
+                }
+            }
+            catch (FileNotFoundException) { }
+            var stream = new MemoryStream(defaultFile);
+            return SfxData.FromJson(stream);
+        }
+
         /// File will be kept open as it is lazily read.
         static DdsGrp LoadDdsGrp(string path, byte[] defaultFile)
         {
@@ -437,6 +453,7 @@ namespace Tatti3.GameData
         public DdsGrp CmdIcons { get; }
         public StringTable ImagesTbl { get; }
         public StringTable PortDataTbl { get; }
+        public SfxData Sfx { get; }
 
         public static bool operator ==(GameData? left, GameData? right)
         {

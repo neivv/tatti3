@@ -223,6 +223,16 @@ namespace Tatti3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] rez_sfx_json {
+            get {
+                object obj = ResourceManager.GetObject("rez_sfx_json", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] rez_stat_txt_json {
             get {
                 object obj = ResourceManager.GetObject("rez_stat_txt_json", resourceCulture);

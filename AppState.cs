@@ -1013,6 +1013,15 @@ namespace Tatti3
                             entries = NamesFromBackRefs(limit, ArrayFileType.CmdIcon, i => $"Icon #{i}");
                         }
                         break;
+                    case ArrayFileType.SfxData:
+                    {
+                        var sfx = GameData?.Sfx;
+                        if (sfx != null)
+                        {
+                            entries = sfx.Names;
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
