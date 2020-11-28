@@ -19,7 +19,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <DockPanel Grid.Column="0">
-            <ListBox x:Name="buttonList" MinHeight="200" MinWidth="180">
+            <ListBox x:Name="buttonList" MinHeight="200" MinWidth="150">
                 <ListBox.ItemsSource>
                     <Binding Source="{StaticResource ButtonView}" />
                 </ListBox.ItemsSource>
@@ -73,10 +73,15 @@
                 <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x03" />
                 <local:DatRefStat Text="Disabled Label" Dat="StatTxt" FieldId="0x04"/>
                 <local:DatRefStat Text="Enabled Label" Dat="StatTxt" FieldId="0x05"/>
-                <local:ButtonEnumStat x:Name="conditionStat" Text="Condition" FieldId="0x06" DropdownWidth="220"/>
-                <local:IntStat Text="Condition Param" FieldId="0x07"/>
+                <local:ButtonEnumStat x:Name="conditionStat" Text="Condition" FieldId="0x06" DropdownWidth="220"
+                    />
+                <local:ButtonParamStat x:Name="conditionParam" Text="Condition Param" EnumFieldId="0x06" ParamFieldId="0x07"
+                    MaxWidth="{Binding Path=ActualWidth, ElementName=conditionStat}"
+                    />
                 <local:ButtonEnumStat x:Name="actionStat" Text="Action" FieldId="0x08" DropdownWidth="220"/>
-                <local:IntStat Text="Action Param" FieldId="0x09"/>
+                <local:ButtonParamStat x:Name="actionParam" Text="Action Param" EnumFieldId="0x08" ParamFieldId="0x09"
+                    MaxWidth="{Binding Path=ActualWidth, ElementName=conditionStat}"
+                    />
             </local:StatGroup>
         </GroupBox>
     </Grid>

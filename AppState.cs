@@ -39,6 +39,7 @@ namespace Tatti3
         {
             public uint GetField(uint field);
             public void SetField(uint field, uint value);
+            public ArrayFileType GetDatType();
         }
 
         // Just to allow syntactic sugar for xaml
@@ -475,12 +476,14 @@ namespace Tatti3
                 GetFieldRef(field, 0).Item = value;
             }
 
+            ArrayFileType IDatEntryView.GetDatType() => arrayFileType;
+
             AppState state;
             GameData.DatTable? table;
             /// Is -1 for non-dat files
             int selectionIndex;
             int entryIndex = 0;
-            ArrayFileType arrayFileType;
+            readonly ArrayFileType arrayFileType;
             List<string>? names;
             List<string>? indexPrefixedNames;
         }

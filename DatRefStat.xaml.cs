@@ -71,6 +71,7 @@ namespace Tatti3
                 {
                     button.Visibility = Visibility.Visible;
                 }
+                UpdateBinding();
             }
         }
         FrameworkElement IStatControl.LabelText

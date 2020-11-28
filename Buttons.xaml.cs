@@ -26,7 +26,9 @@ namespace Tatti3
             InitializeComponent();
             this.DataContextChanged += (o, e) => this.UpdateBinding();
             this.conditionStat.SetList(ConditionList);
+            this.conditionParam.SetList(ConditionList);
             this.actionStat.SetList(ActionList);
+            this.actionParam.SetList(ActionList);
         }
 
         void UpdateBinding()
@@ -434,6 +436,8 @@ namespace Tatti3
             {
                 this[field].Item = value;
             }
+
+            ArrayFileType AppState.IDatEntryView.GetDatType() => ArrayFileType.Buttons;
 
             public void Update()
             {
