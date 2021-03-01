@@ -20,6 +20,8 @@
             Executed="CopyEntryCmdExecuted" CanExecute="CopyEntryCmdCanExecute"/>
         <CommandBinding Command="{x:Static local:MainWindow.PasteEntryCommand}"
             Executed="PasteEntryCmdExecuted" CanExecute="PasteEntryCmdCanExecute"/>
+        <CommandBinding Command="{x:Static local:MainWindow.PasteNewEntryCommand}"
+            Executed="PasteNewEntryCmdExecuted" CanExecute="PasteNewEntryCmdCanExecute"/>
     </Window.CommandBindings>
     <Grid Background="#FFE5E5E5">
         <Grid.RowDefinitions>
@@ -83,6 +85,8 @@
                         <MenuItem Header="Paste entry"
                             Command="{x:Static local:MainWindow.PasteEntryCommand}"
                             InputGestureText="Ctrl+Shift+V" />
+                        <MenuItem Header="Paste as a new entry"
+                            Command="{x:Static local:MainWindow.PasteNewEntryCommand}" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.InputBindings>

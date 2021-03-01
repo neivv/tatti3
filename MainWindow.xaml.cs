@@ -27,6 +27,7 @@ namespace Tatti3
         public static RoutedCommand NewEntryCommand = new RoutedCommand();
         public static RoutedCommand CopyEntryCommand = new RoutedCommand();
         public static RoutedCommand PasteEntryCommand = new RoutedCommand();
+        public static RoutedCommand PasteNewEntryCommand = new RoutedCommand();
 
         public MainWindow()
         {
@@ -433,6 +434,30 @@ namespace Tatti3
             }
             var text = Clipboard.GetText();
             e.CanExecute = dat.IsValidEntryJson(text);
+        }
+
+        void PasteNewEntryCmdExecuted(object target, ExecutedRoutedEventArgs e)
+        {
+            var dat = state.GetDat(state.CurrentDat);
+            if (dat == null)
+            {
+                return;
+            }
+            var text = Clipboard.GetText();
+            if (!dat.IsValidEntryJson(text))
+            {
+                return;
+            }
+            dat.DuplicateEntry(0);
+            var newIndex = entryList.Items.Count - 1;
+            dat.DeserializeEntryFromJson((uint)newIndex, text);
+            entryList.SelectedIndex = newIndex;
+            entryList.ScrollIntoView(entryList.Items[newIndex]);
+        }
+
+        void PasteNewEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
+        {
+            PasteEntryCmdCanExecute(target, e);
         }
     }
 }
