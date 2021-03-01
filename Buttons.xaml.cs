@@ -220,6 +220,10 @@ namespace Tatti3
                 ("Terran Basic Buildings", null),
                 ("Terran Advanced Buildings", null),
                 ("Nuke Train", null),
+                ("Upgrade at Max Level", ArrayFileType.Upgrades),
+                ("Upgrade at Level 1 or Higher", ArrayFileType.Upgrades),
+                ("Upgrade at Level 2 or Higher", ArrayFileType.Upgrades),
+                ("Upgrade at Level 3 or Higher", ArrayFileType.Upgrades),
             });
             ActionList = new(new (string, ArrayFileType?)[]{
                 ("Cancel Infestation", null),
