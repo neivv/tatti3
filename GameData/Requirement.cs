@@ -2,13 +2,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tatti3.GameData
 {
     public struct Requirement
     {
         public UInt16 Opcode { get; set; }
-        public UInt16 Param { get; set; }
+        public UInt16[] Params { get; private set; }
+
+        public Requirement(UInt16 opcode)
+        {
+            Opcode = opcode;
+            Params = new UInt16[ParamsForOpcode(opcode)];
+        }
 
         public static List<Requirement> ListFromRaw(UInt16[] raw)
         {
@@ -16,21 +23,17 @@ namespace Tatti3.GameData
             var result = new List<Requirement>();
             while (i < raw.Length)
             {
-                UInt16 param = 0;
                 UInt16 opcode = raw[i];
-                switch (opcode)
+                var opcodeCount = ParamsForOpcode(opcode);
+                UInt16[] parameters = new UInt16[opcodeCount];
+                for (int j = 0; j < opcodeCount; j++)
                 {
-                    case 0xff02: case 0xff03: case 0xff04: case 0xff25:
-                        param = raw[i + 1];
-                        i += 1;
-                        break;
-                    default:
-                        break;
+                    parameters[j] = raw[i + 1 + j];
                 }
-                i += 1;
+                i += 1 + opcodeCount;
                 result.Add(new Requirement {
                     Opcode = opcode,
-                    Param = param,
+                    Params = parameters,
                 });
             }
             return result;
@@ -43,14 +46,7 @@ namespace Tatti3.GameData
             foreach (var req in reqs)
             {
                 result.Add(req.Opcode);
-                switch (req.Opcode)
-                {
-                    case 0xff02: case 0xff03: case 0xff04: case 0xff25:
-                        result.Add(req.Param);
-                        break;
-                    default:
-                        break;
-                }
+                result.AddRange(req.Params);
             }
             return result.ToArray();
         }
@@ -65,16 +61,32 @@ namespace Tatti3.GameData
             return Opcode == 0xffff;
         }
 
+        public static int ParamsForOpcode(UInt16 opcode)
+        {
+            return opcode switch
+            {
+                0xff02 or 0xff03 or 0xff04 or 0xff25 => 1,
+                0xff40 => 2,
+                _ => 0,
+            };
+        }
+
         public override bool Equals(object? obj)
         {
             return obj is Requirement value &&
                 Opcode == value.Opcode &&
-                Param == value.Param;
+                Params.SequenceEqual(value.Params);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Opcode, Param);
+            var code = new HashCode();
+            code.Add(Opcode);
+            foreach (var x in Params)
+            {
+                code.Add(x);
+            }
+            return code.ToHashCode();
         }
 
         public static bool operator ==(Requirement left, Requirement right)

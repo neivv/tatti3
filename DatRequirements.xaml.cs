@@ -41,11 +41,7 @@ namespace Tatti3
                 }
                 var reqListIndex = requirementList.SelectedIndex;
                 var opcode = OpcodeNames[selectRequirement.SelectedIndex].Item1;
-                var req = new Requirement
-                {
-                    Opcode = opcode,
-                    Param = 0,
-                };
+                var req = new Requirement(opcode);
                 var dat = (AppState.DatTableRef)this.DataContext;
                 if (dat == null)
                 {
@@ -112,11 +108,7 @@ namespace Tatti3
                 opcode = OpcodeNames[pos].Item1;
             }
             var list = (RequirementList)requirementList.DataContext;
-            var req = new Requirement
-            {
-                Opcode = opcode,
-                Param = 0,
-            };
+            var req = new Requirement(opcode);
             list.Insert(list.Count, new RequirementList.RequirementWrap(req));
         }
 
@@ -246,6 +238,7 @@ namespace Tatti3
             OpcodeNames.Add((0xff24, "Is Brood War"));
             OpcodeNames.Add((0xff25, "Tech [...] is researched"));
             OpcodeNames.Add((0xff26, "Is burrowed"));
+            OpcodeNames.Add((0xff40, "Has less than [..] units (Including incomplete)"));
             foreach ((var op, var text) in OpcodeNames)
             {
                 if (op != 0)
@@ -309,6 +302,7 @@ namespace Tatti3
                     };
                     AddChild(i, text);
                 }
+                var paramIndex = part.ParamIndex;
                 if (part.Dat != null)
                 {
                     var dropdown = new ComboBox();
@@ -332,34 +326,69 @@ namespace Tatti3
                             return;
                         }
                         var data = (Requirement)this.RequirementData;
-                        dropdown.SelectedIndex = data.Opcode < 0xff00 ? data.Opcode : data.Param;
+                        dropdown.SelectedIndex =
+                            data.Opcode < 0xff00 ? data.Opcode : data.Params[paramIndex];
                     };
                     Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);
 
                     BindingOperations.SetBinding(dropdown, ComboBox.ItemsSourceProperty, binding);
-                    dropdown.SelectedIndex = data.Opcode < 0xff00 ? data.Opcode : data.Param;
+                    dropdown.SelectedIndex =
+                        data.Opcode < 0xff00 ? data.Opcode : data.Params[paramIndex];
                     dropdown.SelectionChanged += (o, e) => {
                         var selection = dropdown.SelectedIndex;
                         if (selection != -1)
                         {
                             if (RequirementData is Requirement old)
                             {
-                                var newReq = old.Opcode < 0xff00 ? (
-                                    new Requirement()
-                                    {
-                                        Opcode = (UInt16)selection,
-                                        Param = 0,
-                                    }
-                                ) : (
-                                    new Requirement()
-                                    {
-                                        Opcode = old.Opcode,
-                                        Param = (UInt16)selection,
-                                    }
-                                );
+                                Requirement newReq;
+                                if (old.Opcode < 0xff00)
+                                {
+                                    newReq = new Requirement((UInt16)selection);
+                                }
+                                else
+                                {
+                                    newReq = new Requirement(old.Opcode);
+                                    old.Params.CopyTo(newReq.Params, 0);
+                                    newReq.Params[paramIndex] = (UInt16)selection;
+                                }
                                 if (old != newReq)
                                 {
                                     RequirementData = newReq;
+                                }
+                            }
+                        }
+                    };
+                }
+                if (part.Uint16)
+                {
+                    var textbox = new TextBox();
+                    AddChild(i, textbox);
+                    var intValue = data.Params[paramIndex];
+                    textbox.Text = intValue.ToString();
+                    textbox.Width = 50;
+                    textbox.MaxLength = 5;
+                    textbox.TextChanged += (o, e) => {
+                        if (RequirementData is Requirement old)
+                        {
+                            if (UInt16.TryParse(textbox.Text, out var result))
+                            {
+                                var newReq = new Requirement(old.Opcode);
+                                old.Params.CopyTo(newReq.Params, 0);
+                                newReq.Params[paramIndex] = (UInt16)result;
+                                if (old != newReq)
+                                {
+                                    RequirementData = newReq;
+                                }
+                            }
+                            else
+                            {
+                                if (textbox.Text.Trim() == "")
+                                {
+                                    textbox.Text = "0";
+                                }
+                                else
+                                {
+                                    textbox.Text = old.Params[paramIndex].ToString();
                                 }
                             }
                         }
@@ -373,7 +402,8 @@ namespace Tatti3
         {
             if (panel.Children.Count > i)
             {
-                panel.Children[i] = child;
+                panel.Children.RemoveAt(i);
+                panel.Children.Insert(i, child);
             }
             else
             {
@@ -387,29 +417,41 @@ namespace Tatti3
             Func<string, Part> Text = x => new Part {
                 Text = x,
             };
-            Func<ArrayFileType, Part> DatRef = x => new Part {
+            Func<ArrayFileType, int, Part> DatRef = (x, idx) => new Part {
                 Dat = x,
+                ParamIndex = idx,
+            };
+            Func<int, Part> Uint16 = idx => new Part {
+                Uint16 = true,
+                ParamIndex = idx,
             };
             switch (req.Opcode)
             {
                 case 0xff02:
                     result.Add(Text("Current unit is "));
-                    result.Add(DatRef(ArrayFileType.Units));
+                    result.Add(DatRef(ArrayFileType.Units, 0));
                     break;
                 case 0xff03:
                     result.Add(Text("Has "));
-                    result.Add(DatRef(ArrayFileType.Units));
+                    result.Add(DatRef(ArrayFileType.Units, 0));
                     result.Add(Text(" (Accept incomplete)"));
                     break;
                 case 0xff04:
                     result.Add(Text("Has addon "));
-                    result.Add(DatRef(ArrayFileType.Units));
+                    result.Add(DatRef(ArrayFileType.Units, 0));
                     result.Add(Text(" attached"));
                     break;
                 case 0xff25:
                     result.Add(Text("Tech "));
-                    result.Add(DatRef(ArrayFileType.TechData));
+                    result.Add(DatRef(ArrayFileType.TechData, 0));
                     result.Add(Text(" is researched"));
+                    break;
+                case 0xff40:
+                    result.Add(Text("Has less than "));
+                    result.Add(Uint16(1));
+                    result.Add(Text(" "));
+                    result.Add(DatRef(ArrayFileType.Units, 0));
+                    result.Add(Text(" (Including incomplete)"));
                     break;
                 case 0xffff:
                     result.Add(Text("-- End --"));
@@ -422,7 +464,7 @@ namespace Tatti3
                     else if (req.Opcode < 0xff00)
                     {
                         result.Add(Text("Has "));
-                        result.Add(DatRef(ArrayFileType.Units));
+                        result.Add(DatRef(ArrayFileType.Units, -1));
                     }
                     else
                     {
@@ -433,29 +475,12 @@ namespace Tatti3
             return result;
         }
 
-        struct Part
+        record Part
         {
             public string? Text;
             public ArrayFileType? Dat;
-
-            public override bool Equals(object? obj)
-            {
-                return obj is Part value && this == value;
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Text, Dat);
-            }
-
-            public static bool operator ==(Part x, Part y)
-            {
-                return x.Text == y.Text && x.Dat == y.Dat;
-            }
-            public static bool operator !=(Part x, Part y)
-            {
-                return !(x == y);
-            }
+            public bool Uint16 = false;
+            public int ParamIndex = -1;
         }
 
         List<Part> currentParts = new List<Part>();

@@ -32,7 +32,7 @@ namespace Tatti3
             }
             Requirement req;
             public UInt16 Opcode { get => Value.Opcode; }
-            public UInt16 Param { get => Value.Param; }
+            public UInt16[] Params { get => Value.Params; }
         }
 
         public RequirementList()
@@ -51,7 +51,14 @@ namespace Tatti3
 
         public override string ToString()
         {
-            var parts = String.Join(", ", list.Select(x => $"{x.Opcode:x04}:{x.Param:x}"));
+            var parts = String.Join(", ", list.Select(x => {
+                if (x.Params.Length == 0) {
+                    return $"{x.Opcode:x04}";
+                } else {
+                    var paramsStr = String.Join("-", x.Params.Select(x => $"{x:x}"));
+                    return $"{x.Opcode:x04}:{paramsStr}";
+                }
+            }));
             return $"[{parts}]";
         }
 
@@ -68,6 +75,7 @@ namespace Tatti3
             get => list[index];
             set
             {
+                var oldItem = list[index];
                 var old = list[index].Value;
                 var newValue = value.Value;
                 list[index] = value;
@@ -80,10 +88,12 @@ namespace Tatti3
                 }
                 var oldIsUpgrade = old.IsUpgradeLevelOpcode();
                 var newIsUpgrade = newValue.IsUpgradeLevelOpcode();
+                bool complex = false;
                 // If we changed to a upgrade level item, add list End,
                 // Similarly, if we changed away, remove list End if any followed.
                 if (oldIsUpgrade != newIsUpgrade && oldIsUpgrade)
                 {
+                    complex = true;
                     // Remove new end
                     for (int i = index + 1; i < list.Count; i++)
                     {
@@ -96,6 +106,7 @@ namespace Tatti3
                 }
                 else if (oldIsUpgrade != newIsUpgrade && newIsUpgrade)
                 {
+                    complex = true;
                     // Add end. If there's an upgrade jump above this add it one before this,
                     // otherwise add one after this.
                     // Also don't add end to the end of list.
@@ -111,17 +122,25 @@ namespace Tatti3
                     int insertPos = index2 == -1 ? index + 1 : index;
                     if (insertPos != list.Count)
                     {
-                        var end = new Requirement
-                        {
-                            Opcode = 0xffff,
-                            Param = 0,
-                        };
+                        var end = new Requirement(0xffff);
                         list.Insert(insertPos, new RequirementWrap(end));
                     }
                 }
-                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
-                    NotifyCollectionChangedAction.Reset
-                ));
+                if (complex)
+                {
+                    CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Reset
+                    ));
+                }
+                else
+                {
+                    CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Replace,
+                        value,
+                        oldItem,
+                        index
+                    ));
+                }
                 Mutated?.Invoke(this, new EventArgs());
             }
         }
@@ -140,11 +159,7 @@ namespace Tatti3
             };
             if (req.IsUpgradeLevelOpcode())
             {
-                var end = new Requirement
-                {
-                    Opcode = 0xffff,
-                    Param = 0,
-                };
+                var end = new Requirement(0xffff);
                 list.Insert(index + 1, new RequirementWrap(end));
             }
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(

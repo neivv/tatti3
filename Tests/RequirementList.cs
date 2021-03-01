@@ -10,11 +10,7 @@ namespace Tests
     {
         static Requirement Req(UInt16 id)
         {
-            return new Requirement
-            {
-                Opcode = id,
-                Param = 0x0000,
-            };
+            return new Requirement(id);
         }
 
         void VerifyList(RequirementList list, string ctx)
