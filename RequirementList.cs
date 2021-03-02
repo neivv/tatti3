@@ -16,7 +16,7 @@ namespace Tatti3
 
             public RequirementWrap(Requirement val)
             {
-                Value = val;
+                req = val;
             }
 
             public Requirement Value {
