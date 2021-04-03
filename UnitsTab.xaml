@@ -232,13 +232,13 @@
                         <local:StatGroup DockPanel.Dock="Left" LabelWidth="100">
                             <local:DatRefStat Text="Ready" Dat="SfxData" FieldId="0x1d"
                                 DropdownWidth="280"/>
-                            <local:DatRefStat Text="Yes (First)" Dat="SfxData" FieldId="0x1e"
+                            <local:DatRefStat Text="What (First)" Dat="SfxData" FieldId="0x1e"
                                 DropdownWidth="280"/>
-                            <local:DatRefStat Text="Yes (Last)" Dat="SfxData" FieldId="0x1f"
+                            <local:DatRefStat Text="What (Last)" Dat="SfxData" FieldId="0x1f"
                                 DropdownWidth="280"/>
-                            <local:DatRefStat Text="What (First)" Dat="SfxData" FieldId="0x22"
+                            <local:DatRefStat Text="Yes (First)" Dat="SfxData" FieldId="0x22"
                                 DropdownWidth="280"/>
-                            <local:DatRefStat Text="What (Last)" Dat="SfxData" FieldId="0x23"
+                            <local:DatRefStat Text="Yes (Last)" Dat="SfxData" FieldId="0x23"
                                 DropdownWidth="280"/>
                             <local:DatRefStat Text="Annoyed (First)" Dat="SfxData" FieldId="0x20"
                                 DropdownWidth="280"/>
