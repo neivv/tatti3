@@ -212,7 +212,7 @@ namespace Tatti3
             var result = new StringBuilder();
             while (true)
             {
-                result.Append($"{e.Message}\n");
+                result.Append($"{e.GetType().Name} {e.Message}\n");
                 if (e.InnerException == null)
                 {
                     result.Append($"\n{e.StackTrace}");

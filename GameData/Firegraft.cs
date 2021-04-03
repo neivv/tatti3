@@ -225,12 +225,16 @@ namespace Tatti3.GameData
                 var path = Path.Join(root, "samase/firegraft.fgp");
                 return File.OpenRead(path);
             }
-            catch (FileNotFoundException) { }
-            var file = Directory.EnumerateFiles(Path.Join(root, "Firegraft"), "*.fgp")
-                .FirstOrDefault();
-            if (file != null)
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) {}
+            var firegraftDir = Path.Join(root, "Firegraft");
+            if (Directory.Exists(firegraftDir))
             {
-                return File.OpenRead(file);
+                var file = Directory.EnumerateFiles(firegraftDir, "*.fgp")
+                    .FirstOrDefault();
+                if (file != null)
+                {
+                    return File.OpenRead(file);
+                }
             }
 
             return new MemoryStream(Properties.Resources.firegraft_default_fgp);

@@ -14,6 +14,10 @@ namespace Tatti3.GameData
     {
         GameData(string root)
         {
+            if (!Directory.Exists(root))
+            {
+                throw new DirectoryNotFoundException(root);
+            }
             var firegraft = new FiregraftData(root);
             Units = LoadDatTable(Path.Join(root, "arr/units.dat"), LegacyDatDecl.Units, firegraft);
             // Wireframe mode, wireframe ID
@@ -111,6 +115,10 @@ namespace Tatti3.GameData
 
         public void Save(string root)
         {
+            var arrDir = Path.Join(root, "arr");
+            if (!Directory.Exists(arrDir)) {
+                Directory.CreateDirectory(arrDir);
+            }
             using var tempFiles = new WriteTempFiles();
             SaveDatTable(tempFiles, Units, Path.Join(root, "arr/units.dat"));
             SaveDatTable(tempFiles, Weapons, Path.Join(root, "arr/weapons.dat"));
@@ -150,7 +158,7 @@ namespace Tatti3.GameData
                     table = DatTable.LoadNew(file, legacyDecl);
                 }
             }
-            catch (FileNotFoundException)
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
             {
                 var stream = new MemoryStream(legacyDecl.defaultFile);
                 table = DatTable.LoadLegacy(stream, legacyDecl);
@@ -178,7 +186,7 @@ namespace Tatti3.GameData
                 using var file = File.OpenRead(path);
                 table = DatTable.LoadNew(file, legacyDecl);
             }
-            catch (FileNotFoundException)
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
             {
                 // Firegraft data only contains buttons that have been changed; load base
                 // buttons first and then patch firegraft data on that.
@@ -338,13 +346,13 @@ namespace Tatti3.GameData
                 using var file = File.OpenRead($"{path}.json");
                 return StringTable.FromJson(file);
             }
-            catch (FileNotFoundException) { }
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
             try
             {
                 using var file = File.OpenRead($"{path}.xml");
                 return StringTable.FromXml(file);
             }
-            catch (FileNotFoundException) { }
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
             return StringTable.FromJson(stream);
         }
@@ -356,7 +364,7 @@ namespace Tatti3.GameData
                 using var file = File.OpenRead(path);
                 return StringTable.FromTbl(file);
             }
-            catch (FileNotFoundException) { }
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
             return StringTable.FromTbl(stream);
         }
@@ -368,7 +376,7 @@ namespace Tatti3.GameData
                 using var file = File.OpenRead(path);
                 return SfxData.FromJson(file);
             }
-            catch (FileNotFoundException) { }
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
             return SfxData.FromJson(stream);
         }
@@ -381,7 +389,7 @@ namespace Tatti3.GameData
                 var file = File.OpenRead(path);
                 return new DdsGrp(file);
             }
-            catch (FileNotFoundException) { }
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
             var stream = new MemoryStream(defaultFile);
             return new DdsGrp(stream);
         }
