@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -29,10 +30,37 @@ namespace Tatti3.GameData
                 if (key != null && value != null)
                 {
                     self.keyToIndex[key] = (uint)self.byIndex.Count;
-                    self.byIndex.Add(value);
+                    self.byIndex.Add(UnescapeJsonControlCodes(value));
                 }
             }
             return self;
+        }
+
+        static string UnescapeJsonControlCodes(string value)
+        {
+            // Convert \uxxxx to <x> if x < 20 (they're in hex)
+            // Also cut off strings at \u0000
+            int pos = 0;
+            while (true)
+            {
+                int next = value.IndexOf("\\u", pos);
+                if (next == -1 || next + 6 > value.Length)
+                {
+                    return value;
+                }
+                if (UInt32.TryParse(value[(next + 2)..][..4], NumberStyles.AllowHexSpecifier, null, out var val))
+                {
+                    if (val == 0)
+                    {
+                        return value[..next];
+                    }
+                    else if (val < 0x20)
+                    {
+                        value = value[..next] + (char)val + value[(next + 6)..];
+                    }
+                }
+                pos = next + 1;
+            }
         }
 
         public static StringTable FromXml(Stream input)
