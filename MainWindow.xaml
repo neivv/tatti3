@@ -475,56 +475,73 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <DockPanel>
-                                    <GroupBox DockPanel.Dock="Top">
-                                        <GroupBox.Header>
-                                            <TextBlock Text="Upgrade Display" />
-                                        </GroupBox.Header>
-                                        <local:StatGroup LabelWidth="80">
-                                            <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x7"/>
-                                            <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x8"/>
-                                        </local:StatGroup>
-                                    </GroupBox>
-                                    <DockPanel DockPanel.Dock="Top">
-                                        <GroupBox DockPanel.Dock="Left">
+                                    <DockPanel DockPanel.Dock="Left">
+                                        <GroupBox DockPanel.Dock="Top">
                                             <GroupBox.Header>
-                                                <TextBlock Text="Base Cost" />
+                                                <TextBlock Text="Upgrade Display" />
                                             </GroupBox.Header>
                                             <local:StatGroup LabelWidth="80">
-                                                <local:IntStat Text="Minerals" FieldId="0x0"/>
-                                                <local:IntStat Text="Vespene" FieldId="0x2"/>
-                                                <local:IntStat Text="Time" FieldId="0x4"/>
+                                                <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x7"/>
+                                                <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x8"/>
                                             </local:StatGroup>
                                         </GroupBox>
-                                        <GroupBox DockPanel.Dock="Left">
+                                        <DockPanel DockPanel.Dock="Top">
+                                            <GroupBox DockPanel.Dock="Left">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="Base Cost" />
+                                                </GroupBox.Header>
+                                                <local:StatGroup LabelWidth="80">
+                                                    <local:IntStat Text="Minerals" FieldId="0x0"/>
+                                                    <local:IntStat Text="Vespene" FieldId="0x2"/>
+                                                    <local:IntStat Text="Time" FieldId="0x4"/>
+                                                </local:StatGroup>
+                                            </GroupBox>
+                                            <GroupBox DockPanel.Dock="Left">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="Factor Cost" />
+                                                </GroupBox.Header>
+                                                <local:StatGroup>
+                                                    <local:IntStat Text="Minerals" FieldId="0x1"/>
+                                                    <local:IntStat Text="Vespene" FieldId="0x3"/>
+                                                    <local:IntStat Text="Time" FieldId="0x5"/>
+                                                </local:StatGroup>
+                                            </GroupBox>
+                                        </DockPanel>
+                                        <GroupBox DockPanel.Dock="Top">
                                             <GroupBox.Header>
-                                                <TextBlock Text="Factor Cost" />
+                                                <TextBlock Text="Upgrade Properties" />
                                             </GroupBox.Header>
-                                            <local:StatGroup>
-                                                <local:IntStat Text="Minerals" FieldId="0x1"/>
-                                                <local:IntStat Text="Vespene" FieldId="0x3"/>
-                                                <local:IntStat Text="Time" FieldId="0x5"/>
-                                            </local:StatGroup>
+                                            <DockPanel>
+                                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
+                                                    <local:IntStat Text="Max Repeats" FieldId="0xa"/>
+                                                    <local:EnumStat Text="Race" FieldId="0x9" DropdownWidth="80">
+                                                        <system:String>Zerg</system:String>
+                                                        <system:String>Terran</system:String>
+                                                        <system:String>Protoss</system:String>
+                                                        <system:String>All</system:String>
+                                                    </local:EnumStat>
+                                                </local:StatGroup>
+                                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
+                                                    <local:BoolStat Text="Brood War" FieldId="0xb:1"/>
+                                                </local:StatGroup>
+                                            </DockPanel>
                                         </GroupBox>
                                     </DockPanel>
-                                    <GroupBox DockPanel.Dock="Top">
-                                        <GroupBox.Header>
-                                            <TextBlock Text="Upgrade Properties" />
-                                        </GroupBox.Header>
+                                    <local:LimitVerticalGrowth DockPanel.Dock="Left">
                                         <DockPanel>
-                                            <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
-                                                <local:IntStat Text="Max Repeats" FieldId="0xa"/>
-                                                <local:EnumStat Text="Race" FieldId="0x9" DropdownWidth="80">
-                                                    <system:String>Zerg</system:String>
-                                                    <system:String>Terran</system:String>
-                                                    <system:String>Protoss</system:String>
-                                                    <system:String>All</system:String>
-                                                </local:EnumStat>
-                                            </local:StatGroup>
-                                            <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
-                                                <local:BoolStat Text="Brood War" FieldId="0xb:1"/>
-                                            </local:StatGroup>
+                                            <GroupBox DockPanel.Dock="Top">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="Attached Units" />
+                                                </GroupBox.Header>
+                                                <GroupBox.ToolTip>
+                                                    <ToolTip>
+                                                        <TextBlock>List of units which, when given to another player, give this upgrade to the receiving player if the source player had it researched.</TextBlock>
+                                                    </ToolTip>
+                                                </GroupBox.ToolTip>
+                                                <local:DatRefList Dat="Units" OffsetFieldId="0x11" />
+                                            </GroupBox>
                                         </DockPanel>
-                                    </GroupBox>
+                                    </local:LimitVerticalGrowth>
                                 </DockPanel>
                             </Grid>
                         </TabItem>
@@ -559,43 +576,60 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <DockPanel>
-                                    <GroupBox DockPanel.Dock="Top">
-                                        <GroupBox.Header>
-                                            <TextBlock Text="Technology Display" />
-                                        </GroupBox.Header>
-                                        <local:StatGroup>
-                                            <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x6"/>
-                                            <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x7"/>
-                                        </local:StatGroup>
-                                    </GroupBox>
-                                    <DockPanel DockPanel.Dock="Top">
-                                        <GroupBox DockPanel.Dock="Left">
+                                    <DockPanel DockPanel.Dock="Left">
+                                        <GroupBox DockPanel.Dock="Top">
                                             <GroupBox.Header>
-                                                <TextBlock Text="Technology Cost" />
+                                                <TextBlock Text="Technology Display" />
                                             </GroupBox.Header>
                                             <local:StatGroup>
-                                                <local:IntStat Text="Minerals" FieldId="0x0"/>
-                                                <local:IntStat Text="Vespene" FieldId="0x1"/>
-                                                <local:IntStat Text="Time" FieldId="0x2"/>
-                                                <local:IntStat Text="Energy" FieldId="0x3"/>
+                                                <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x6"/>
+                                                <local:DatRefStat Text="Label" Dat="StatTxt" FieldId="0x7"/>
                                             </local:StatGroup>
                                         </GroupBox>
-                                        <GroupBox DockPanel.Dock="Left">
-                                            <GroupBox.Header>
-                                                <TextBlock Text="Technology Properties" />
-                                            </GroupBox.Header>
-                                            <local:StatGroup>
-                                                <local:EnumStat Text="Race" FieldId="0x8" DropdownWidth="80">
-                                                    <system:String>Zerg</system:String>
-                                                    <system:String>Terran</system:String>
-                                                    <system:String>Protoss</system:String>
-                                                    <system:String>All</system:String>
-                                                </local:EnumStat>
-                                                <local:BoolStat Text="Unused" FieldId="0x9:1"/>
-                                                <local:BoolStat Text="Brood War" FieldId="0xa:1"/>
-                                            </local:StatGroup>
-                                        </GroupBox>
+                                        <DockPanel DockPanel.Dock="Top">
+                                            <GroupBox DockPanel.Dock="Left">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="Technology Cost" />
+                                                </GroupBox.Header>
+                                                <local:StatGroup>
+                                                    <local:IntStat Text="Minerals" FieldId="0x0"/>
+                                                    <local:IntStat Text="Vespene" FieldId="0x1"/>
+                                                    <local:IntStat Text="Time" FieldId="0x2"/>
+                                                    <local:IntStat Text="Energy" FieldId="0x3"/>
+                                                </local:StatGroup>
+                                            </GroupBox>
+                                            <GroupBox DockPanel.Dock="Left">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="Technology Properties" />
+                                                </GroupBox.Header>
+                                                <local:StatGroup>
+                                                    <local:EnumStat Text="Race" FieldId="0x8" DropdownWidth="80">
+                                                        <system:String>Zerg</system:String>
+                                                        <system:String>Terran</system:String>
+                                                        <system:String>Protoss</system:String>
+                                                        <system:String>All</system:String>
+                                                    </local:EnumStat>
+                                                    <local:BoolStat Text="Unused" FieldId="0x9:1"/>
+                                                    <local:BoolStat Text="Brood War" FieldId="0xa:1"/>
+                                                </local:StatGroup>
+                                            </GroupBox>
+                                        </DockPanel>
                                     </DockPanel>
+                                    <local:LimitVerticalGrowth DockPanel.Dock="Left">
+                                        <DockPanel>
+                                            <GroupBox DockPanel.Dock="Top">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="Attached Units" />
+                                                </GroupBox.Header>
+                                                <GroupBox.ToolTip>
+                                                    <ToolTip>
+                                                        <TextBlock>List of units which, when given to another player, give this tech to the receiving player if the source player had it researched.</TextBlock>
+                                                    </ToolTip>
+                                                </GroupBox.ToolTip>
+                                                <local:DatRefList Dat="Units" OffsetFieldId="0x12" />
+                                            </GroupBox>
+                                        </DockPanel>
+                                    </local:LimitVerticalGrowth>
                                 </DockPanel>
                             </Grid>
                         </TabItem>

@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="Tatti3.DatRefList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tatti3"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:ListIndexConverter x:Key="ListIndexConverter" />
+    </UserControl.Resources>
+    <UserControl.DataContext>
+        <MultiBinding Converter="{StaticResource MultiBindingToArrayConverter}">
+            <Binding />
+            <Binding
+                RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
+                Path="DataContext" />
+        </MultiBinding>
+    </UserControl.DataContext>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Button Click="OnRemoveClick" DockPanel.Dock="Right" MinWidth="50">
+                <Button.Content>
+                    <TextBlock Text="Remove" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+            <Button Click="OnAddClick" DockPanel.Dock="Right" MinWidth="50">
+                <Button.Content>
+                    <TextBlock Text="Add" Margin="2,0,2,0" />
+                </Button.Content>
+            </Button>
+            <ComboBox x:Name="dropdown" Width="150" Padding="5,1,5,0" >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Width="300">
+                        </TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+        </DockPanel>
+        <ListBox x:Name="datRefList" MinHeight="100">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Path=[0], Converter={StaticResource ListIndexConverter}}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</UserControl>

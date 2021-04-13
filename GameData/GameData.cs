@@ -63,7 +63,57 @@ namespace Tatti3.GameData
             Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
             Upgrades =
                 LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);
+            // Attached units
+            if (!Upgrades.HasField(0x11))
+            {
+                var zeroes = new List<byte>(
+                    Enumerable.Range(0, (int)Upgrades.Entries * 2)
+                        .Select(x => (byte)0)
+                );
+                Upgrades.AddField(0x11, DatFieldFormat.Uint16, zeroes);
+                Upgrades.AddField(0x12, DatFieldFormat.Uint16, zeroes);
+                Upgrades.AddField(0x13, DatFieldFormat.Uint16, new List<byte>());
+                var defaultValues = new (uint, uint)[] {
+                    (0x10, 0x00), (0x14, 0x01), (0x15, 0x01), (0x11, 0x02), (0x16, 0x08),
+                    (0x13, 0x09), (0x17, 0x0c), (0x18, 0x2a), (0x19, 0x2a), (0x1a, 0x2a),
+                    (0x1b, 0x25), (0x1c, 0x25), (0x1d, 0x26), (0x1e, 0x26), (0x1f, 0x2d),
+                    (0x20, 0x2e), (0x21, 0x42), (0x22, 0x41), (0x23, 0x53), (0x24, 0x53),
+                    (0x25, 0x45), (0x26, 0x54), (0x27, 0x54), (0x28, 0x43), (0x29, 0x46),
+                    (0x2a, 0x46), (0x2b, 0x48), (0x2c, 0x47), (0x36, 0x03), (0x35, 0x27),
+                    (0x34, 0x27), (0x33, 0x22), (0x31, 0x3f), (0x2f, 0x3c),
+                };
+                foreach (var (upgrade, unit) in defaultValues)
+                {
+                    Upgrades.SetListRaw(upgrade, 0x11, new uint[][] { new uint[]{ unit }});
+                }
+            }
             TechData = LoadDatTable(Path.Join(root, "arr/techdata.dat"), LegacyDatDecl.TechData, firegraft);
+            if (!TechData.HasField(0x12))
+            {
+                var zeroes = new List<byte>(
+                    Enumerable.Range(0, (int)Upgrades.Entries * 2)
+                        .Select(x => (byte)0)
+                );
+                TechData.AddField(0x12, DatFieldFormat.Uint16, zeroes);
+                TechData.AddField(0x13, DatFieldFormat.Uint16, zeroes);
+                TechData.AddField(0x14, DatFieldFormat.Uint16, new List<byte>());
+                var defaultValues = new (uint, uint)[] {
+                    (0x06, 0x09), (0x07, 0x09), (0x02, 0x09), (0x01, 0x01), (0x0a, 0x01),
+                    (0x03, 0x02), (0x09, 0x08), (0x08, 0x0c), (0x0c, 0x2d), (0x12, 0x2d),
+                    (0x0d, 0x2d), (0x11, 0x2d), (0x0e, 0x2e), (0x0f, 0x2e), (0x10, 0x2e),
+                    (0x17, 0x43), (0x13, 0x43), (0x14, 0x43), (0x15, 0x47), (0x16, 0x47),
+                    (0x22, 0x22), (0x18, 0x22), (0x1e, 0x22), (0x19, 0x3c), (0x1c, 0x3d),
+                    (0x1b, 0x3f), (0x1d, 0x3f), (0x1f, 0x3f),
+                };
+                foreach (var (upgrade, unit) in defaultValues)
+                {
+                    TechData.SetListRaw(upgrade, 0x12, new uint[][] { new uint[]{ unit }});
+                }
+                TechData.SetListRaw(0x00, 0x12, new uint[][] { new uint[]{ 0x00, 0x20 }});
+                TechData.SetListRaw(0x05, 0x12, new uint[][] { new uint[]{ 0x05, 0x1e }});
+                TechData.SetListRaw(0x0b, 0x12, new uint[][] { new uint[]{ 0x25, 0x26, 0x29, 0x2e, 0x32 }});
+                TechData.SetListRaw(0x20, 0x12, new uint[][] { new uint[]{ 0x26, 0x67 }});
+            }
             Flingy = LoadDatTable(Path.Join(root, "arr/flingy.dat"), LegacyDatDecl.Flingy, firegraft);
             Sprites = LoadDatTable(Path.Join(root, "arr/sprites.dat"), LegacyDatDecl.Sprites, firegraft);
             Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images, firegraft);

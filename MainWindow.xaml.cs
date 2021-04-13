@@ -460,4 +460,26 @@ namespace Tatti3
             PasteEntryCmdCanExecute(target, e);
         }
     }
+
+    class LimitVerticalGrowth : Decorator
+    {
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            Child.Measure(new Size(availableSize.Width, Math.Min(availableSize.Height, height)));
+            return new Size(Child.DesiredSize.Width, 0);
+        }
+
+        protected override Size ArrangeOverride(Size arrangeSize)
+        {
+            height = arrangeSize.Height;
+            if (Child.DesiredSize.Height > arrangeSize.Height)
+            {
+                Child.Measure(new Size(Child.DesiredSize.Width, arrangeSize.Height));
+            }
+            Child.Arrange(new Rect(arrangeSize));
+            return arrangeSize;
+        }
+
+        double height = 1000000.0;
+    }
 }
