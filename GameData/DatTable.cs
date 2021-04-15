@@ -829,6 +829,20 @@ namespace Tatti3.GameData
             return fields.ContainsKey(fieldId);
         }
 
+        public void AddZeroField(uint fieldId, DatFieldFormat format)
+        {
+            var size = format switch
+            {
+                DatFieldFormat.Uint8 => this.Entries,
+                DatFieldFormat.Uint16 => this.Entries * 2,
+                DatFieldFormat.Uint32 => this.Entries * 4,
+                DatFieldFormat.Uint64 => this.Entries * 8,
+                _ => throw new Exception($"Invalid format for zero field ${format}"),
+            };
+            var data = new List<byte>(new byte[size]);
+            AddField(fieldId, format, data);
+        }
+
         public void AddField(uint fieldId, DatFieldFormat format, List<byte> data)
         {
             fields[fieldId] = new DatValue(data, format, 1);

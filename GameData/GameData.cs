@@ -60,6 +60,25 @@ namespace Tatti3.GameData
                 );
                 Units.AddField(0x43, DatFieldFormat.Uint16, data2);
             }
+            // Movement speed multiplier, ext flags
+            if (!Units.HasField(0x46))
+            {
+                Units.AddZeroField(0x46, DatFieldFormat.Uint16);
+                Units.AddZeroField(0x47, DatFieldFormat.Uint32);
+                var defaultSpeeds = new (uint, uint)[] {
+                    (0x30, 1536), (0x35, 1536), (0x36, 1536), (0x39, 4102), (0x4d, 1536),
+                    (0x50, 1366), (0x58, 1366), (0x67, 1536),
+                };
+                for (uint i = 0; i < Units.Entries; i++)
+                {
+                    Units.SetFieldUint(i, 0x46, 1024);
+                }
+                foreach (var (unit, multiplier) in defaultSpeeds)
+                {
+                    Units.SetFieldUint(unit, 0x46, multiplier);
+                }
+                Units.SetFieldUint(0x36, 0x47, 0x1);
+            }
             Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
             Upgrades =
                 LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);
@@ -70,8 +89,8 @@ namespace Tatti3.GameData
                     Enumerable.Range(0, (int)Upgrades.Entries * 2)
                         .Select(x => (byte)0)
                 );
-                Upgrades.AddField(0x11, DatFieldFormat.Uint16, zeroes);
-                Upgrades.AddField(0x12, DatFieldFormat.Uint16, zeroes);
+                Upgrades.AddZeroField(0x11, DatFieldFormat.Uint16);
+                Upgrades.AddZeroField(0x12, DatFieldFormat.Uint16);
                 Upgrades.AddField(0x13, DatFieldFormat.Uint16, new List<byte>());
                 var defaultValues = new (uint, uint)[] {
                     (0x10, 0x00), (0x14, 0x01), (0x15, 0x01), (0x11, 0x02), (0x16, 0x08),

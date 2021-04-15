@@ -20,6 +20,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal">
                         <GroupBox>
@@ -140,6 +141,19 @@
                                         <local:IntStat Text="Target Acquisition Range" FieldId="0x17"/>
                                     </local:StatGroup>
                                 </DockPanel>
+                            </DockPanel>
+                        </GroupBox>
+                    </DockPanel>
+                    <DockPanel Grid.Row="4">
+                        <GroupBox DockPanel.Dock="Left">
+                            <GroupBox.Header>
+                                <TextBlock Text="Speed Bonuses" />
+                            </GroupBox.Header>
+                            <DockPanel>
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="*">
+                                    <local:IntStat Text="Movement Speed Multiplier" FieldId="0x46" Scale="1024"/>
+                                    <local:BoolStat Text="Natural Attack Speed Upgrade" FieldId="0x47:0x1"/>
+                                </local:StatGroup>
                             </DockPanel>
                         </GroupBox>
                     </DockPanel>
