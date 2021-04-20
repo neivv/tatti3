@@ -30,7 +30,9 @@ namespace Tatti3.GameData
                 if (key != null && value != null)
                 {
                     self.keyToIndex[key] = (uint)self.byIndex.Count;
-                    self.byIndex.Add(UnescapeJsonControlCodes(value));
+                    var unescaped = UnescapeJsonControlCodes(value);
+                    unescaped = unescaped.Replace("\\n", "\n");
+                    self.byIndex.Add(unescaped);
                 }
             }
             return self;
