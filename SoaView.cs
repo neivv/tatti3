@@ -230,7 +230,11 @@ namespace Tatti3
         }
         public uint this[int index]
         {
-            get => Values[index];
+            get
+            {
+                return Values.Length > index ? Values[index] :
+                    throw new Exception($"Out of bounds index {index}, size was {Values.Length}");
+            }
             set
             {
                 if (Values[index] != value)

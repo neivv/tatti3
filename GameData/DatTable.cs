@@ -750,14 +750,16 @@ namespace Tatti3.GameData
         }
 
         // Reads list from .dat, skipping the mutation store layer
+        // Returned value is { { entry_0_field1, entry_1_field2, ... }, { entry_0_field2, ...}, ... },
+        // each field being a single array containing values for all entries.
         private UInt32[][] GetListFromData(uint index, ListFieldState field)
         {
             var offset = GetFieldUint(index, field.OffsetFieldId);
             var result = new List<UInt32[]>(field.DataFieldIds.Length);
+            uint length = field.LengthFieldId != null ? GetFieldUint(index, (uint)field.LengthFieldId) : 0;
             foreach (var id in field.DataFieldIds)
             {
                 var data = fields[id];
-                uint length = field.LengthFieldId != null ? GetFieldUint(index, (uint)field.LengthFieldId) : 0;
                 result.Add(field.ReadData(offset, data, length));
             }
             return result.ToArray();
@@ -781,6 +783,11 @@ namespace Tatti3.GameData
                 throw new InvalidOperationException($"Cannot set list with different array lengths");
             }
             var field = listFields[fieldId];
+            if (value.Length != field.DataFieldIds.Length)
+            {
+                throw new InvalidOperationException($"Cannot set dat list field 0x{fieldId:x}. Invalid field count. " +
+                    $"Received {value.Length}, expected {field.DataFieldIds.Length}");
+            }
             if (!NestedArrayEqual(GetListFromData(index, field), value))
             {
                 field.ChangedEntries[index] = value;

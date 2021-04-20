@@ -9,80 +9,48 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <local:StringTableLookupConverter x:Key="StatTxtLookupConverter" />
-        <local:CreateButtonDatTableRef x:Key="CreateButtonDatTableRef" />
         <CollectionViewSource x:Key="ButtonView" />
     </UserControl.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <DockPanel Grid.Column="0">
-            <ListBox x:Name="buttonList" MinHeight="200" MinWidth="150">
-                <ListBox.ItemsSource>
-                    <Binding Source="{StaticResource ButtonView}" />
-                </ListBox.ItemsSource>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Path=[3], Converter={StaticResource StatTxtLookupConverter}}">
-                        </TextBlock>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </DockPanel>
-        <StackPanel Orientation="Vertical" Grid.Column="1">
-            <Button Click="OnAddClick">
-                <Button.Content>
-                    <TextBlock Text="Add" Margin="2,0,2,0" />
-                </Button.Content>
-            </Button>
-            <Button Click="OnCopyClick">
-                <Button.Content>
-                    <TextBlock Text="Copy" Margin="2,0,2,0" />
-                </Button.Content>
-            </Button>
-            <Separator />
-            <Button Click="OnMoveUpClick">
-                <Button.Content>
-                    <TextBlock Text="Move up" Margin="2,0,2,0" />
-                </Button.Content>
-            </Button>
-            <Button Click="OnMoveDownClick">
-                <Button.Content>
-                    <TextBlock Text="Move down" Margin="2,0,2,0" />
-                </Button.Content>
-            </Button>
-            <Separator />
-            <Button Click="OnRemoveClick">
-                <Button.Content>
-                    <TextBlock Text="Remove" Margin="2,0,2,0" />
-                </Button.Content>
-            </Button>
-        </StackPanel>
-        <GroupBox Grid.Column="2">
-            <GroupBox.DataContext>
-                <Binding Source="{StaticResource ButtonView}" Path="/"
-                    Converter="{StaticResource CreateButtonDatTableRef}" />
-            </GroupBox.DataContext>
-            <GroupBox.Header>
-                <TextBlock Text="Properties" />
-            </GroupBox.Header>
-            <local:StatGroup LabelWidth="90">
-                <local:IntStat Text="Position" FieldId="0x02"/>
-                <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x03" />
-                <local:DatRefStat Text="Disabled Label" Dat="StatTxt" FieldId="0x04"/>
-                <local:DatRefStat Text="Enabled Label" Dat="StatTxt" FieldId="0x05"/>
-                <local:ButtonEnumStat x:Name="conditionStat" Text="Condition" FieldId="0x06" DropdownWidth="220"
-                    />
-                <local:ButtonParamStat x:Name="conditionParam" Text="Condition Param" EnumFieldId="0x06" ParamFieldId="0x07"
-                    MaxWidth="{Binding Path=ActualWidth, ElementName=conditionStat}"
-                    />
-                <local:ButtonEnumStat x:Name="actionStat" Text="Action" FieldId="0x08" DropdownWidth="220"/>
-                <local:ButtonParamStat x:Name="actionParam" Text="Action Param" EnumFieldId="0x08" ParamFieldId="0x09"
-                    MaxWidth="{Binding Path=ActualWidth, ElementName=conditionStat}"
-                    />
-            </local:StatGroup>
-        </GroupBox>
-    </Grid>
+    <local:ListFieldEdit Dat="Buttons" ListFieldId="0x0" FirstArrayField="0x2">
+        <local:ListFieldEdit.ListBoxTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding Path=[3], Converter={StaticResource StatTxtLookupConverter}}">
+                </TextBlock>
+            </DataTemplate>
+        </local:ListFieldEdit.ListBoxTemplate>
+        <local:ListFieldEdit.EditControl>
+            <GroupBox>
+                <GroupBox.Header>
+                    <TextBlock Text="Properties" />
+                </GroupBox.Header>
+                <local:StatGroup LabelWidth="90">
+                    <local:IntStat Text="Position" FieldId="0x02"/>
+                    <local:IconStat Text="Icon" Dat="CmdIcon" FieldId="0x03" />
+                    <local:DatRefStat Text="Disabled Label" Dat="StatTxt" FieldId="0x04"/>
+                    <local:DatRefStat Text="Enabled Label" Dat="StatTxt" FieldId="0x05"/>
+                    <local:ButtonEnumStat x:Name="conditionStat" Text="Condition" FieldId="0x06" DropdownWidth="220"
+                        />
+                    <local:ButtonParamStat x:Name="conditionParam" Text="Condition Param" EnumFieldId="0x06" ParamFieldId="0x07"
+                        MaxWidth="{Binding Path=ActualWidth, ElementName=conditionStat}"
+                        />
+                    <local:ButtonEnumStat x:Name="actionStat" Text="Action" FieldId="0x08" DropdownWidth="220"/>
+                    <local:ButtonParamStat x:Name="actionParam" Text="Action Param" EnumFieldId="0x08" ParamFieldId="0x09"
+                        MaxWidth="{Binding Path=ActualWidth, ElementName=conditionStat}"
+                        />
+                </local:StatGroup>
+            </GroupBox>
+        </local:ListFieldEdit.EditControl>
+        <local:ListFieldEdit.DefaultValues>
+            <x:Array Type="sys:UInt32">
+                <sys:UInt32>1</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+            </x:Array>
+        </local:ListFieldEdit.DefaultValues>
+    </local:ListFieldEdit>
 </UserControl>
