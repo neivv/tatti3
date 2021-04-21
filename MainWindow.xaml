@@ -545,6 +545,17 @@
                                 </DockPanel>
                             </Grid>
                         </TabItem>
+                        <TabItem Header="Effects">
+                            <DockPanel Background="#FFE5E5E5">
+                                <GroupBox DockPanel.Dock="Left">
+                                    <GroupBox.Header>
+                                        <TextBlock Text="Upgrade Effects" />
+                                    </GroupBox.Header>
+                                    <local:UpgradeEffects>
+                                    </local:UpgradeEffects>
+                                </GroupBox>
+                            </DockPanel>
+                        </TabItem>
                         <TabItem Header="Research Requirements">
                             <Grid Background="#FFE5E5E5">
                                 <Grid.ColumnDefinitions>

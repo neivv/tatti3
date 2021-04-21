@@ -6,3 +6,26 @@ Units
 0x45    Linked Buttons Unit
 0x46    Speed multiplier
 0x47    Ext flags, 0x1 = Attack speed upgrade
+
+TechData
+0x10    Research req buffer
+0x11    Use req buffer
+0x12    Attached unit offset u16
+0x13    Attached unit count u16
+0x14    Attached unit buffer
+
+Upgrade
+0x10    Req buffer
+0x11    Attached unit offset u16
+0x12    Attached unit count u16
+0x13    Attached unit buffer
+0x14    Effect offset byte
+0x15    Effect count byte
+0x16    Effect types {
+    0 = Movement speed buff i32 modifier,
+    1 = Attack speed buff
+}
+0x17    Effect min levels
+0x18    Effect max levels
+0x19    Effect units
+0x1a    Effect values (u32)

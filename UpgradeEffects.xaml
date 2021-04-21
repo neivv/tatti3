@@ -1,0 +1,49 @@
+<UserControl x:Class="Tatti3.UpgradeEffects"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:local="clr-namespace:Tatti3"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:EffectNameConverter x:Key="EffectNameConverter" />
+    </UserControl.Resources>
+    <UserControl.DataContext>
+        <Binding
+            RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
+            Path="DataContext" />
+    </UserControl.DataContext>
+    <local:ListFieldEdit Dat="Upgrades" ListFieldId="0x14" FirstArrayField="0x16">
+        <local:ListFieldEdit.ListBoxTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding Path=., Converter={StaticResource EffectNameConverter}}">
+                </TextBlock>
+            </DataTemplate>
+        </local:ListFieldEdit.ListBoxTemplate>
+        <local:ListFieldEdit.EditControl>
+            <GroupBox>
+                <GroupBox.Header>
+                    <TextBlock Text="Properties" />
+                </GroupBox.Header>
+                <local:StatGroup LabelWidth="70">
+                    <local:EnumStat x:Name="effectStat" Text="Effect" FieldId="0x16" DropdownWidth="180"/>
+                    <local:IntStat Text="Min Level" FieldId="0x17"/>
+                    <local:IntStat Text="Max Level" FieldId="0x18"/>
+                    <local:DatRefStat Text="Unit" Dat="Units" FieldId="0x19" DropdownWidth="180"/>
+                    <local:UpgradeValueStat x:Name="valueStat" />
+                </local:StatGroup>
+            </GroupBox>
+        </local:ListFieldEdit.EditControl>
+        <local:ListFieldEdit.DefaultValues>
+            <x:Array Type="sys:UInt32">
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>1</sys:UInt32>
+                <sys:UInt32>255</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
+            </x:Array>
+        </local:ListFieldEdit.DefaultValues>
+    </local:ListFieldEdit>
+</UserControl>

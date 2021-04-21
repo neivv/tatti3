@@ -85,10 +85,6 @@ namespace Tatti3.GameData
             // Attached units
             if (!Upgrades.HasField(0x11))
             {
-                var zeroes = new List<byte>(
-                    Enumerable.Range(0, (int)Upgrades.Entries * 2)
-                        .Select(x => (byte)0)
-                );
                 Upgrades.AddZeroField(0x11, DatFieldFormat.Uint16);
                 Upgrades.AddZeroField(0x12, DatFieldFormat.Uint16);
                 Upgrades.AddField(0x13, DatFieldFormat.Uint16, new List<byte>());
@@ -106,15 +102,46 @@ namespace Tatti3.GameData
                     Upgrades.SetListRaw(upgrade, 0x11, new uint[][] { new uint[]{ unit }});
                 }
             }
+            // Upgrade Effects
+            if (!Upgrades.HasField(0x14))
+            {
+                Upgrades.AddZeroField(0x14, DatFieldFormat.Uint16);
+                Upgrades.AddZeroField(0x15, DatFieldFormat.Uint16);
+                Upgrades.AddField(0x16, DatFieldFormat.Uint8, new List<byte>());
+                Upgrades.AddField(0x17, DatFieldFormat.Uint8, new List<byte>());
+                Upgrades.AddField(0x18, DatFieldFormat.Uint8, new List<byte>());
+                Upgrades.AddField(0x19, DatFieldFormat.Uint16, new List<byte>());
+                Upgrades.AddField(0x1a, DatFieldFormat.Uint32, new List<byte>());
+                var defaultValues = new (uint, uint, uint, uint)[] {
+                    (0x11, 0x02, 0x00, 512),
+                    (0x11, 0x13, 0x00, 512),
+                    (0x1a, 0x2a, 0x00, 3078),
+                    (0x1b, 0x25, 0x00, 512),
+                    (0x1c, 0x25, 0x01, 0),
+                    (0x1d, 0x26, 0x00, 512),
+                    (0x22, 0x41, 0x00, 512),
+                    (0x25, 0x45, 0x00, 512),
+                    (0x27, 0x54, 0x00, 512),
+                    (0x2a, 0x46, 0x00, 342),
+                    (0x35, 0x27, 0x00, 512),
+                };
+                foreach (var (upgrade, unit, type, val) in defaultValues)
+                {
+                    var old = Upgrades.GetListRaw(upgrade, 0x14);
+                    Upgrades.SetListRaw(upgrade, 0x14, new uint[][] {
+                        ArrayPush(old[0], type),
+                        ArrayPush(old[1], 1),
+                        ArrayPush(old[2], 255),
+                        ArrayPush(old[3], unit),
+                        ArrayPush(old[4], val),
+                    });
+                }
+            }
             TechData = LoadDatTable(Path.Join(root, "arr/techdata.dat"), LegacyDatDecl.TechData, firegraft);
             if (!TechData.HasField(0x12))
             {
-                var zeroes = new List<byte>(
-                    Enumerable.Range(0, (int)Upgrades.Entries * 2)
-                        .Select(x => (byte)0)
-                );
-                TechData.AddField(0x12, DatFieldFormat.Uint16, zeroes);
-                TechData.AddField(0x13, DatFieldFormat.Uint16, zeroes);
+                TechData.AddZeroField(0x12, DatFieldFormat.Uint16);
+                TechData.AddZeroField(0x13, DatFieldFormat.Uint16);
                 TechData.AddField(0x14, DatFieldFormat.Uint16, new List<byte>());
                 var defaultValues = new (uint, uint)[] {
                     (0x06, 0x09), (0x07, 0x09), (0x02, 0x09), (0x01, 0x01), (0x0a, 0x01),
@@ -475,6 +502,14 @@ namespace Tatti3.GameData
                 }
                 table.AddField(field, DatFieldFormat.Uint32, new List<byte>(stream.ToArray()));
             }
+        }
+
+        static uint[] ArrayPush(uint[] array, uint value)
+        {
+            var newArr = new uint[array.Length + 1];
+            array.CopyTo(newArr, 0);
+            newArr[array.Length] = value;
+            return newArr;
         }
 
         public override bool Equals(object? obj)

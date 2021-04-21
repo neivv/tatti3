@@ -22,9 +22,11 @@ namespace Tatti3
         [ValueConversion(typeof(uint), typeof(float))]
         class ScaleConverter : IValueConverter
         {
-            public ScaleConverter(uint scale)
+            public ScaleConverter(uint scale, bool percent, bool signed)
             {
                 this.scale = scale;
+                this.percent = percent;
+                this.signed = signed;
             }
 
             object? IValueConverter.Convert(
@@ -33,7 +35,13 @@ namespace Tatti3
                 object parameter,
                 System.Globalization.CultureInfo culture
             ) {
-                return (float)(uint)value / (float)scale;
+                float scaled = signed ?
+                    (float)(int)(uint)value / (float)scale :
+                    (float)(uint)value / (float)scale;
+                scaled = percent ? scaled * 100.0f : scaled;
+                return percent ?
+                    String.Format(CultureInfo.InvariantCulture, "{0:F1}", scaled) :
+                    $"{scaled}";
             }
 
             object? IValueConverter.ConvertBack(
@@ -45,7 +53,14 @@ namespace Tatti3
                 try
                 {
                     var format = System.Globalization.NumberFormatInfo.InvariantInfo;
-                    return (uint)(Single.Parse((string)value, format) * (float)scale);
+                    float val = Single.Parse((string)value, format);
+                    if (percent)
+                    {
+                        val = val / 100.0f;
+                    }
+                    return signed ?
+                        (uint)(int)(val * (float)scale) :
+                        (uint)(val * (float)scale);
                 }
                 catch
                 {
@@ -54,6 +69,8 @@ namespace Tatti3
             }
 
             uint scale;
+            bool percent;
+            bool signed;
         }
 
         public IntStat()
@@ -105,13 +122,33 @@ namespace Tatti3
             }
         }
 
+        public bool Percent
+        {
+            get => percent;
+            set
+            {
+                percent = value;
+                UpdateBinding();
+            }
+        }
+
+        public bool Signed
+        {
+            get => signed;
+            set
+            {
+                signed = value;
+                UpdateBinding();
+            }
+        }
+
         void UpdateBinding()
         {
             var path = $"Fields[{Field}~{SubIndex}].Item";
             IValueConverter? converter = null;
-            if (Scale != 1)
+            if (Scale != 1 || Percent || Signed)
             {
-                converter = new ScaleConverter(Scale);
+                converter = new ScaleConverter(Scale, Percent, Signed);
             }
             var binding = new Binding
             {
@@ -124,6 +161,8 @@ namespace Tatti3
         uint Field = 0;
         uint SubIndex = 0;
         uint scale = 1;
+        bool percent = false;
+        bool signed = false;
 
         FrameworkElement IStatControl.LabelText
         {
