@@ -41,7 +41,7 @@ namespace Tatti3
                 scaled = percent ? scaled * 100.0f : scaled;
                 return percent ?
                     String.Format(CultureInfo.InvariantCulture, "{0:F1}", scaled) :
-                    $"{scaled}";
+                    String.Format(CultureInfo.InvariantCulture, "{0:G}", scaled);
             }
 
             object? IValueConverter.ConvertBack(
