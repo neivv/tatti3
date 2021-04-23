@@ -114,7 +114,7 @@ namespace Tatti3.GameData
         {
             // Format:
             //  u16 major_version (1)
-            //  u16 minor_version (1)
+            //  u16 minor_version (2)
             //      Minor version is something that can increase while staying compatible with
             //      users that only understand older minor version - even if they won't support
             //      it completely. Major is a fully breaking change.
@@ -150,10 +150,11 @@ namespace Tatti3.GameData
             {
                 throw new InvalidDataException($"Invalid dat file version {major:02x}:{minor:02x}");
             }
-            if (minor > 1)
+            if (minor > 2)
             {
                 throw new InvalidDataException($"The dat appears to be saved with a newer version of this program");
             }
+            self.Version = minor;
             self.Entries = reader.ReadUInt32();
             var fieldCount = reader.ReadInt32();
             if (fieldCount > 1024)
@@ -356,7 +357,7 @@ namespace Tatti3.GameData
             {
                 writer.WriteU32(0x2b746144);
                 writer.WriteU16(1);
-                writer.WriteU16(1);
+                writer.WriteU16(2);
                 writer.WriteU32(Entries);
                 writer.WriteI32(fields.Count);
                 var fieldIds = new List<uint>(fields.Keys);
@@ -971,6 +972,7 @@ namespace Tatti3.GameData
         public event EventHandler<EventArgs>? EntryCountChanged;
 
         public uint Entries { get; private set; }
+        public UInt16 Version { get; private set; }
         public List<RefField> RefFields { get; private set; }
 
         Dictionary<uint, DatValue> fields;

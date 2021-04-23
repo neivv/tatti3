@@ -165,6 +165,17 @@ namespace Tatti3.GameData
             Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images, firegraft);
             PortData = LoadDatTable(Path.Join(root, "arr/portdata.dat"), LegacyDatDecl.PortData, firegraft);
             Orders = LoadDatTable(Path.Join(root, "arr/orders.dat"), LegacyDatDecl.Orders, firegraft);
+            if (Orders.Version < 2)
+            {
+                // Dummy reqs
+                var orders = new uint[] { 0x24, 0x66 };
+                foreach (var order in orders)
+                {
+                    var reqs = Orders.GetRequirements(order, 0x11);
+                    reqs.Add(new Requirement(0xff13));
+                    Orders.SetRequirements(order, 0x11, reqs.ToArray());
+                }
+            }
             Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);
