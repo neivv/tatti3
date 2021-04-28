@@ -176,6 +176,13 @@ namespace Tatti3.GameData
                     Orders.SetRequirements(order, 0x11, reqs.ToArray());
                 }
             }
+            if (Orders.Version < 3)
+            {
+                var reqs = Orders.GetRequirements(0x24, 0x11);
+                reqs.Remove(new Requirement(0xff13));
+                reqs.Add(new Requirement(0xff0c));
+                Orders.SetRequirements(0x24, 0x11, reqs.ToArray());
+            }
             Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);

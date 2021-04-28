@@ -32,3 +32,5 @@ Upgrade
 
 version 2 -- Adds default dummy reqs for spread creep (0x66) and place addon (0x24) orders.dat,
     necessary since tatti doesn't make distinction between no reqs enabled and no reqs disabled.
+version 3 -- Fixes place addon req from "Is Landed building" to "Has no Addon"
+    (Lifted off buildings couldn't build addons)
