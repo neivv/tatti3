@@ -123,7 +123,7 @@ namespace Tatti3
         void UpdateBinding()
         {
             var state = (AppState)this.DataContext;
-            if (state == null)
+            if (state == null || state.GameData == null)
             {
                 return;
             }
