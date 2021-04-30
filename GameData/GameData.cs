@@ -79,6 +79,17 @@ namespace Tatti3.GameData
                 }
                 Units.SetFieldUint(0x36, 0x47, 0x1);
             }
+            // Turret max angle
+            if (!Units.HasField(0x48))
+            {
+                Units.AddZeroField(0x48, DatFieldFormat.Uint8);
+                for (uint i = 0; i < Units.Entries; i++)
+                {
+                    Units.SetFieldUint(i, 0x48, 128);
+                }
+                Units.SetFieldUint(0x4, 0x48, 32);
+                Units.SetFieldUint(0x12, 0x48, 32);
+            }
             Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
             Upgrades =
                 LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);

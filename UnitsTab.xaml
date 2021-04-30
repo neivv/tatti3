@@ -471,6 +471,35 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
+            <TabItem Header="Misc">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0">
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Turret Properties" />
+                            </GroupBox.Header>
+                            <local:StatGroup>
+                                <local:IntStat Text="Max Angle" FieldId="0x48">
+                                    <local:IntStat.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock>
+    Maximum angle difference of subunit turret (this unit) and its parent.<LineBreak />
+    128 = 180 degrees, making the turret not turn with parent unit at all.
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </local:IntStat.ToolTip>
+                                </local:IntStat>
+                            </local:StatGroup>
+                        </GroupBox>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </UserControl>

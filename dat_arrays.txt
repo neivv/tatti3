@@ -6,6 +6,7 @@ Units
 0x45    Linked Buttons Unit
 0x46    Speed multiplier
 0x47    Ext flags, 0x1 = Attack speed upgrade
+0x48    Turret max angle
 
 TechData
 0x10    Research req buffer
