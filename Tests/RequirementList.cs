@@ -155,5 +155,41 @@ namespace Tests
             Assert.AreEqual(arr[4], Req(0xffff));
             Assert.AreEqual(arr[5], Req(0xff21));
         }
+
+        [TestMethod]
+        public void UpgradeLevelJumps6()
+        {
+            // Inserting between upgrade case and end
+            var list = new RequirementList();
+            list.Insert(0, new RequirementList.RequirementWrap(Req(0xff11)));
+            list.Insert(1, new RequirementList.RequirementWrap(Req(0xff1f)));
+            list.Insert(2, new RequirementList.RequirementWrap(Req(0xff21)));
+            list.Insert(2, new RequirementList.RequirementWrap(Req(0xff20)));
+            MutateAtEveryPosition(list);
+            var arr = list.ToArray();
+            var msg = list.ToString();
+            Assert.AreEqual(arr.Length, 6, msg);
+            Assert.AreEqual(arr[0], Req(0xff11), msg);
+            Assert.AreEqual(arr[1], Req(0xff1f), msg);
+            Assert.AreEqual(arr[2], Req(0xffff), msg);
+            Assert.AreEqual(arr[3], Req(0xff20), msg);
+            Assert.AreEqual(arr[4], Req(0xffff), msg);
+            Assert.AreEqual(arr[5], Req(0xff21), msg);
+        }
+
+        [TestMethod]
+        public void UpgradeLevelJumps7()
+        {
+            var list = new RequirementList();
+            list.Insert(0, new RequirementList.RequirementWrap(Req(0xff11)));
+            list.Insert(1, new RequirementList.RequirementWrap(Req(0xff1f)));
+            list.Insert(2, new RequirementList.RequirementWrap(Req(0xff20)));
+            list.RemoveAt(3);
+            MutateAtEveryPosition(list);
+            var arr = list.ToArray();
+            Assert.AreEqual(arr.Length, 2);
+            Assert.AreEqual(arr[0], Req(0xff11));
+            Assert.AreEqual(arr[1], Req(0xff1f));
+        }
     }
 }

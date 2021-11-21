@@ -163,7 +163,9 @@ namespace Tatti3
             };
             if (req.IsUpgradeLevelOpcode())
             {
-                if (!isLast) {
+                // Add end for upgrade opcode unless last,
+                // or unless insert was already right before existing end
+                if (!isLast && list[index + 1].Opcode != 0xffff) {
                     var end = new Requirement(0xffff);
                     list.Insert(index + 1, new RequirementWrap(end));
                 }
@@ -207,6 +209,10 @@ namespace Tatti3
                         break;
                     }
                 }
+            }
+            // If removing the last item puts End as a new last, remove that too
+            if (list.Count != 0 && list[list.Count - 1].Value.IsEnd()) {
+                list.RemoveAt(list.Count - 1);
             }
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
                 NotifyCollectionChangedAction.Reset
