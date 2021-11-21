@@ -113,6 +113,9 @@ namespace Tatti3
                     int index2 = -1;
                     for (int i = index - 1; i >= 0; i--)
                     {
+                        if (list[i].Opcode == 0xffff) {
+                            break;
+                        }
                         if (list[i].Value.IsUpgradeLevelOpcode())
                         {
                             index2 = i;
@@ -153,14 +156,30 @@ namespace Tatti3
             {
                 return;
             }
+            var isLast = index == list.Count;
             list.Insert(index, item);
             item.PropertyChanged += (o, args) => {
                 Mutated?.Invoke(this, new EventArgs());
             };
             if (req.IsUpgradeLevelOpcode())
             {
-                var end = new Requirement(0xffff);
-                list.Insert(index + 1, new RequirementWrap(end));
+                if (!isLast) {
+                    var end = new Requirement(0xffff);
+                    list.Insert(index + 1, new RequirementWrap(end));
+                }
+                // If there was a upgrade level opcode before that hadn't been terminated
+                // with 0xffff, terminate it above current requirement
+                for (int i = index - 1; i >= 0; i--) {
+                    if (list[i].Opcode == 0xffff) {
+                        // Was terminated
+                        break;
+                    }
+                    if (list[i].Value.IsUpgradeLevelOpcode()) {
+                        var end = new Requirement(0xffff);
+                        list.Insert(index, new RequirementWrap(end));
+                        break;
+                    }
+                }
             }
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
                 NotifyCollectionChangedAction.Reset
