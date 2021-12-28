@@ -194,6 +194,23 @@ namespace Tatti3.GameData
                 reqs.Add(new Requirement(0xff0c));
                 Orders.SetRequirements(0x24, 0x11, reqs.ToArray());
             }
+            if (Units.Version < 4)
+            {
+                for (uint i = 228; i < 261; i++)
+                {
+                    Units.SetFieldUint(i, 0x01, 0xe4);
+                    Units.SetFieldUint(i, 0x02, 0xe4);
+                    Units.SetFieldUint(i, 0x03, 0xe4);
+                    Units.SetFieldUint(i, 0x0c, 23);
+                    Units.SetFieldUint(i, 0x0d, 23);
+                    Units.SetFieldUint(i, 0x0e, 23);
+                    Units.SetFieldUint(i, 0x0f, 23);
+                    Units.SetFieldUint(i, 0x10, 23);
+                    Units.SetFieldUint(i, 0x11, 130);
+                    Units.SetFieldUint(i, 0x13, 130);
+                    Units.SetFieldUint(i, 0x18, 1);
+                }
+            }
             Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);
