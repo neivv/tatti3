@@ -516,6 +516,31 @@ namespace Tatti3
                     UpdateCurrentBackRef();
                 }
             };
+
+            this.BackRefsChanged += (obj, args) => {
+                switch (args.Type)
+                {
+                    case ArrayFileType.Flingy:
+                    case ArrayFileType.Sprites:
+                    case ArrayFileType.Images:
+                    case ArrayFileType.PortData:
+                    case ArrayFileType.Buttons:
+                    case ArrayFileType.CmdIcon:
+                        OnNamesChanged(args.Type);
+                        break;
+                    default:
+                        break;
+                }
+            };
+            this.NamesChanged += (obj, args) => {
+                if (refLinkedNames.TryGetValue(args.Type, out List<ArrayFileType>? linked))
+                {
+                    foreach (var type in linked)
+                    {
+                        OnNamesChanged(type);
+                    }
+                }
+            };
         }
 
         public void Save(string path)
@@ -599,6 +624,7 @@ namespace Tatti3
             indexPrefixedEntryNames.Clear();
             backRefs.Clear();
             backRefChangeHandlersAdded.Clear();
+            datTableRefs.Clear();
             // Name change events
             var weapons = GetDat(ArrayFileType.Weapons);
             if (weapons != null)
@@ -620,21 +646,6 @@ namespace Tatti3
                     }
                 };
             }
-            this.BackRefsChanged += (obj, args) => {
-                switch (args.Type)
-                {
-                    case ArrayFileType.Flingy:
-                    case ArrayFileType.Sprites:
-                    case ArrayFileType.Images:
-                    case ArrayFileType.PortData:
-                    case ArrayFileType.Buttons:
-                    case ArrayFileType.CmdIcon:
-                        OnNamesChanged(args.Type);
-                        break;
-                    default:
-                        break;
-                }
-            };
             ArrayFileType[] usesBackRefsForNames = {
                 ArrayFileType.Flingy,
                 ArrayFileType.Sprites,
@@ -646,7 +657,7 @@ namespace Tatti3
             // When names first array of tuple change,
             // invalidate the second array's names as they
             // contain names derived from first array.
-            var refLinkedNames = new Dictionary<ArrayFileType, List<ArrayFileType>>();
+            refLinkedNames.Clear();
             foreach (var type in usesBackRefsForNames)
             {
                 foreach ((var otherType, var dat) in IterDats())
@@ -668,15 +679,6 @@ namespace Tatti3
                     }
                 }
             }
-            this.NamesChanged += (obj, args) => {
-                if (refLinkedNames.TryGetValue(args.Type, out List<ArrayFileType>? linked))
-                {
-                    foreach (var type in linked)
-                    {
-                        OnNamesChanged(type);
-                    }
-                }
-            };
 
             var upgrades = GetDat(ArrayFileType.Upgrades);
             if (upgrades != null)
@@ -1236,8 +1238,6 @@ namespace Tatti3
 
         public RootDatRef Dat { get; }
 
-        Dictionary<ArrayFileType, DatTableRef> datTableRefs = new Dictionary<ArrayFileType, DatTableRef>();
-
         public DatTableRef GetDatTableRef(ArrayFileType type)
         {
             if (!datTableRefs.TryGetValue(type, out DatTableRef? val))
@@ -1302,7 +1302,9 @@ namespace Tatti3
         Dictionary<ArrayFileType, List<EntryListData>> indexPrefixedEntryNames =
             new Dictionary<ArrayFileType, List<EntryListData>>();
         Dictionary<ArrayFileType, List<BackRef>> backRefs = new Dictionary<ArrayFileType, List<BackRef>>();
+        Dictionary<ArrayFileType, DatTableRef> datTableRefs = new Dictionary<ArrayFileType, DatTableRef>();
         HashSet<ArrayFileType> backRefChangeHandlersAdded = new HashSet<ArrayFileType>();
+        Dictionary<ArrayFileType, List<ArrayFileType>> refLinkedNames = new();
 
         public class EntryListData
         {
