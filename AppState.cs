@@ -626,6 +626,7 @@ namespace Tatti3
                     case ArrayFileType.Flingy:
                     case ArrayFileType.Sprites:
                     case ArrayFileType.Images:
+                    case ArrayFileType.PortData:
                     case ArrayFileType.Buttons:
                     case ArrayFileType.CmdIcon:
                         OnNamesChanged(args.Type);
