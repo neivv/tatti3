@@ -8,6 +8,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <StartupObject>Tatti3.App</StartupObject>
     <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+    <ApplicationIcon>tatti.ico</ApplicationIcon>
   </PropertyGroup>
   
   
@@ -16,6 +17,11 @@
     <EmbeddedResource Remove="Tests\**" />
     <None Remove="Tests\**" />
     <Page Remove="Tests\**" />
+  </ItemGroup>
+  
+  
+  <ItemGroup>
+    <Content Include="tatti.ico" />
   </ItemGroup>
 
   <ItemGroup>
