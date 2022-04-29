@@ -28,6 +28,8 @@ namespace Tatti3
             var effectNames = new string[]{
                 "Modify Movement Speed",
                 "Increase Attack Speed",
+                "Modify Weapon Range",
+                "Modify Sight Range",
             };
             foreach (var name in effectNames)
             {
@@ -54,16 +56,24 @@ namespace Tatti3
     {
         public UpgradeValueStat()
         {
-            intStat.FieldId = "0x1a";
+            datRefStat.Dat = ArrayFileType.Units;
+            datRefStat.DropdownWidth = 180;
             intStatControl = ((IStatControl)intStat).Value;
             intStatControl.Visibility = Visibility.Hidden;
-            AddChild(intStatControl);
+            datRefStatControl = ((IStatControl)datRefStat).Value;
+            datRefStatControl.Visibility = Visibility.Hidden;
+            AddChild(grid);
+            grid.Children.Add(intStatControl);
+            grid.Children.Add(datRefStatControl);
             this.DataContextChanged += (o, e) => this.UpdateBinding();
             UpdateBinding();
         }
 
         IntStat intStat = new();
+        DatRefStat datRefStat = new();
         FrameworkElement intStatControl;
+        FrameworkElement datRefStatControl;
+        Grid grid = new();
 
         void UpdateBinding()
         {
@@ -88,25 +98,65 @@ namespace Tatti3
                 return;
             }
             var effect = state.GetField(0x16);
-            switch (effect)
+            if (this.FieldId == 0x1a)
             {
-                case 0:
-                    intStatControl.Visibility = Visibility.Visible;
-                    intStat.Scale = 1024;
-                    intStat.Text = "Value (%)";
-                    intStat.Percent = true;
-                    intStat.Signed = true;
-                    break;
-                case 1:
-                    intStatControl.Visibility = Visibility.Hidden;
-                    intStat.Text = "";
-                    break;
-                default:
-                    intStat.Text = "Value";
-                    intStat.Scale = 1;
-                    intStat.Percent = false;
-                    intStat.Signed = false;
-                    break;
+                bool percent = false;
+                bool signed = true;
+                uint scale = 1;
+                var visibility = Visibility.Visible;
+                switch (effect)
+                {
+                    case 0:
+                        scale = 1024;
+                        intStat.Text = "Value (%)";
+                        percent = true;
+                        break;
+                    case 1:
+                        visibility = Visibility.Hidden;
+                        intStat.Text = "";
+                        break;
+                    case 2:
+                        intStat.Text = "Value (Pixels)";
+                        break;
+                    case 3:
+                        intStat.Text = "Value (Tiles)";
+                        break;
+                    default:
+                        intStat.Text = "Value";
+                        signed = false;
+                        break;
+                }
+                intStat.Visibility = visibility;
+                intStat.Scale = scale;
+                intStat.Signed = signed;
+                intStat.Percent = percent;
+            }
+            else
+            {
+                var datVisibility = Visibility.Hidden;
+                var intVisibility = Visibility.Hidden;
+                string text = "";
+                switch (effect)
+                {
+                    case 0:
+                    case 1:
+                    case 3:
+                        break;
+                    case 2:
+                        datRefStat.Dat = ArrayFileType.Weapons;
+                        datVisibility = Visibility.Visible;
+                        text = "Limit to Weapon";
+                        break;
+                    default:
+                        // Allow viewing/editing the value when unknown.
+                        text = "Value 2";
+                        intVisibility = Visibility.Visible;
+                        break;
+                }
+                // Always using intStat for text control
+                intStat.Text = text;
+                datRefStat.Visibility = datVisibility;
+                intStat.Visibility = intVisibility;
             }
         }
 
@@ -131,6 +181,28 @@ namespace Tatti3
             set
             {
                 SetValue(EffectTypeProperty, value);
+            }
+        }
+
+        public uint FieldId
+        {
+            get => datRefStat.FieldId;
+            set
+            {
+                intStat.FieldId = value.ToString();
+                datRefStat.FieldId = value;
+            }
+        }
+
+        static uint ParseUint(string val)
+        {
+            if (val.StartsWith("0x"))
+            {
+                return UInt32.Parse(val[2..], NumberStyles.HexNumber);
+            }
+            else
+            {
+                return UInt32.Parse(val);
             }
         }
 

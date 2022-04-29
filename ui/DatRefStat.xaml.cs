@@ -132,7 +132,7 @@ namespace Tatti3
                 {
                     index = (int)dat.GetField(self.FieldId);
                 }
-                dropdown.SelectedIndex = index < names.Count ? index : -1;
+                dropdown.SelectedIndex = index < names.Count && index > 0 ? index : -1;
             };
             Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);
             Binding.AddTargetUpdatedHandler(numeric, UpdateDropdownIndex);

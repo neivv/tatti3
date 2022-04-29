@@ -363,6 +363,9 @@ Ugprades.dat:
     * 0x16 Effect type
         - 0 Movement speed buff, value is signed 1024-fixedpoint integer for speed change
         - 1 Attack speed buff, value is unused
+        - 2 Attack range buff, value is signed integer for change in pixels.
+            Value 2 is weapon ID or -1 for all weapons.
+        - 3 Sight range buff, value is signed integer for change in tiles.
     * 0x17 Min level
         Minimum level for which the effect applies
     * 0x18 Max level
@@ -370,6 +373,8 @@ Ugprades.dat:
     * 0x19 Unit
         Unit that the upgrade affects.
     * 0x1a Value
+        Parameter for the upgrade, depends on Effect type
+    * 0x1b Value 2
         Parameter for the upgrade, depends on Effect type
 
 Techdata.dat:

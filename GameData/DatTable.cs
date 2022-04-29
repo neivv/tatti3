@@ -839,12 +839,19 @@ namespace Tatti3.GameData
 
         public void AddZeroField(uint fieldId, DatFieldFormat format)
         {
+            AddZeroFieldWithEntryCount(fieldId, format, this.Entries);
+        }
+
+        /// Adds zero field that does not necessarily use same entry count as the root file.
+        /// Can be used to init list fields too that way.
+        private void AddZeroFieldWithEntryCount(uint fieldId, DatFieldFormat format, uint entries)
+        {
             var size = format switch
             {
-                DatFieldFormat.Uint8 => this.Entries,
-                DatFieldFormat.Uint16 => this.Entries * 2,
-                DatFieldFormat.Uint32 => this.Entries * 4,
-                DatFieldFormat.Uint64 => this.Entries * 8,
+                DatFieldFormat.Uint8 => entries,
+                DatFieldFormat.Uint16 => entries * 2,
+                DatFieldFormat.Uint32 => entries * 4,
+                DatFieldFormat.Uint64 => entries * 8,
                 _ => throw new Exception($"Invalid format for zero field ${format}"),
             };
             var data = new List<byte>(new byte[size]);
@@ -854,6 +861,28 @@ namespace Tatti3.GameData
         public void AddField(uint fieldId, DatFieldFormat format, List<byte> data)
         {
             fields[fieldId] = new DatValue(data, format, 1);
+        }
+
+        /// Adds new list field to an existing list.
+        ///
+        /// Should be only called before the dat has been mutated at all, and the list
+        /// must already have existed.
+        public void AddListField(uint listId, uint fieldId, DatFieldFormat format, uint defaultValue)
+        {
+            var listField = listFields[listId];
+            var existingField = fields[listField.DataFieldIds[0]];
+            var entryCount = existingField.DataFormat switch
+            {
+                DatFieldFormat.Uint8 => (uint)existingField.Data.Count,
+                DatFieldFormat.Uint16 => (uint)existingField.Data.Count / 2,
+                DatFieldFormat.Uint32 => (uint)existingField.Data.Count / 4,
+                DatFieldFormat.Uint64 => (uint)existingField.Data.Count / 8,
+                _ => throw new Exception($"Invalid format in list field"),
+            };
+            AddZeroFieldWithEntryCount(fieldId, format, entryCount);
+            for (uint i = 0; i < entryCount; i++) {
+                SetFieldUint(i, fieldId, defaultValue);
+            }
         }
 
         public override bool Equals(object? obj)

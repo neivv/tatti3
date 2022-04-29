@@ -27,12 +27,13 @@
                 <GroupBox.Header>
                     <TextBlock Text="Properties" />
                 </GroupBox.Header>
-                <local:StatGroup LabelWidth="70">
+                <local:StatGroup LabelWidth="100">
                     <local:EnumStat x:Name="effectStat" Text="Effect" FieldId="0x16" DropdownWidth="180"/>
                     <local:IntStat Text="Min Level" FieldId="0x17"/>
                     <local:IntStat Text="Max Level" FieldId="0x18"/>
                     <local:DatRefStat Text="Unit" Dat="Units" FieldId="0x19" DropdownWidth="180"/>
-                    <local:UpgradeValueStat x:Name="valueStat" />
+                    <local:UpgradeValueStat x:Name="valueStat" FieldId="0x1a"/>
+                    <local:UpgradeValueStat x:Name="valueStat2" FieldId="0x1b"/>
                 </local:StatGroup>
             </GroupBox>
         </local:ListFieldEdit.EditControl>
@@ -41,6 +42,7 @@
                 <sys:UInt32>0</sys:UInt32>
                 <sys:UInt32>1</sys:UInt32>
                 <sys:UInt32>255</sys:UInt32>
+                <sys:UInt32>0</sys:UInt32>
                 <sys:UInt32>0</sys:UInt32>
                 <sys:UInt32>0</sys:UInt32>
             </x:Array>

@@ -148,6 +148,45 @@ namespace Tatti3.GameData
                     });
                 }
             }
+            // Upgrade effect stat 2
+            if (!Upgrades.HasField(0x1b))
+            {
+                Upgrades.AddListField(0x14, 0x1b, DatFieldFormat.Uint32, 0);
+                // Attack/sight range upgrades
+                var defaultValues = new (uint, uint, uint, uint, uint, uint)[] {
+                    (0x10, 0x00, 2, 0x20, 0x82, 1),
+                    (0x1e, 0x26, 2, 0x20, 0x82, 1),
+                    (0x21, 0x42, 2, 0x40, 0x82, 1),
+                    (0x21, 0x4e, 2, 0x40, 0x82, 0),
+                    (0x36, 0x3, 2, 0x60, 0x8, 1),
+                    (0x36, 0x4, 2, 0x60, 0x8, 1),
+                    (0x36, 0x11, 2, 0x60, 0xa, 0),
+                    (0x36, 0x12, 2, 0x60, 0xa, 0),
+                    (0x14, 0x1, 3, 0, 0, 1),
+                    (0x19, 0x2a, 3, 0, 0, 1),
+                    (0x26, 0x54, 3, 0, 0, 1),
+                    (0x29, 0x46, 3, 0, 0, 1),
+                };
+                foreach (var (upgrade, unit, type, val_, weapon, level) in defaultValues)
+                {
+                    var old = Upgrades.GetListRaw(upgrade, 0x14);
+                    uint val = val_;
+                    if (type == 3)
+                    {
+                        // Sight range upgrade was hardcoded to set sight to 0xb,
+                        // have it offset by whatever makes it work
+                        val = 0xb - Units.GetFieldUint(unit, 0x18);
+                    }
+                    Upgrades.SetListRaw(upgrade, 0x14, new uint[][] {
+                        ArrayPush(old[0], type),
+                        ArrayPush(old[1], level),
+                        ArrayPush(old[2], 255),
+                        ArrayPush(old[3], unit),
+                        ArrayPush(old[4], val),
+                        ArrayPush(old[5], weapon),
+                    });
+                }
+            }
             TechData = LoadDatTable(Path.Join(root, "arr/techdata.dat"), LegacyDatDecl.TechData, firegraft);
             if (!TechData.HasField(0x12))
             {
