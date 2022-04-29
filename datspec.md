@@ -362,9 +362,9 @@ Units.dat:
 Ugprades.dat:
 - 0x10 Req buffer
     `Dat requirement buffer`.
-- 0x12 (offset), 0x13 (length) Attached units
+- 0x11 (offset), 0x12 (length) Attached units
     `Variable length list`. Contains units that transfer this upgrade when given to another player
-    * 0x14 Unit list
+    * 0x13 Unit list
 - 0x14 (offset), 0x15 (length) Extended effects
     `Variable length list`. Various effects that are softcoded.
     * 0x16 Effect type

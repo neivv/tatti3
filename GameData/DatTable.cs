@@ -730,6 +730,11 @@ namespace Tatti3.GameData
             }
         }
 
+        public bool IsListField(uint fieldId)
+        {
+            return listFields.ContainsKey(fieldId);
+        }
+
         public List<Requirement> GetRequirements(uint index, uint fieldId)
         {
             var raw = GetListRaw(index, fieldId)[0];

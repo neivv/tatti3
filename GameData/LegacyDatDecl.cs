@@ -453,6 +453,9 @@ namespace Tatti3.GameData
                     RefFields = new RefField[] {
                         MakeRefField(ArrayFileType.CmdIcon, 0x07),
                         MakeRefField(ArrayFileType.StatTxt, 0x08),
+                        MakeRefField(ArrayFileType.Units, 0x11),
+                        MakeRefField(ArrayFileType.Units, 0x14),
+                        MakeRefField(ArrayFileType.Weapons, 0x14),
                     },
                     ListFields = new ListField[] {
                         new ListField(0x06, new uint[] { 0x10 }, U32Code("UpgR"), 0),
@@ -500,6 +503,7 @@ namespace Tatti3.GameData
                     RefFields = new RefField[] {
                         MakeRefField(ArrayFileType.CmdIcon, 0x06),
                         MakeRefField(ArrayFileType.StatTxt, 0x07),
+                        MakeRefField(ArrayFileType.Units, 0x12),
                     },
                     ListFields = new ListField[] {
                         new ListField(0x04, new uint[] { 0x10 }, U32Code("TecR"), 0),

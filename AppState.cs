@@ -1139,14 +1139,46 @@ namespace Tatti3
                                 // also (Buttons) xxx etc
                                 if (!dat.IsInvalidIndex(i) || type == ArrayFileType.Buttons)
                                 {
-                                    var fieldVal = dat.GetFieldUint(i, field);
-                                    if (fieldVal < (uint)entries.Count)
+                                    if (dat.IsListField(field))
                                     {
-                                        if (!refField.ZeroIsNone || fieldVal != 0)
+                                        var list = dat.GetListRaw(i, field);
+                                        // Assuming [0] is the relevant one expect for upgrade
+                                        // effects.
+                                        if (field == 0x14 && otherType == ArrayFileType.Upgrades)
                                         {
-                                            var tuple = (otherType, i);
-                                            entries[(int)fieldVal].Set.Add(tuple);
+                                            if (type == ArrayFileType.Units)
+                                            {
+                                                foreach (uint fieldVal in list[3])
+                                                {
+                                                    AddToBackRefs(entries, fieldVal, (otherType, i), refField);
+                                                }
+                                            }
+                                            else if (type == ArrayFileType.Weapons)
+                                            {
+                                                var effects = list[0];
+                                                var value2 = list[5];
+                                                for (int j = 0; j < effects.Length; j++)
+                                                {
+                                                    if (effects[j] == 2 && value2[j] != WeaponNoneEntry)
+                                                    {
+                                                        AddToBackRefs(entries, value2[j], (otherType, i), refField);
+                                                    }
+                                                }
+                                            }
                                         }
+                                        else
+                                        {
+                                            foreach (uint fieldVal in list[0])
+                                            {
+                                                AddToBackRefs(entries, fieldVal, (otherType, i), refField);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Not list field, more straightforward.
+                                        var fieldVal = dat.GetFieldUint(i, field);
+                                        AddToBackRefs(entries, fieldVal, (otherType, i), refField);
                                     }
                                 }
                             }
@@ -1173,6 +1205,22 @@ namespace Tatti3
             backRefChangeHandlersAdded.Add(type);
             backRefs[type] = entries;
             return entries;
+        }
+
+        // Helper for BackRefs() building
+        void AddToBackRefs(
+            List<BackRef> entries,
+            uint fieldVal,
+            (ArrayFileType, uint) tuple,
+            GameData.RefField refField
+        ) {
+            if (fieldVal < (uint)entries.Count)
+            {
+                if (!refField.ZeroIsNone || fieldVal != 0)
+                {
+                    entries[(int)fieldVal].Set.Add(tuple);
+                }
+            }
         }
 
         // Expected to be called whenever the active tab is being changed
