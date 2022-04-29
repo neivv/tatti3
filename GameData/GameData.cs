@@ -250,6 +250,16 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(i, 0x18, 1);
                 }
             }
+            if (Units.Version < 5)
+            {
+                // No cloak aggression
+                var ghosts = new uint[] { 0x1, 0x10, 0x64, 0x63, 0x68 };
+                foreach (var unit in ghosts)
+                {
+                    var old = Units.GetFieldUint(unit, 0x47);
+                    Units.SetFieldUint(unit, 0x47, old | 0x2);
+                }
+            }
             Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);

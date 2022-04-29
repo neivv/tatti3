@@ -497,6 +497,22 @@
                                 </local:IntStat>
                             </local:StatGroup>
                         </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Cloak Properties" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="90">
+                                <local:BoolStat Text="No Aggression" FieldId="0x47:0x2">
+                                    <local:BoolStat.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock>
+    The unit will not pick targets when cloaked unless told to Hold Position.
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </local:BoolStat.ToolTip>
+                                </local:BoolStat>
+                            </local:StatGroup>
+                        </GroupBox>
                     </DockPanel>
                 </Grid>
             </TabItem>

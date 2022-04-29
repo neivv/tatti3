@@ -54,6 +54,9 @@ some default values that the user can edit afterwards.
     disabled.
 - V3 Fixes place addon req from "Is Landed building" to "Has no Addon"
     (Lifted off buildings couldn't build addons)
+- V4 Changes reserved unit ids to use 0xe4 for subunit 1/2/infestation, sight to 1,
+    orders to 23, weapons to 130.
+- V5 Adds No cloak aggression ext unit flag to ghost units
 
 # Field flags
 
@@ -348,7 +351,9 @@ Units.dat:
     `Single integer`. Automatic speed multiplier that BW had hardcoded for some units.
     In 1024-fixedpoint - 512 is 50% bonus, 256 is 25% etc.
 - 0x47 Ext flags
-    `Single integer`. 0x1 = Attack speed upgrade, other may be used in future.
+    `Single integer`.
+    * 0x1 = Attack speed upgrade
+    * 0x2 = No cloak aggression
 - 0x48 Turret max angle
     `Single integer`. Used to prevent goliath turrets from going to far from parent unit's angle.
 

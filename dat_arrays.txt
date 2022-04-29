@@ -38,3 +38,4 @@ version 3 -- Fixes place addon req from "Is Landed building" to "Has no Addon"
     (Lifted off buildings couldn't build addons)
 version 4 -- changes reserved unit ids to use 0xe4 for subunit 1/2/infestation, sight to 1,
     orders to 23, weapons to 130.
+version 5 -- No cloak aggro for ghosts
