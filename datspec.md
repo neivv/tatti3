@@ -356,6 +356,8 @@ Units.dat:
     * 0x2 = No cloak aggression
 - 0x48 Turret max angle
     `Single integer`. Used to prevent goliath turrets from going to far from parent unit's angle.
+- 0x49 Bunker range bonus
+    `Single integer`. Bonus range the unit gains when in a Bunker.
 
 Ugprades.dat:
 - 0x10 Req buffer

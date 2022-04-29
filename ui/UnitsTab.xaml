@@ -484,7 +484,7 @@
                             <GroupBox.Header>
                                 <TextBlock Text="Turret Properties" />
                             </GroupBox.Header>
-                            <local:StatGroup>
+                            <local:StatGroup LabelWidth="120">
                                 <local:IntStat Text="Max Angle" FieldId="0x48">
                                     <local:IntStat.ToolTip>
                                         <ToolTip>
@@ -501,16 +501,33 @@
                             <GroupBox.Header>
                                 <TextBlock Text="Cloak Properties" />
                             </GroupBox.Header>
-                            <local:StatGroup LabelWidth="90">
+                            <local:StatGroup LabelWidth="120">
                                 <local:BoolStat Text="No Aggression" FieldId="0x47:0x2">
                                     <local:BoolStat.ToolTip>
                                         <ToolTip>
                                             <TextBlock>
-    The unit will not pick targets when cloaked unless told to Hold Position.
+    Makes the unit not pick targets when cloaked, unless it is told to Hold Position.
                                             </TextBlock>
                                         </ToolTip>
                                     </local:BoolStat.ToolTip>
                                 </local:BoolStat>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Attack Properties" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="120">
+                                <local:IntStat Text="Bunker Range Bonus" FieldId="0x49" Signed="True">
+                                    <local:IntStat.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock>
+    Additional range the unit gains when inside a Bunker.<LineBreak />
+    May be set to negative to reduce the range.
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </local:IntStat.ToolTip>
+                                </local:IntStat>
                             </local:StatGroup>
                         </GroupBox>
                     </DockPanel>

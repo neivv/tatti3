@@ -90,6 +90,15 @@ namespace Tatti3.GameData
                 Units.SetFieldUint(0x4, 0x48, 32);
                 Units.SetFieldUint(0x12, 0x48, 32);
             }
+            // Bunker range bonus
+            if (!Units.HasField(0x49))
+            {
+                Units.AddZeroField(0x49, DatFieldFormat.Uint16);
+                for (uint i = 0; i < Units.Entries; i++)
+                {
+                    Units.SetFieldUint(i, 0x49, 0x40);
+                }
+            }
             Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
             Upgrades =
                 LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);
