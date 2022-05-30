@@ -286,8 +286,13 @@ namespace Tatti3
                 return;
             }
             var names = state.IndexPrefixedArrayFileNames(state.CurrentDat);
+            if (names.Count == 0)
+            {
+                return;
+            }
+
             int startIndex = entryList.SelectedIndex;
-            if (startIndex < 0)
+            if (startIndex < 0 || startIndex >= names.Count)
             {
                 startIndex = 0;
             }
@@ -306,13 +311,13 @@ namespace Tatti3
                 }
                 i += 1;
                 // Skip past disabled names and loop back to 0
-                while (true)
+                while (i != startIndex)
                 {
                     if (i >= names.Count)
                     {
                         i = 0;
                     }
-                    if (!names[i].Enabled)
+                    else if (!names[i].Enabled)
                     {
                         i += 1;
                     }
