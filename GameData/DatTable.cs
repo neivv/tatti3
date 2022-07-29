@@ -868,12 +868,16 @@ namespace Tatti3.GameData
             fields[fieldId] = new DatValue(data, format, 1);
         }
 
-        /// Adds new list field to an existing list.
+        /// Adds new list field to an existing list, if it wasn't added yet.
         ///
         /// Should be only called before the dat has been mutated at all, and the list
         /// must already have existed.
         public void AddListField(uint listId, uint fieldId, DatFieldFormat format, uint defaultValue)
         {
+            if (fields.ContainsKey(fieldId))
+            {
+                return;
+            }
             var listField = listFields[listId];
             var existingField = fields[listField.DataFieldIds[0]];
             var entryCount = existingField.DataFormat switch

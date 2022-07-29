@@ -17,9 +17,9 @@ namespace Tatti3.GameData
     // (That is, it's a helper for the load function, not something that is kept alive after load)
     class FiregraftData
     {
-        public FiregraftData(string root)
+        public FiregraftData(IFilesystem fsys)
         {
-            this.root = root;
+            this.fsys = fsys;
             this.data = Array.Empty<byte>();
         }
 
@@ -222,25 +222,23 @@ namespace Tatti3.GameData
             // 3) Embedded default resource
             try
             {
-                var path = Path.Join(root, "samase/firegraft.fgp");
-                return File.OpenRead(path);
+                return fsys.OpenFile("samase/firegraft.fgp");
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) {}
-            var firegraftDir = Path.Join(root, "Firegraft");
-            if (Directory.Exists(firegraftDir))
+            if (fsys.DirectoryExists("Firegraft"))
             {
-                var file = Directory.EnumerateFiles(firegraftDir, "*.fgp")
+                var file = fsys.EnumerateFiles("Firegraft", "*.fgp")
                     .FirstOrDefault();
                 if (file != null)
                 {
-                    return File.OpenRead(file);
+                    return fsys.OpenFile(file);
                 }
             }
 
             return new MemoryStream(Properties.Resources.firegraft_default_fgp);
         }
 
-        string root;
+        IFilesystem fsys;
         byte[] data;
         List<Section> sections = new List<Section>();
 

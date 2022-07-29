@@ -12,14 +12,14 @@ namespace Tatti3.GameData
 {
     class GameData
     {
-        GameData(string root)
+        GameData(string root) : this(new OsFilesystem(root))
         {
-            if (!Directory.Exists(root))
-            {
-                throw new DirectoryNotFoundException(root);
-            }
-            var firegraft = new FiregraftData(root);
-            Units = LoadDatTable(Path.Join(root, "arr/units.dat"), LegacyDatDecl.Units, firegraft);
+        }
+
+        GameData(IFilesystem fsys)
+        {
+            var firegraft = new FiregraftData(fsys);
+            Units = LoadDatTable(fsys, "arr/units.dat", LegacyDatDecl.Units, firegraft);
             // Wireframe mode, wireframe ID
             if (!Units.HasField(0x41))
             {
@@ -99,9 +99,8 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(i, 0x49, 0x40);
                 }
             }
-            Weapons = LoadDatTable(Path.Join(root, "arr/weapons.dat"), LegacyDatDecl.Weapons, firegraft);
-            Upgrades =
-                LoadDatTable(Path.Join(root, "arr/upgrades.dat"), LegacyDatDecl.Upgrades, firegraft);
+            Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);
+            Upgrades = LoadDatTable(fsys, "arr/upgrades.dat", LegacyDatDecl.Upgrades, firegraft);
             // Attached units
             if (!Upgrades.HasField(0x11))
             {
@@ -122,8 +121,11 @@ namespace Tatti3.GameData
                     Upgrades.SetListRaw(upgrade, 0x11, new uint[][] { new uint[]{ unit }});
                 }
             }
+            bool hasEffect1 = Upgrades.HasField(0x14);
+            // This has to be read first since effect1 adds 0x1b too.
+            bool hasEffect2 = Upgrades.HasField(0x1b);
             // Upgrade Effects
-            if (!Upgrades.HasField(0x14))
+            if (!hasEffect1)
             {
                 Upgrades.AddZeroField(0x14, DatFieldFormat.Uint16);
                 Upgrades.AddZeroField(0x15, DatFieldFormat.Uint16);
@@ -132,6 +134,9 @@ namespace Tatti3.GameData
                 Upgrades.AddField(0x18, DatFieldFormat.Uint8, new List<byte>());
                 Upgrades.AddField(0x19, DatFieldFormat.Uint16, new List<byte>());
                 Upgrades.AddField(0x1a, DatFieldFormat.Uint32, new List<byte>());
+                // Effect 2, will also be added with AddListField
+                // below if hasEffect1 was true but hasEffect2 false
+                Upgrades.AddField(0x1b, DatFieldFormat.Uint32, new List<byte>());
                 var defaultValues = new (uint, uint, uint, uint)[] {
                     (0x11, 0x02, 0x00, 512),
                     (0x11, 0x13, 0x00, 512),
@@ -154,11 +159,12 @@ namespace Tatti3.GameData
                         ArrayPush(old[2], 255),
                         ArrayPush(old[3], unit),
                         ArrayPush(old[4], val),
+                        ArrayPush(old[5], 0),
                     });
                 }
             }
             // Upgrade effect stat 2
-            if (!Upgrades.HasField(0x1b))
+            if (!hasEffect2)
             {
                 Upgrades.AddListField(0x14, 0x1b, DatFieldFormat.Uint32, 0);
                 // Attack/sight range upgrades
@@ -196,7 +202,7 @@ namespace Tatti3.GameData
                     });
                 }
             }
-            TechData = LoadDatTable(Path.Join(root, "arr/techdata.dat"), LegacyDatDecl.TechData, firegraft);
+            TechData = LoadDatTable(fsys, "arr/techdata.dat", LegacyDatDecl.TechData, firegraft);
             if (!TechData.HasField(0x12))
             {
                 TechData.AddZeroField(0x12, DatFieldFormat.Uint16);
@@ -219,11 +225,11 @@ namespace Tatti3.GameData
                 TechData.SetListRaw(0x0b, 0x12, new uint[][] { new uint[]{ 0x25, 0x26, 0x29, 0x2e, 0x32 }});
                 TechData.SetListRaw(0x20, 0x12, new uint[][] { new uint[]{ 0x26, 0x67 }});
             }
-            Flingy = LoadDatTable(Path.Join(root, "arr/flingy.dat"), LegacyDatDecl.Flingy, firegraft);
-            Sprites = LoadDatTable(Path.Join(root, "arr/sprites.dat"), LegacyDatDecl.Sprites, firegraft);
-            Images = LoadDatTable(Path.Join(root, "arr/images.dat"), LegacyDatDecl.Images, firegraft);
-            PortData = LoadDatTable(Path.Join(root, "arr/portdata.dat"), LegacyDatDecl.PortData, firegraft);
-            Orders = LoadDatTable(Path.Join(root, "arr/orders.dat"), LegacyDatDecl.Orders, firegraft);
+            Flingy = LoadDatTable(fsys, "arr/flingy.dat", LegacyDatDecl.Flingy, firegraft);
+            Sprites = LoadDatTable(fsys, "arr/sprites.dat", LegacyDatDecl.Sprites, firegraft);
+            Images = LoadDatTable(fsys, "arr/images.dat", LegacyDatDecl.Images, firegraft);
+            PortData = LoadDatTable(fsys, "arr/portdata.dat", LegacyDatDecl.PortData, firegraft);
+            Orders = LoadDatTable(fsys, "arr/orders.dat", LegacyDatDecl.Orders, firegraft);
             if (Orders.Version < 2)
             {
                 // Dummy reqs
@@ -269,13 +275,14 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(unit, 0x47, old | 0x2);
                 }
             }
-            Buttons = LoadButtons(Path.Join(root, "arr/buttons.dat"), LegacyDatDecl.Buttons, Units, firegraft);
-            StatTxt = LoadStringTable(Path.Join(root, "rez/stat_txt"), Properties.Resources.rez_stat_txt_json);
-            ImagesTbl = LoadTbl(Path.Join(root, "arr/images.tbl"), Properties.Resources.arr_images_tbl);
-            PortDataTbl = LoadTbl(Path.Join(root, "arr/portdata.tbl"), Properties.Resources.arr_portdata_tbl);
-            Sfx = LoadSfx(Path.Join(root, "rez/sfx.json"), Properties.Resources.rez_sfx_json);
+            Buttons = LoadButtons(fsys, "arr/buttons.dat", LegacyDatDecl.Buttons, Units, firegraft);
+            StatTxt = LoadStringTable(fsys, "rez/stat_txt", Properties.Resources.rez_stat_txt_json);
+            ImagesTbl = LoadTbl(fsys, "arr/images.tbl", Properties.Resources.arr_images_tbl);
+            PortDataTbl = LoadTbl(fsys, "arr/portdata.tbl", Properties.Resources.arr_portdata_tbl);
+            Sfx = LoadSfx(fsys, "rez/sfx.json", Properties.Resources.rez_sfx_json);
             CmdIcons = LoadDdsGrp(
-                Path.Join(root, "HD2/unit/cmdicons/cmdicons.dds.grp"),
+                fsys,
+                "HD2/unit/cmdicons/cmdicons.dds.grp",
                 Properties.Resources.cmdicons_dds_grp
             );
             // Widen some arrays to 32bit
@@ -313,6 +320,11 @@ namespace Tatti3.GameData
             return new GameData(root);
         }
 
+        public static GameData Open(IFilesystem root)
+        {
+            return new GameData(root);
+        }
+
         public void Save(string root)
         {
             var arrDir = Path.Join(root, "arr");
@@ -345,12 +357,16 @@ namespace Tatti3.GameData
             }
         }
 
-        static DatTable LoadDatTable(string path, LegacyDatDecl legacyDecl, FiregraftData firegraft)
-        {
+        static DatTable LoadDatTable(
+            IFilesystem fsys,
+            string path,
+            LegacyDatDecl legacyDecl,
+            FiregraftData firegraft
+        ) {
             DatTable table;
             try
             {
-                using var file = File.OpenRead(path);
+                using var file = fsys.OpenFile(path);
                 if (file.Length == legacyDecl.FileSize)
                 {
                     table = DatTable.LoadLegacy(file, legacyDecl);
@@ -374,6 +390,7 @@ namespace Tatti3.GameData
         }
 
         static DatTable LoadButtons(
+            IFilesystem fsys,
             string path,
             LegacyDatDecl legacyDecl,
             DatTable units,
@@ -385,7 +402,7 @@ namespace Tatti3.GameData
             DatTable table;
             try
             {
-                using var file = File.OpenRead(path);
+                using var file = fsys.OpenFile(path);
                 table = DatTable.LoadNew(file, legacyDecl);
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
@@ -541,17 +558,17 @@ namespace Tatti3.GameData
         }
 
         /// Path must be without extension. Tries both json/xml
-        static StringTable LoadStringTable(string path, byte[] defaultFile)
+        static StringTable LoadStringTable(IFilesystem fsys, string path, byte[] defaultFile)
         {
             try
             {
-                using var file = File.OpenRead($"{path}.json");
+                using var file = fsys.OpenFile($"{path}.json");
                 return StringTable.FromJson(file);
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
             try
             {
-                using var file = File.OpenRead($"{path}.xml");
+                using var file = fsys.OpenFile($"{path}.xml");
                 return StringTable.FromXml(file);
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
@@ -559,11 +576,11 @@ namespace Tatti3.GameData
             return StringTable.FromJson(stream);
         }
 
-        static StringTable LoadTbl(string path, byte[] defaultFile)
+        static StringTable LoadTbl(IFilesystem fsys, string path, byte[] defaultFile)
         {
             try
             {
-                using var file = File.OpenRead(path);
+                using var file = fsys.OpenFile(path);
                 return StringTable.FromTbl(file);
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
@@ -571,11 +588,11 @@ namespace Tatti3.GameData
             return StringTable.FromTbl(stream);
         }
 
-        static SfxData LoadSfx(string path, byte[] defaultFile)
+        static SfxData LoadSfx(IFilesystem fsys, string path, byte[] defaultFile)
         {
             try
             {
-                using var file = File.OpenRead(path);
+                using var file = fsys.OpenFile(path);
                 return SfxData.FromJson(file);
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
@@ -584,11 +601,11 @@ namespace Tatti3.GameData
         }
 
         /// File will be kept open as it is lazily read.
-        static DdsGrp LoadDdsGrp(string path, byte[] defaultFile)
+        static DdsGrp LoadDdsGrp(IFilesystem fsys, string path, byte[] defaultFile)
         {
             try
             {
-                var file = File.OpenRead(path);
+                var file = fsys.OpenFile(path);
                 return new DdsGrp(file);
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException) { }
