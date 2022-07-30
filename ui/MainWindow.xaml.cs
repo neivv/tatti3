@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 using ArrayFileType = Tatti3.GameData.ArrayFileType;
 
@@ -34,27 +34,13 @@ namespace Tatti3
             var args = Environment.GetCommandLineArgs();
             GameData.GameData? gameData = null;
             Title = "Dat editing thing";
+            this.state = new AppState(gameData);
+            this.DataContext = state;
+            InitializeComponent();
             if (args.Length > 1)
             {
-                try
-                {
-                    gameData = GameData.GameData.Open(args[1]);
-                    Opened(args[1]);
-                }
-                catch (Exception e)
-                {
-                    gameData = null;
-                    MessageBox.Show(this, FormatException(e), "Opening data files failed");
-                }
+                this.OpenDat(args[1]);
             }
-            this.state = new AppState(gameData);
-            UpdateTitle();
-            foreach ((var type, var dat) in this.state.IterDats())
-            {
-                dat.FieldChanged += (obj, e) => this.UpdateTitle();
-            }
-            InitializeComponent();
-            this.DataContext = state;
             this.rootTab.SelectionChanged += (e, args) => {
                 // Tab selection events get sent a lot more often than just when the user
                 // changes tab??
@@ -121,6 +107,28 @@ namespace Tatti3
                 System.Runtime.InteropServices.Marshal.CleanupUnusedObjectsInCurrentContext();
             };
             rootTab.SelectedIndex = 0;
+        }
+
+        void OpenDat(string path)
+        {
+            GameData.GameData? gameData = null;
+            try
+            {
+                gameData = GameData.GameData.Open(path);
+            }
+            catch (Exception e)
+            {
+                gameData = null;
+                MessageBox.Show(this, FormatException(e), "Opening data files failed");
+            }
+            Opened(path);
+            this.state = new AppState(gameData);
+            this.DataContext = this.state;
+            UpdateTitle();
+            foreach ((var type, var dat) in this.state.IterDats())
+            {
+                dat.FieldChanged += (obj, e) => this.UpdateTitle();
+            }
         }
 
         void GotoBackRef(object sender, MouseButtonEventArgs e)
@@ -331,11 +339,36 @@ namespace Tatti3
 
         void OpenCmdExecuted(object target, ExecutedRoutedEventArgs e)
         {
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = ".dat files|*.dat";
+            dialog.Title = "Select one of the .dat files (all will be opened)";
+            bool? result = dialog.ShowDialog();
+            if (result == true)
+            {
+                string path = dialog.FileName;
+                string? parent = Path.GetDirectoryName(path);
+                if (parent == null)
+                {
+                    return;
+                }
+                string? parentDir = Path.GetFileName(parent);
+                if (parentDir == null || parentDir.ToLowerInvariant() != "arr")
+                {
+                    MessageBox.Show(this, "This program can only open dat files in arr/ subdirectory of a mod", "Invalid path");
+                } else
+                {
+                    string? root = Path.GetDirectoryName(parent);
+                    if (root != null)
+                    {
+                        OpenDat(root);
+                    }
+                }
+            }
         }
 
         void OpenCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = false;
+            e.CanExecute = true;
         }
 
         void SaveCmdExecuted(object target, ExecutedRoutedEventArgs e)
