@@ -237,6 +237,7 @@ namespace Tatti3
             OpcodeNames.Add((0xff23, "Always blank"));
             OpcodeNames.Add((0xff24, "Is Brood War"));
             OpcodeNames.Add((0xff25, "Tech [...] is researched"));
+            OpcodeNames.Add((0xff41, "Tech [...] is not researched"));
             OpcodeNames.Add((0xff26, "Is burrowed"));
             OpcodeNames.Add((0xff40, "Has less than [..] units (Including incomplete)"));
             foreach ((var op, var text) in OpcodeNames)
@@ -452,6 +453,11 @@ namespace Tatti3
                     result.Add(Text(" "));
                     result.Add(DatRef(ArrayFileType.Units, 0));
                     result.Add(Text(" (Including incomplete)"));
+                    break;
+                case 0xff41:
+                    result.Add(Text("Tech "));
+                    result.Add(DatRef(ArrayFileType.TechData, 0));
+                    result.Add(Text(" is not researched"));
                     break;
                 case 0xffff:
                     result.Add(Text("-- End --"));

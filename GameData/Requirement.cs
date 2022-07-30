@@ -65,7 +65,7 @@ namespace Tatti3.GameData
         {
             return opcode switch
             {
-                0xff02 or 0xff03 or 0xff04 or 0xff25 => 1,
+                0xff02 or 0xff03 or 0xff04 or 0xff25 or 0xff41 => 1,
                 0xff40 => 2,
                 _ => 0,
             };

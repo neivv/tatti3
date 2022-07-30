@@ -393,6 +393,10 @@ Techdata.dat:
     `Variable length list`. Contains units that transfer this tech when given to another player
     * 0x14 unit list
 
+Orders.dat:
+- 0x20 req buffer
+    `Dat requirement buffer`.
+
 Buttons.dat:
 - 0x00 (offset), 0x01 (length) Buttons
     `Variable length list`. Contains buttons of a buttonset.
