@@ -57,6 +57,7 @@ some default values that the user can edit afterwards.
 - V4 Changes reserved unit ids to use 0xe4 for subunit 1/2/infestation, sight to 1,
     orders to 23, weapons to 130.
 - V5 Adds No cloak aggression ext unit flag to ghost units
+- V6 Adds ext unit flags 0x18, 0x20
 
 # Field flags
 
@@ -354,10 +355,21 @@ Units.dat:
     `Single integer`.
     * 0x1 = Attack speed upgrade
     * 0x2 = No cloak aggression
+    * 0x4 = Alternate unit training string ("Opening warp gate" etc)
+    * 0x18 = Rank string bits
+        0x0 = Default (If terran, not building, not powerup)
+        0x1 = Show alt rank if UMS didn't rename unit
+        0x2 = Show alt rank if UMS did rename unit
+        0x3 = Always show alt rank
+    * 0x20 = Always hide kills (Scourge, Infested Terran)
 - 0x48 Turret max angle
     `Single integer`. Used to prevent goliath turrets from going to far from parent unit's angle.
 - 0x49 Bunker range bonus
     `Single integer`. Bonus range the unit gains when in a Bunker.
+- 0x4a Death timer
+    `Single integer` Death timer of unit. 10-fixedpoint.
+- 0x4b Alternate rank string
+    `Single integer` Normally set for some of carrier/bc heroes
 
 Ugprades.dat:
 - 0x10 Req buffer

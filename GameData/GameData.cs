@@ -99,6 +99,20 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(i, 0x49, 0x40);
                 }
             }
+            // Death timer
+            if (!Units.HasField(0x4a))
+            {
+                Units.AddZeroField(0x4a, DatFieldFormat.Uint16);
+                Units.SetFieldUint(0x28, 0x4a, 1800);
+            }
+            // Alt rank string
+            if (!Units.HasField(0x4b))
+            {
+                Units.AddZeroField(0x4b, DatFieldFormat.Uint16);
+                Units.SetFieldUint(0x52, 0x4b, 0x23c);
+                Units.SetFieldUint(0x1c, 0x4b, 0x23b);
+                Units.SetFieldUint(0x1d, 0x4b, 0x23b);
+            }
             Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);
             Upgrades = LoadDatTable(fsys, "arr/upgrades.dat", LegacyDatDecl.Upgrades, firegraft);
             // Attached units
@@ -274,6 +288,28 @@ namespace Tatti3.GameData
                     var old = Units.GetFieldUint(unit, 0x47);
                     Units.SetFieldUint(unit, 0x47, old | 0x2);
                 }
+            }
+            if (Units.Version < 6)
+            {
+                // Rank alt string bits
+                // Gantrithor: if not renamed
+                var old = Units.GetFieldUint(0x52, 0x47);
+                Units.SetFieldUint(0x52, 0x47, old | 0x8);
+                // Hyperion, Norad II: if renamed
+                old = Units.GetFieldUint(0x1c, 0x47);
+                Units.SetFieldUint(0x1c, 0x47, old | 0x10);
+                old = Units.GetFieldUint(0x1d, 0x47);
+                Units.SetFieldUint(0x1d, 0x47, old | 0x10);
+                // Civilian, Spider mine: Always (None)
+                old = Units.GetFieldUint(0x0f, 0x47);
+                Units.SetFieldUint(0x0f, 0x47, old | 0x18);
+                old = Units.GetFieldUint(0x0d, 0x47);
+                Units.SetFieldUint(0x0d, 0x47, old | 0x18);
+                // Hide kills: Scourge, Inf Terran
+                old = Units.GetFieldUint(0x2f, 0x47);
+                Units.SetFieldUint(0x2f, 0x47, old | 0x20);
+                old = Units.GetFieldUint(0x32, 0x47);
+                Units.SetFieldUint(0x32, 0x47, old | 0x20);
             }
             Buttons = LoadButtons(fsys, "arr/buttons.dat", LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(fsys, "rez/stat_txt", Properties.Resources.rez_stat_txt_json);

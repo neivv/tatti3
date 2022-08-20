@@ -392,9 +392,15 @@
                             <GroupBox.Header>
                                 <TextBlock Text="String Properties" />
                             </GroupBox.Header>
-                            <local:StatGroup LabelWidth="100">
-                                <local:DatRefStat Text="Rank / Sublabel" Dat="StatTxtRank" FieldId="0xb" />
-                            </local:StatGroup>
+                            <StackPanel Orientation="Vertical">
+                                <local:StatGroup LabelWidth="100">
+                                    <local:DatRefStat Text="Rank / Sublabel" Dat="StatTxtRank" FieldId="0xb" />
+                                    <local:DatRefStat Text="Alternate Rank" Dat="StatTxt" FieldId="0x4b" />
+                                </local:StatGroup>
+                                <local:StatGroup Flags="true">
+                                    <local:BoolStat Text="Never Show Kills" FieldId="0x47:0x20"/>
+                                </local:StatGroup>
+                            </StackPanel>
                         </GroupBox>
                     </DockPanel>
                 </Grid>
@@ -527,6 +533,15 @@
                                             </TextBlock>
                                         </ToolTip>
                                     </local:IntStat.ToolTip>
+                                </local:IntStat>
+                            </local:StatGroup>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Other Properties" />
+                            </GroupBox.Header>
+                            <local:StatGroup LabelWidth="120">
+                                <local:IntStat Text="Death timer" FieldId="0x4a" Scale="10">
                                 </local:IntStat>
                             </local:StatGroup>
                         </GroupBox>
