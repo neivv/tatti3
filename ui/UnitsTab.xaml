@@ -396,6 +396,25 @@
                                 <local:StatGroup LabelWidth="100">
                                     <local:DatRefStat Text="Rank / Sublabel" Dat="StatTxtRank" FieldId="0xb" />
                                     <local:DatRefStat Text="Alternate Rank" Dat="StatTxt" FieldId="0x4b" />
+                                    <local:EnumStat Text="Rank Mode" FieldId="0x47:0x18" DropdownWidth="220">
+                                        <system:String>Default</system:String>
+                                        <system:String>Alt If Not Renamed</system:String>
+                                        <system:String>Alt If Renamed</system:String>
+                                        <system:String>Always Show Alternate</system:String>
+                                        <local:EnumStat.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock>
+        Determines when Rank / Alternate Rank string is shown.<LineBreak />
+        - Default: If Terran, not building, and not powerup.<LineBreak />
+        - Alt If Not Renamed: Uses Alternate Rank by default,
+            but if an UMS map renames the unit it'll switch to default mode.<LineBreak />
+        - Alt If Renamed: If an UMS map renames the unit it'll switch to alternate rank.<LineBreak />
+        - Always Show Alternate: Always show the Alternate Rank. Can be used to show rank on non-Terran units,
+            or hide the rank on Terran units.
+                                                </TextBlock>
+                                            </ToolTip>
+                                        </local:EnumStat.ToolTip>
+                                    </local:EnumStat>
                                 </local:StatGroup>
                                 <local:StatGroup Flags="true">
                                     <local:BoolStat Text="Never Show Kills" FieldId="0x47:0x20"/>

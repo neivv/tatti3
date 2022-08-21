@@ -19,7 +19,7 @@ namespace Tatti3
     /// </summary>
     public partial class BoolStat : UserControl, IStatControl
     {
-        [ValueConversion(typeof((uint, bool)), typeof(bool))]
+        [ValueConversion(typeof((uint, uint)), typeof(bool))]
         class BitConverter : IValueConverter
         {
             public BitConverter(uint mask)
@@ -33,7 +33,7 @@ namespace Tatti3
                 object parameter,
                 System.Globalization.CultureInfo culture
             ) {
-                var (bits, _) = ((uint, bool))value;
+                var (bits, _) = ((uint, uint))value;
                 return (bits & mask) == mask;
             }
 
@@ -43,7 +43,15 @@ namespace Tatti3
                 object parameter,
                 System.Globalization.CultureInfo culture
             ) {
-                return (mask, (bool)value);
+                bool set = (bool)value;
+                if (set)
+                {
+                    return (mask, mask);
+                }
+                else
+                {
+                    return (mask, 0U);
+                }
             }
 
             uint mask;

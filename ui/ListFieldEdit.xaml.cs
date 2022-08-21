@@ -406,6 +406,15 @@ namespace Tatti3
                 }
             }
 
+            public (uint, uint) ItemBits
+            {
+                get => throw new Exception("ItemBits not implemented for ListFieldEdit.FieldRef");
+                set
+                {
+                    throw new Exception("ItemBits not implemented for ListFieldEdit.FieldRef");
+                }
+            }
+
             public void Update()
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));

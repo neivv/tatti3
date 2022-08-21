@@ -116,17 +116,17 @@ namespace Tatti3
                     }
                 }
 
-                // Somewhat hacky, but getting gives the entire value and a dummy bool,
-                // setting must be either `(mask, true)` to set, or `(mask, false)` to clear
-                public (uint, bool) ItemBits
+                // Somewhat hacky, but getting gives the entire value and a dummy value,
+                // setting must be `(mask, new_value)`
+                public (uint, uint) ItemBits
                 {
-                    get => (item, true);
+                    get => (item, 0U);
                     set
                     {
                         if (parent.table != null)
                         {
-                            var bit = value.Item1;
-                            var combined = value.Item2 ? (bit | item) : (~bit & item);
+                            var mask = value.Item1;
+                            var combined = (mask & value.Item2) | (~mask & item);
                             if (item != combined)
                             {
                                 uint entryIndex = (uint)parent.entryIndex;

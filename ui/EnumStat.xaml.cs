@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Numerics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,9 +26,17 @@ namespace Tatti3
         [ValueConversion(typeof(int), typeof(int))]
         public class DropdownFilterInvalid<T> : IValueConverter
         {
-            public DropdownFilterInvalid(List<T> entries)
+            public DropdownFilterInvalid(List<T> entries, uint mask)
             {
                 this.entries = entries;
+                if (mask == UInt32.MaxValue)
+                {
+                    this.maskConverter = null;
+                }
+                else
+                {
+                    this.maskConverter = new MaskIntConverter(mask);
+                }
             }
 
             object? IValueConverter.Convert(
@@ -35,7 +45,15 @@ namespace Tatti3
                 object parameter,
                 System.Globalization.CultureInfo culture
             ) {
-                int val = (int)(uint)value;
+                int val = 0;
+                if (this.maskConverter != null)
+                {
+                    val = (int)(uint)(maskConverter.Convert(value, targetType, parameter, culture)!);
+                }
+                else
+                {
+                    val = (int)(uint)value;
+                }
                 if (val < 0 || val >= entries.Count)
                 {
                     return -1;
@@ -61,7 +79,14 @@ namespace Tatti3
                     }
                     else
                     {
-                        return val;
+                        if (this.maskConverter != null)
+                        {
+                            return maskConverter.ConvertBack((uint)val, targetType, parameter, culture);
+                        }
+                        else
+                        {
+                            return (uint)val;
+                        }
                     }
                 }
                 catch
@@ -71,6 +96,55 @@ namespace Tatti3
             }
 
             List<T> entries;
+            MaskIntConverter? maskConverter;
+        }
+
+        [ValueConversion(typeof((uint, uint)), typeof(UInt32))]
+        public class MaskIntConverter : IValueConverter
+        {
+            public MaskIntConverter(UInt32 mask)
+            {
+                this.mask = mask;
+            }
+
+            public object? Convert(
+                object value,
+                Type targetType,
+                object parameter,
+                System.Globalization.CultureInfo culture
+            ) {
+                var (val, _) = ((UInt32, uint))value;
+                if (mask != UInt32.MaxValue)
+                {
+                    int shift = BitOperations.TrailingZeroCount(mask);
+                    val = (val & mask) >> shift;
+                }
+                return val;
+            }
+
+            public object? ConvertBack(
+                object value,
+                Type targetType,
+                object parameter,
+                System.Globalization.CultureInfo culture
+            ) {
+                try
+                {
+                    UInt32 val = (UInt32)value;
+                    if (mask != UInt32.MaxValue)
+                    {
+                        int shift = BitOperations.TrailingZeroCount(mask);
+                        val = (val << shift) & mask;
+                    }
+                    return (mask, val);
+                }
+                catch
+                {
+                    return DependencyProperty.UnsetValue;
+                }
+            }
+
+            UInt32 mask;
         }
 
         public EnumStat()
@@ -90,13 +164,33 @@ namespace Tatti3
             }
         }
 
-        public uint FieldId
+        public string FieldId
         {
-            get => field;
             set
             {
-                field = value;
+                var tokens = value.Split(':');
+                field = ParseUint(tokens[0]);
+                if (tokens.Length > 1)
+                {
+                    mask = ParseUint(tokens[1]);
+                }
+                else
+                {
+                    mask = uint.MaxValue;
+                }
                 UpdateBinding();
+            }
+        }
+
+        static uint ParseUint(string val)
+        {
+            if (val.StartsWith("0x"))
+            {
+                return UInt32.Parse(val[2..], NumberStyles.HexNumber);
+            }
+            else
+            {
+                return UInt32.Parse(val);
             }
         }
 
@@ -110,22 +204,43 @@ namespace Tatti3
 
         void UpdateBinding()
         {
-            var path = $"Fields[{FieldId}].Item";
-            var binding = new Binding
+            if (mask == uint.MaxValue)
             {
-                Path = new PropertyPath(path),
-            };
-            var binding2 = new Binding
-            {
-                Path = new PropertyPath(path),
-                Converter = new DropdownFilterInvalid<string>(this.enumNames),
-            };
+                var path = $"Fields[{this.field}].Item";
+                var binding = new Binding
+                {
+                    Path = new PropertyPath(path),
+                };
+                var binding2 = new Binding
+                {
+                    Path = new PropertyPath(path),
+                    Converter = new DropdownFilterInvalid<string>(this.enumNames, this.mask),
+                };
 
-            BindingOperations.SetBinding(numeric, TextBox.TextProperty, binding);
-            BindingOperations.SetBinding(dropdown, ComboBox.SelectedIndexProperty, binding2);
+                BindingOperations.SetBinding(numeric, TextBox.TextProperty, binding);
+                BindingOperations.SetBinding(dropdown, ComboBox.SelectedIndexProperty, binding2);
+            }
+            else
+            {
+                var path = $"Fields[{this.field}].ItemBits";
+                var binding = new Binding
+                {
+                    Path = new PropertyPath(path),
+                    Converter = new MaskIntConverter(this.mask),
+                };
+                var binding2 = new Binding
+                {
+                    Path = new PropertyPath(path),
+                    Converter = new DropdownFilterInvalid<string>(this.enumNames, this.mask),
+                };
+
+                BindingOperations.SetBinding(numeric, TextBox.TextProperty, binding);
+                BindingOperations.SetBinding(dropdown, ComboBox.SelectedIndexProperty, binding2);
+            }
         }
 
         uint field = 0;
+        uint mask = 0;
 
         FrameworkElement IStatControl.LabelText
         {
