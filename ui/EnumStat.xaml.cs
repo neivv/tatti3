@@ -48,7 +48,7 @@ namespace Tatti3
                 int val = 0;
                 if (this.maskConverter != null)
                 {
-                    val = (int)(uint)(maskConverter.Convert(value, targetType, parameter, culture)!);
+                    val = (int)(maskConverter.Convert(value, targetType, parameter, culture)!);
                 }
                 else
                 {
@@ -81,7 +81,7 @@ namespace Tatti3
                     {
                         if (this.maskConverter != null)
                         {
-                            return maskConverter.ConvertBack((uint)val, targetType, parameter, culture);
+                            return maskConverter.ConvertBack($"{val}", targetType, parameter, culture);
                         }
                         else
                         {
@@ -119,7 +119,7 @@ namespace Tatti3
                     int shift = BitOperations.TrailingZeroCount(mask);
                     val = (val & mask) >> shift;
                 }
-                return val;
+                return (int)val;
             }
 
             public object? ConvertBack(
@@ -130,7 +130,7 @@ namespace Tatti3
             ) {
                 try
                 {
-                    UInt32 val = (UInt32)value;
+                    UInt32 val = ParseUint((string)value);
                     if (mask != UInt32.MaxValue)
                     {
                         int shift = BitOperations.TrailingZeroCount(mask);
