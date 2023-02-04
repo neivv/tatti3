@@ -326,9 +326,18 @@ namespace Tatti3
                         {
                             return;
                         }
+                        if (i >= this.currentParts.Count)
+                        {
+                            return;
+                        }
+                        var part = this.currentParts[i];
                         var data = (Requirement)this.RequirementData;
-                        dropdown.SelectedIndex =
-                            data.Opcode < 0xff00 ? data.Opcode : data.Params[paramIndex];
+                        var paramIndex = part.ParamIndex;
+                        if (data.Opcode < 0xff00) {
+                            dropdown.SelectedIndex = data.Opcode;
+                        } else if (paramIndex < data.Params.Length) {
+                            dropdown.SelectedIndex = data.Params[paramIndex];
+                        }
                     };
                     Binding.AddTargetUpdatedHandler(dropdown, UpdateDropdownIndex);
 
