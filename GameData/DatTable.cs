@@ -150,7 +150,7 @@ namespace Tatti3.GameData
             {
                 throw new InvalidDataException($"Invalid dat file version {major:02x}:{minor:02x}");
             }
-            if (minor > 6)
+            if (minor > CurrentMinorVersion)
             {
                 throw new InvalidDataException($"The dat appears to be saved with a newer version of this program");
             }
@@ -357,7 +357,7 @@ namespace Tatti3.GameData
             {
                 writer.WriteU32(0x2b746144);
                 writer.WriteU16(1);
-                writer.WriteU16(6);
+                writer.WriteU16(CurrentMinorVersion);
                 writer.WriteU32(Entries);
                 writer.WriteI32(fields.Count);
                 var fieldIds = new List<uint>(fields.Keys);
@@ -863,6 +863,57 @@ namespace Tatti3.GameData
             AddField(fieldId, format, data);
         }
 
+        public void AddFieldWithValueForAll(uint fieldId, uint value, DatFieldFormat format)
+        {
+            var stream = new MemoryStream();
+            using (var writer = new BinaryWriter(stream))
+            {
+                var entries = this.Entries;
+                switch (format)
+                {
+                    case DatFieldFormat.Uint8:
+                    {
+                        byte val = checked((byte)value);
+                        for (uint i = 0; i < entries; i++)
+                        {
+                            writer.WriteU8(val);
+                        }
+                        break;
+                    }
+                    case DatFieldFormat.Uint16:
+                    {
+                        UInt16 val = checked((UInt16)value);
+                        for (uint i = 0; i < entries; i++)
+                        {
+                            writer.WriteU16(val);
+                        }
+                        break;
+                    }
+                    case DatFieldFormat.Uint32:
+                    {
+                        for (uint i = 0; i < entries; i++)
+                        {
+                            writer.WriteU32(value);
+                        }
+                        break;
+                    }
+                    case DatFieldFormat.Uint64:
+                    {
+                        UInt64 val = checked((UInt64)value);
+                        for (uint i = 0; i < entries; i++)
+                        {
+                            writer.WriteU64(val);
+                        }
+                        break;
+                    }
+                    default:
+                        throw new Exception($"Invalid format for uint field ${format}");
+                }
+            }
+            var data = new List<byte>(stream.ToArray());
+            AddField(fieldId, format, data);
+        }
+
         public void AddField(uint fieldId, DatFieldFormat format, List<byte> data)
         {
             fields[fieldId] = new DatValue(data, format, 1);
@@ -1019,6 +1070,8 @@ namespace Tatti3.GameData
         uint invalidIndexStart;
         uint invalidIndexCount;
         LegacyDatDecl legacyDecl;
+
+        const UInt16 CurrentMinorVersion = 7;
 
         public static bool operator ==(DatTable? left, DatTable? right)
         {

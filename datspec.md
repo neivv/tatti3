@@ -45,7 +45,7 @@ Field: (0xc bytes)
 # Versions
 Major version should be 1. Plan is to increment if there are breaking changes in format (never)
 
-Minor version is currently 3. It gets incremented when the editor should automatically once write
+Minor version is currently 7. It gets incremented when the editor should automatically once write
 some default values that the user can edit afterwards.
 
 ## Minor version changes
@@ -58,6 +58,7 @@ some default values that the user can edit afterwards.
     orders to 23, weapons to 130.
 - V5 Adds No cloak aggression ext unit flag to ghost units
 - V6 Adds ext unit flags 0x18, 0x20
+- V7 Adds max energy upgrades
 
 # Field flags
 
@@ -370,6 +371,8 @@ Units.dat:
     `Single integer` Death timer of unit. 10-fixedpoint.
 - 0x4b Alternate rank string
     `Single integer` Normally set for some of carrier/bc heroes
+- 0x4c Max energy
+    `Single integer` Will not include the (50 * 256) bonus for heroes
 
 Ugprades.dat:
 - 0x10 Req buffer
@@ -385,6 +388,7 @@ Ugprades.dat:
         - 2 Attack range buff, value is signed integer for change in pixels.
             Value 2 is weapon ID or -1 for all weapons.
         - 3 Sight range buff, value is signed integer for change in tiles.
+        - 4 Max energy buff, value is signed integer for change.
     * 0x17 Min level
         Minimum level for which the effect applies
     * 0x18 Max level

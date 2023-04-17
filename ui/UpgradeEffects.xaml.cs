@@ -30,6 +30,7 @@ namespace Tatti3
                 "Increase Attack Speed",
                 "Modify Weapon Range",
                 "Modify Sight Range",
+                "Modify Max Energy",
             };
             foreach (var name in effectNames)
             {
@@ -121,6 +122,10 @@ namespace Tatti3
                     case 3:
                         intStat.Text = "Value (Tiles)";
                         break;
+                    case 4:
+                        scale = 256;
+                        intStat.Text = "Value";
+                        break;
                     default:
                         intStat.Text = "Value";
                         signed = false;
@@ -141,6 +146,7 @@ namespace Tatti3
                     case 0:
                     case 1:
                     case 3:
+                    case 4:
                         break;
                     case 2:
                         datRefStat.Dat = ArrayFileType.Weapons;

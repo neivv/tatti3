@@ -156,6 +156,25 @@
                                 </local:StatGroup>
                             </DockPanel>
                         </GroupBox>
+                        <GroupBox DockPanel.Dock="Left">
+                            <GroupBox.Header>
+                                <TextBlock Text="Energy" />
+                            </GroupBox.Header>
+                            <DockPanel>
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
+                                    <local:IntStat Text="Max Energy" FieldId="0x4c" Scale="256">
+                                        <local:IntStat.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock>
+        Does not include the +50 energy bonus for units with 'Hero' flag set.<LineBreak />
+        Energy is still limited by game to be less than 256.<LineBreak />
+                                                </TextBlock>
+                                            </ToolTip>
+                                        </local:IntStat.ToolTip>
+                                    </local:IntStat>
+                                </local:StatGroup>
+                            </DockPanel>
+                        </GroupBox>
                     </DockPanel>
                 </Grid>
             </TabItem>

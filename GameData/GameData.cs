@@ -113,6 +113,11 @@ namespace Tatti3.GameData
                 Units.SetFieldUint(0x1c, 0x4b, 0x23b);
                 Units.SetFieldUint(0x1d, 0x4b, 0x23b);
             }
+            // Max energy
+            if (!Units.HasField(0x4c))
+            {
+                Units.AddFieldWithValueForAll(0x4c, 256 * 200, DatFieldFormat.Uint32);
+            }
             Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);
             Upgrades = LoadDatTable(fsys, "arr/upgrades.dat", LegacyDatDecl.Upgrades, firegraft);
             // Attached units
@@ -213,6 +218,37 @@ namespace Tatti3.GameData
                         ArrayPush(old[3], unit),
                         ArrayPush(old[4], val),
                         ArrayPush(old[5], weapon),
+                    });
+                }
+            }
+            // Max energy upgrades
+            if (Upgrades.Version < 7)
+            {
+                var defaultValues = new (uint, uint)[] {
+                    (0x13, 0x09),
+                    (0x15, 0x01),
+                    (0x16, 0x08),
+                    (0x17, 0x0c),
+                    (0x1f, 0x2d),
+                    (0x20, 0x2e),
+                    (0x28, 0x43),
+                    (0x2c, 0x47),
+                    (0x2f, 0x3c),
+                    (0x31, 0x3f),
+                    (0x33, 0x22),
+                };
+                uint type = 4;
+                uint val = 50 * 256;
+                foreach (var (upgrade, unit) in defaultValues)
+                {
+                    var old = Upgrades.GetListRaw(upgrade, 0x14);
+                    Upgrades.SetListRaw(upgrade, 0x14, new uint[][] {
+                        ArrayPush(old[0], type),
+                        ArrayPush(old[1], 1),
+                        ArrayPush(old[2], 255),
+                        ArrayPush(old[3], unit),
+                        ArrayPush(old[4], val),
+                        ArrayPush(old[5], 0),
                     });
                 }
             }
