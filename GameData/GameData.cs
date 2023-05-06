@@ -279,6 +279,7 @@ namespace Tatti3.GameData
             Sprites = LoadDatTable(fsys, "arr/sprites.dat", LegacyDatDecl.Sprites, firegraft);
             Images = LoadDatTable(fsys, "arr/images.dat", LegacyDatDecl.Images, firegraft);
             PortData = LoadDatTable(fsys, "arr/portdata.dat", LegacyDatDecl.PortData, firegraft);
+            MapData = LoadDatTable(fsys, "arr/mapdata.dat", LegacyDatDecl.MapData, firegraft);
             Orders = LoadDatTable(fsys, "arr/orders.dat", LegacyDatDecl.Orders, firegraft);
             if (Orders.Version < 2)
             {
@@ -351,6 +352,7 @@ namespace Tatti3.GameData
             StatTxt = LoadStringTable(fsys, "rez/stat_txt", Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(fsys, "arr/images.tbl", Properties.Resources.arr_images_tbl);
             PortDataTbl = LoadTbl(fsys, "arr/portdata.tbl", Properties.Resources.arr_portdata_tbl);
+            MapDataTbl = LoadTbl(fsys, "arr/mapdata.tbl", Properties.Resources.arr_mapdata_tbl);
             Sfx = LoadSfx(fsys, "rez/sfx.json", Properties.Resources.rez_sfx_json);
             CmdIcons = LoadDdsGrp(
                 fsys,
@@ -377,6 +379,7 @@ namespace Tatti3.GameData
             Sprites = new DatTable(other.Sprites);
             Images = new DatTable(other.Images);
             PortData = new DatTable(other.PortData);
+            MapData = new DatTable(other.MapData);
             Orders = new DatTable(other.Orders);
             Buttons = new DatTable(other.Buttons);
             // Ok as long as this program doesn't support TBL editing
@@ -384,6 +387,7 @@ namespace Tatti3.GameData
             CmdIcons = other.CmdIcons;
             ImagesTbl = other.ImagesTbl;
             PortDataTbl = other.PortDataTbl;
+            MapDataTbl = other.MapDataTbl;
             Sfx = other.Sfx;
         }
 
@@ -411,6 +415,7 @@ namespace Tatti3.GameData
             SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
             SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
             SaveDatTable(tempFiles, PortData, Path.Join(root, "arr/portdata.dat"));
+            SaveDatTable(tempFiles, MapData, Path.Join(root, "arr/mapdata.dat"));
             SaveDatTable(tempFiles, Orders, Path.Join(root, "arr/orders.dat"));
             SaveDatTable(tempFiles, Buttons, Path.Join(root, "arr/buttons.dat"));
             tempFiles.Commit();
@@ -718,6 +723,7 @@ namespace Tatti3.GameData
                    EqualityComparer<DatTable>.Default.Equals(Sprites, data.Sprites) &&
                    EqualityComparer<DatTable>.Default.Equals(Images, data.Images) &&
                    EqualityComparer<DatTable>.Default.Equals(PortData, data.PortData) &&
+                   EqualityComparer<DatTable>.Default.Equals(MapData, data.MapData) &&
                    EqualityComparer<DatTable>.Default.Equals(Orders, data.Orders) &&
                    EqualityComparer<DatTable>.Default.Equals(Buttons, data.Buttons);
         }
@@ -726,7 +732,7 @@ namespace Tatti3.GameData
         {
             return HashCode.Combine(
                 HashCode.Combine(Units, Weapons, Upgrades, TechData, Flingy, Sprites, Images),
-                HashCode.Combine(Orders, Buttons, PortData)
+                HashCode.Combine(Orders, Buttons, PortData, MapData)
             );
         }
 
@@ -738,12 +744,14 @@ namespace Tatti3.GameData
         public DatTable Sprites { get; }
         public DatTable Images { get; }
         public DatTable PortData { get; }
+        public DatTable MapData { get; }
         public DatTable Orders { get; }
         public DatTable Buttons { get; }
         public StringTable StatTxt { get; }
         public DdsGrp CmdIcons { get; }
         public StringTable ImagesTbl { get; }
         public StringTable PortDataTbl { get; }
+        public StringTable MapDataTbl { get; }
         public SfxData Sfx { get; }
 
         public static bool operator ==(GameData? left, GameData? right)

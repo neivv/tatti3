@@ -564,6 +564,7 @@ namespace Tatti3
                 ArrayFileType.Upgrades => GameData?.Upgrades,
                 ArrayFileType.TechData => GameData?.TechData,
                 ArrayFileType.PortData => GameData?.PortData,
+                ArrayFileType.MapData => GameData?.MapData,
                 ArrayFileType.Orders => GameData?.Orders,
                 ArrayFileType.Buttons => GameData?.Buttons,
                 _ => throw new ArgumentException($"There is no dat table for {type}"),
@@ -577,7 +578,7 @@ namespace Tatti3
                 ArrayFileType.Units, ArrayFileType.Weapons, ArrayFileType.Flingy,
                 ArrayFileType.Sprites, ArrayFileType.Images, ArrayFileType.Upgrades,
                 ArrayFileType.TechData, ArrayFileType.Orders, ArrayFileType.PortData,
-                ArrayFileType.Buttons,
+                ArrayFileType.MapData, ArrayFileType.Buttons,
             };
             foreach (var type in dats)
             {
@@ -595,7 +596,8 @@ namespace Tatti3
             {
                 ArrayFileType.Units or ArrayFileType.Weapons or ArrayFileType.Flingy or ArrayFileType.Sprites or 
                     ArrayFileType.Images or ArrayFileType.Upgrades or ArrayFileType.TechData or 
-                    ArrayFileType.PortData or ArrayFileType.Orders or ArrayFileType.Buttons => true,
+                    ArrayFileType.PortData or ArrayFileType.MapData or ArrayFileType.Orders or
+                    ArrayFileType.Buttons => true,
                 _ => false,
             };
         }
@@ -894,6 +896,22 @@ namespace Tatti3
                     case ArrayFileType.PortData:
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.PortData, i => $"Portrait #{i}");
                         break;
+                    case ArrayFileType.MapData:
+                        for (uint i = 0; i < dat.Entries; i++)
+                        {
+                            uint label = dat.GetFieldUint(i, 0);
+                            string name;
+                            if (label == 0)
+                            {
+                                name = $"Mission #{i}";
+                            }
+                            else
+                            {
+                                name = GameData?.MapDataTbl.GetByIndex(label) ?? "(Invalid)";
+                            }
+                            entries.Add(name);
+                        }
+                        break;
                     case ArrayFileType.Buttons:
                         entries = NamesFromBackRefs(dat.Entries, ArrayFileType.Buttons, i => $"Buttonset #{i}");
                         entries[0] = "None";
@@ -1001,6 +1019,15 @@ namespace Tatti3
                     case ArrayFileType.PortDataTbl:
                     {
                         var tbl = GameData?.PortDataTbl;
+                        if (tbl != null)
+                        {
+                            entries = tbl.ListByIndex();
+                        }
+                        break;
+                    }
+                    case ArrayFileType.MapDataTbl:
+                    {
+                        var tbl = GameData?.MapDataTbl;
                         if (tbl != null)
                         {
                             entries = tbl.ListByIndex();
@@ -1258,8 +1285,9 @@ namespace Tatti3
                 ArrayFileType.Upgrades => 5,
                 ArrayFileType.TechData => 6,
                 ArrayFileType.PortData => 7,
-                ArrayFileType.Orders => 8,
-                ArrayFileType.Buttons => 9,
+                ArrayFileType.MapData => 8,
+                ArrayFileType.Orders => 9,
+                ArrayFileType.Buttons => 10,
                 _ => -1
             };
         }

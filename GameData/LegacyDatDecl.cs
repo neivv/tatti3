@@ -544,6 +544,24 @@ namespace Tatti3.GameData
             }
 
             {
+                Func<Field> Uint32 = () => MakeField(4, 0, 65, u32Zero, DatFieldFormat.Uint32);
+                MapData = new LegacyDatDecl
+                {
+                    entries = 65,
+                    FileSize = 260,
+                    InvalidIndexStart = 0,
+                    InvalidIndexCount = 0,
+                    defaultFile = Properties.Resources.arr_mapdata_dat,
+                    fields = new Field[] {
+                        // 0x00 Directory root
+                        Uint32(),
+                    },
+                    RefFields = new RefField[] {},
+                    ListFields = new ListField[] {},
+                };
+            }
+
+            {
                 Func<Field> Uint8 = () => MakeField(1, 0, 189, u8Zero, DatFieldFormat.Uint8);
                 Func<Field> Uint16 = () => MakeField(2, 0, 189, u16Zero, DatFieldFormat.Uint16);
                 Func<Field> Uint32 = () => MakeField(4, 0, 189, u32Zero, DatFieldFormat.Uint32);
@@ -660,6 +678,7 @@ namespace Tatti3.GameData
         public static readonly LegacyDatDecl Upgrades;
         public static readonly LegacyDatDecl TechData;
         public static readonly LegacyDatDecl PortData;
+        public static readonly LegacyDatDecl MapData;
         public static readonly LegacyDatDecl Orders;
         public static readonly LegacyDatDecl Buttons;
     }

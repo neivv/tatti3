@@ -712,6 +712,21 @@
                     </DockPanel>
                 </DockPanel>
             </TabItem>
+            <TabItem Header="Campaign">
+                <TabItem.DataContext>
+                    <Binding Path="Dat[MapData]" />
+                </TabItem.DataContext>
+                <DockPanel Background="#FFE5E5E5" LastChildFill="false">
+                    <GroupBox DockPanel.Dock="Top">
+                        <GroupBox.Header>
+                            <TextBlock Text="Campaign Mission" />
+                        </GroupBox.Header>
+                        <local:StatGroup LabelWidth="80">
+                            <local:DatRefStat Text="Path" Dat="MapDataTbl" FieldId="0x0"/>
+                        </local:StatGroup>
+                    </GroupBox>
+                </DockPanel>
+            </TabItem>
             <TabItem Header="Orders">
                 <TabItem.DataContext>
                     <Binding Path="Dat[Orders]" />

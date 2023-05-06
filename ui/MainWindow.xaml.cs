@@ -77,9 +77,12 @@ namespace Tatti3
                         state.SelectDat(ArrayFileType.PortData);
                         break;
                     case 8:
-                        state.SelectDat(ArrayFileType.Orders);
+                        state.SelectDat(ArrayFileType.MapData);
                         break;
                     case 9:
+                        state.SelectDat(ArrayFileType.Orders);
+                        break;
+                    case 10:
                         state.SelectDat(ArrayFileType.Buttons);
                         break;
                     default:

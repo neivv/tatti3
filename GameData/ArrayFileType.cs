@@ -18,6 +18,7 @@ namespace Tatti3.GameData
         CmdIcon,
         ImagesTbl,
         PortDataTbl,
+        MapDataTbl,
         Buttons,
     }
 }
