@@ -29,6 +29,20 @@ namespace Tatti3
         public static RoutedCommand PasteEntryCommand = new RoutedCommand();
         public static RoutedCommand PasteNewEntryCommand = new RoutedCommand();
 
+        static readonly ArrayFileType[] TabOrder = {
+            ArrayFileType.Units,
+            ArrayFileType.Weapons,
+            ArrayFileType.Flingy,
+            ArrayFileType.Sprites,
+            ArrayFileType.Images,
+            ArrayFileType.Upgrades,
+            ArrayFileType.TechData,
+            ArrayFileType.PortData,
+            ArrayFileType.MapData,
+            ArrayFileType.Orders,
+            ArrayFileType.Buttons,
+        };
+
         public MainWindow()
         {
             var args = Environment.GetCommandLineArgs();
@@ -50,44 +64,10 @@ namespace Tatti3
                 }
                 this.currentTab = rootTab.SelectedIndex;
 
-                switch (rootTab.SelectedIndex)
-                {
-                    case 0:
-                        state.SelectDat(ArrayFileType.Units);
-                        break;
-                    case 1:
-                        state.SelectDat(ArrayFileType.Weapons);
-                        break;
-                    case 2:
-                        state.SelectDat(ArrayFileType.Flingy);
-                        break;
-                    case 3:
-                        state.SelectDat(ArrayFileType.Sprites);
-                        break;
-                    case 4:
-                        state.SelectDat(ArrayFileType.Images);
-                        break;
-                    case 5:
-                        state.SelectDat(ArrayFileType.Upgrades);
-                        break;
-                    case 6:
-                        state.SelectDat(ArrayFileType.TechData);
-                        break;
-                    case 7:
-                        state.SelectDat(ArrayFileType.PortData);
-                        break;
-                    case 8:
-                        state.SelectDat(ArrayFileType.MapData);
-                        break;
-                    case 9:
-                        state.SelectDat(ArrayFileType.Orders);
-                        break;
-                    case 10:
-                        state.SelectDat(ArrayFileType.Buttons);
-                        break;
-                    default:
-                        return;
+                if (rootTab.SelectedIndex >= TabOrder.Length) {
+                    return;
                 }
+                state.SelectDat(TabOrder[rootTab.SelectedIndex]);
 
                 int index = AppState.DatFileTypeToIndex(state.CurrentDat);
                 var selections = state.Selections;
@@ -155,41 +135,9 @@ namespace Tatti3
             {
                 return;
             }
-            int tab;
-            switch (type)
-            {
-                case ArrayFileType.Units:
-                    tab = 0;
-                    break;
-                case ArrayFileType.Weapons:
-                    tab = 1;
-                    break;
-                case ArrayFileType.Flingy:
-                    tab = 2;
-                    break;
-                case ArrayFileType.Sprites:
-                    tab = 3;
-                    break;
-                case ArrayFileType.Images:
-                    tab = 4;
-                    break;
-                case ArrayFileType.Upgrades:
-                    tab = 5;
-                    break;
-                case ArrayFileType.TechData:
-                    tab = 6;
-                    break;
-                case ArrayFileType.PortData:
-                    tab = 7;
-                    break;
-                case ArrayFileType.Orders:
-                    tab = 8;
-                    break;
-                case ArrayFileType.Buttons:
-                    tab = 9;
-                    break;
-                default:
-                    return;
+            int tab = Array.IndexOf(TabOrder, type);
+            if (tab == -1) {
+                return;
             }
             rootTab.SelectedIndex = tab;
             entryList.SelectedIndex = index;
