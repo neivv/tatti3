@@ -68,7 +68,7 @@ namespace Tatti3
                 ("Transport Capacity Not Met", null),
                 ("Carrying Some Units", null),
                 ("Tech Not Researched", ArrayFileType.TechData),
-                ("Tech Researched", ArrayFileType.TechData),
+                ("Can Use Tech", ArrayFileType.TechData),
                 ("Has Mines", ArrayFileType.TechData),
                 ("Upgrade not at Max Level", ArrayFileType.Upgrades),
                 ("Can Cloak", ArrayFileType.TechData),
