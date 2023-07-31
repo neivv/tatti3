@@ -225,10 +225,10 @@
                                     <local:BoolStat Text="Use Medium Overlays" FieldId="0x16:0x02000000"/>
                                     <local:BoolStat Text="Use Large Overlays" FieldId="0x16:0x04000000"/>
                                     <local:BoolStat Text="Ignore Supply Check" FieldId="0x16:0x01000000"/>
-                                    <local:BoolStat Text="Unknown 18" FieldId="0x16:0x00040000"/>
+                                    <local:BoolStat Text="Extra Creep When Built" FieldId="0x16:0x80000000"/>
                                     <local:BoolStat Text="Clickable Overlays" FieldId="0x16:0x00000100"/>
                                     <local:BoolStat Text="Unknown 23" FieldId="0x16:0x00800000"/>
-                                    <local:BoolStat Text="Unknown 31" FieldId="0x16:0x80000000"/>
+                                    <local:BoolStat Text="Unknown 18" FieldId="0x16:0x00040000"/>
                                 </local:StatGroup>
                             </DockPanel>
                         </GroupBox>
