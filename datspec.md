@@ -59,6 +59,7 @@ some default values that the user can edit afterwards.
 - V5 Adds No cloak aggression ext unit flag to ghost units
 - V6 Adds ext unit flags 0x18, 0x20
 - V7 Adds max energy upgrades
+- V8 Adds ext unit flag 0x40
 
 # Field flags
 
@@ -363,6 +364,7 @@ Units.dat:
         0x2 = Show alt rank if UMS did rename unit
         0x3 = Always show alt rank
     * 0x20 = Always hide kills (Scourge, Infested Terran)
+    * 0x40 = Can rally
 - 0x48 Turret max angle
     `Single integer`. Used to prevent goliath turrets from going to far from parent unit's angle.
 - 0x49 Bunker range bonus
@@ -373,8 +375,10 @@ Units.dat:
     `Single integer` Normally set for some of carrier/bc heroes
 - 0x4c Max energy
     `Single integer` Will not include the (50 * 256) bonus for heroes
+- 0x4d Infestation HP percentage
+    `Single integer`
 
-Ugprades.dat:
+Upgrades.dat:
 - 0x10 Req buffer
     `Dat requirement buffer`.
 - 0x11 (offset), 0x12 (length) Attached units

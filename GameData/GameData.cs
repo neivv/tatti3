@@ -118,6 +118,11 @@ namespace Tatti3.GameData
             {
                 Units.AddFieldWithValueForAll(0x4c, 256 * 200, DatFieldFormat.Uint32);
             }
+            // Infestation HP
+            if (!Units.HasField(0x4d))
+            {
+                Units.AddFieldWithValueForAll(0x4d, 50, DatFieldFormat.Uint8);
+            }
             Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);
             Upgrades = LoadDatTable(fsys, "arr/upgrades.dat", LegacyDatDecl.Upgrades, firegraft);
             // Attached units
@@ -347,6 +352,18 @@ namespace Tatti3.GameData
                 Units.SetFieldUint(0x2f, 0x47, old | 0x20);
                 old = Units.GetFieldUint(0x32, 0x47);
                 Units.SetFieldUint(0x32, 0x47, old | 0x20);
+            }
+            if (Units.Version < 8)
+            {
+                // Can rally bits
+                var buildings = new uint[] {
+                    0x6a, 0x6f, 0x71, 0x72, 0x82, 0x83, 0x84, 0x85, 0x9a, 0xa0, 0xa7, 0x9b
+                };
+                foreach (var unit in buildings)
+                {
+                    var old = Units.GetFieldUint(unit, 0x47);
+                    Units.SetFieldUint(unit, 0x47, old | 0x40);
+                }
             }
             Buttons = LoadButtons(fsys, "arr/buttons.dat", LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(fsys, "rez/stat_txt", Properties.Resources.rez_stat_txt_json);

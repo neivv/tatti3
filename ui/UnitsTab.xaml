@@ -237,8 +237,11 @@
                                 <TextBlock Text="Other Properties" />
                             </GroupBox.Header>
                             <DockPanel>
-                                <local:StatGroup DockPanel.Dock="Top">
+                                <local:StatGroup DockPanel.Dock="Top" LabelWidth="90">
                                     <local:DatRefStat Text="Infestation" Dat="Units" FieldId="0x3"/>
+                                    <local:IntStat Text="Infestation HP%" FieldId="0x4d"/>
+                                </local:StatGroup>
+                                <local:StatGroup DockPanel.Dock="Top">
                                     <local:DatRefStat Text="Subunit 1" Dat="Units" FieldId="0x1"/>
                                     <local:DatRefStat Text="Subunit 2" Dat="Units" FieldId="0x2"/>
                                 </local:StatGroup>
@@ -581,6 +584,7 @@
                             <local:StatGroup LabelWidth="120">
                                 <local:IntStat Text="Death timer" FieldId="0x4a" Scale="10">
                                 </local:IntStat>
+                                <local:BoolStat Text="Can Rally" FieldId="0x47:0x40"/>
                             </local:StatGroup>
                         </GroupBox>
                     </DockPanel>
