@@ -1064,6 +1064,12 @@ namespace Tatti3.GameData
         public UInt16 Version { get; private set; }
         public List<RefField> RefFields { get; private set; }
 
+        public bool VersionLessThan(UInt16 val)
+        {
+            System.Diagnostics.Trace.Assert(val <= CurrentMinorVersion);
+            return Version < val;
+        }
+
         Dictionary<uint, DatValue> fields;
         // Key is offset field id
         Dictionary<uint, ListFieldState> listFields;
@@ -1071,7 +1077,7 @@ namespace Tatti3.GameData
         uint invalidIndexCount;
         LegacyDatDecl legacyDecl;
 
-        const UInt16 CurrentMinorVersion = 7;
+        const UInt16 CurrentMinorVersion = 8;
 
         public static bool operator ==(DatTable? left, DatTable? right)
         {

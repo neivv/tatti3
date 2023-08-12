@@ -227,7 +227,7 @@ namespace Tatti3.GameData
                 }
             }
             // Max energy upgrades
-            if (Upgrades.Version < 7)
+            if (Upgrades.VersionLessThan(7))
             {
                 var defaultValues = new (uint, uint)[] {
                     (0x13, 0x09),
@@ -286,7 +286,7 @@ namespace Tatti3.GameData
             PortData = LoadDatTable(fsys, "arr/portdata.dat", LegacyDatDecl.PortData, firegraft);
             MapData = LoadDatTable(fsys, "arr/mapdata.dat", LegacyDatDecl.MapData, firegraft);
             Orders = LoadDatTable(fsys, "arr/orders.dat", LegacyDatDecl.Orders, firegraft);
-            if (Orders.Version < 2)
+            if (Orders.VersionLessThan(2))
             {
                 // Dummy reqs
                 var orders = new uint[] { 0x24, 0x66 };
@@ -297,14 +297,14 @@ namespace Tatti3.GameData
                     Orders.SetRequirements(order, 0x11, reqs.ToArray());
                 }
             }
-            if (Orders.Version < 3)
+            if (Orders.VersionLessThan(3))
             {
                 var reqs = Orders.GetRequirements(0x24, 0x11);
                 reqs.Remove(new Requirement(0xff13));
                 reqs.Add(new Requirement(0xff0c));
                 Orders.SetRequirements(0x24, 0x11, reqs.ToArray());
             }
-            if (Units.Version < 4)
+            if (Units.VersionLessThan(4))
             {
                 for (uint i = 228; i < 261; i++)
                 {
@@ -321,7 +321,7 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(i, 0x18, 1);
                 }
             }
-            if (Units.Version < 5)
+            if (Units.VersionLessThan(5))
             {
                 // No cloak aggression
                 var ghosts = new uint[] { 0x1, 0x10, 0x64, 0x63, 0x68 };
@@ -331,7 +331,7 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(unit, 0x47, old | 0x2);
                 }
             }
-            if (Units.Version < 6)
+            if (Units.VersionLessThan(6))
             {
                 // Rank alt string bits
                 // Gantrithor: if not renamed
@@ -353,7 +353,7 @@ namespace Tatti3.GameData
                 old = Units.GetFieldUint(0x32, 0x47);
                 Units.SetFieldUint(0x32, 0x47, old | 0x20);
             }
-            if (Units.Version < 8)
+            if (Units.VersionLessThan(8))
             {
                 // Can rally bits
                 var buildings = new uint[] {
