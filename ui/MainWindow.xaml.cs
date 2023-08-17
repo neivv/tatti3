@@ -112,6 +112,11 @@ namespace Tatti3
             {
                 dat.FieldChanged += (obj, e) => this.UpdateTitle();
             }
+            if (rootTab.SelectedIndex >= 0 && rootTab.SelectedIndex < TabOrder.Length) {
+                state.SelectDat(TabOrder[rootTab.SelectedIndex]);
+                int index = AppState.DatFileTypeToIndex(state.CurrentDat);
+                entryList.SelectedIndex = state.Selections[index];
+            }
         }
 
         void GotoBackRef(object sender, MouseButtonEventArgs e)
