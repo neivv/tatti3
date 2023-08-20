@@ -60,6 +60,7 @@ some default values that the user can edit afterwards.
 - V6 Adds ext unit flags 0x18, 0x20
 - V7 Adds max energy upgrades
 - V8 Adds ext unit flag 0x40
+- V9 Adds ext unit flag 0x4
 
 # Field flags
 

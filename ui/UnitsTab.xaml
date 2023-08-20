@@ -440,6 +440,16 @@
                                 </local:StatGroup>
                                 <local:StatGroup Flags="true">
                                     <local:BoolStat Text="Never Show Kills" FieldId="0x47:0x20"/>
+                                    <local:BoolStat Text="Alternate Train String" FieldId="0x47:0x4">
+                                        <local:BoolStat.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock>
+        Shows an alternate string (STR_BUILDING_LBL instead of default STR_BUILDING2_LBL)
+        when this building is training units.
+                                                </TextBlock>
+                                            </ToolTip>
+                                        </local:BoolStat.ToolTip>
+                                    </local:BoolStat>
                                 </local:StatGroup>
                             </StackPanel>
                         </GroupBox>

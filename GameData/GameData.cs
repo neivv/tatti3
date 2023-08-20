@@ -365,6 +365,16 @@ namespace Tatti3.GameData
                     Units.SetFieldUint(unit, 0x47, old | 0x40);
                 }
             }
+            if (Units.VersionLessThan(9))
+            {
+                // Alt train string
+                var buildings = new uint[] { 0x6c, 0xa0, 0xa7 };
+                foreach (var unit in buildings)
+                {
+                    var old = Units.GetFieldUint(unit, 0x47);
+                    Units.SetFieldUint(unit, 0x47, old | 0x4);
+                }
+            }
             Buttons = LoadButtons(fsys, "arr/buttons.dat", LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(fsys, "rez/stat_txt", Properties.Resources.rez_stat_txt_json);
             ImagesTbl = LoadTbl(fsys, "arr/images.tbl", Properties.Resources.arr_images_tbl);

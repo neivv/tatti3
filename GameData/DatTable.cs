@@ -1077,7 +1077,7 @@ namespace Tatti3.GameData
         uint invalidIndexCount;
         LegacyDatDecl legacyDecl;
 
-        const UInt16 CurrentMinorVersion = 8;
+        const UInt16 CurrentMinorVersion = 9;
 
         public static bool operator ==(DatTable? left, DatTable? right)
         {
