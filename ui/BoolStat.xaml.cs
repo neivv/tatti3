@@ -86,6 +86,15 @@ namespace Tatti3
             }
         }
 
+        public object ToolTipText
+        {
+            set
+            {
+                label.ToolTip = value;
+                this.ToolTip = value;
+            }
+        }
+
         static uint ParseUint(string val)
         {
             if (val.StartsWith("0x"))

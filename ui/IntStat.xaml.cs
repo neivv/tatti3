@@ -142,6 +142,15 @@ namespace Tatti3
             }
         }
 
+        public object ToolTipText
+        {
+            set
+            {
+                label.ToolTip = value;
+                this.ToolTip = value;
+            }
+        }
+
         void UpdateBinding()
         {
             var path = $"Fields[{Field}~{SubIndex}].Item";

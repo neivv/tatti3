@@ -163,14 +163,12 @@
                             <DockPanel>
                                 <local:StatGroup DockPanel.Dock="Top" LabelWidth="80">
                                     <local:IntStat Text="Max Energy" FieldId="0x4c" Scale="256">
-                                        <local:IntStat.ToolTip>
-                                            <ToolTip>
-                                                <TextBlock>
+                                        <local:IntStat.ToolTipText>
+                                            <TextBlock>
         Does not include the +50 energy bonus for units with 'Hero' flag set.<LineBreak />
         Energy is still limited by game to be less than 256.
-                                                </TextBlock>
-                                            </ToolTip>
-                                        </local:IntStat.ToolTip>
+                                            </TextBlock>
+                                        </local:IntStat.ToolTipText>
                                     </local:IntStat>
                                 </local:StatGroup>
                             </DockPanel>
@@ -423,9 +421,8 @@
                                         <system:String>Alt If Not Renamed</system:String>
                                         <system:String>Alt If Renamed</system:String>
                                         <system:String>Always Show Alternate</system:String>
-                                        <local:EnumStat.ToolTip>
-                                            <ToolTip>
-                                                <TextBlock>
+                                        <local:EnumStat.ToolTipText>
+                                            <TextBlock>
         Determines when Rank / Alternate Rank string is shown.<LineBreak />
         - Default: If Terran, not building, and not powerup.<LineBreak />
         - Alt If Not Renamed: Uses Alternate Rank by default,
@@ -433,22 +430,17 @@
         - Alt If Renamed: If an UMS map renames the unit it'll switch to alternate rank.<LineBreak />
         - Always Show Alternate: Always show the Alternate Rank. Can be used to show rank on non-Terran units,
             or hide the rank on Terran units.
-                                                </TextBlock>
-                                            </ToolTip>
-                                        </local:EnumStat.ToolTip>
+                                            </TextBlock>
+                                        </local:EnumStat.ToolTipText>
                                     </local:EnumStat>
                                 </local:StatGroup>
                                 <local:StatGroup Flags="true">
                                     <local:BoolStat Text="Never Show Kills" FieldId="0x47:0x20"/>
                                     <local:BoolStat Text="Alternate Train String" FieldId="0x47:0x4">
-                                        <local:BoolStat.ToolTip>
-                                            <ToolTip>
-                                                <TextBlock>
+                                        <local:BoolStat.ToolTipText>
         Shows an alternate string (STR_BUILDING_LBL instead of default STR_BUILDING2_LBL)
         when this building is training units.
-                                                </TextBlock>
-                                            </ToolTip>
-                                        </local:BoolStat.ToolTip>
+                                        </local:BoolStat.ToolTipText>
                                     </local:BoolStat>
                                 </local:StatGroup>
                             </StackPanel>
@@ -543,14 +535,12 @@
                             </GroupBox.Header>
                             <local:StatGroup LabelWidth="120">
                                 <local:IntStat Text="Max Angle" FieldId="0x48">
-                                    <local:IntStat.ToolTip>
-                                        <ToolTip>
-                                            <TextBlock>
+                                    <local:IntStat.ToolTipText>
+                                        <TextBlock>
     Maximum angle difference of subunit turret (this unit) and its parent.<LineBreak />
     128 = 180 degrees, making the turret not turn with parent unit at all.
-                                            </TextBlock>
-                                        </ToolTip>
-                                    </local:IntStat.ToolTip>
+                                        </TextBlock>
+                                    </local:IntStat.ToolTipText>
                                 </local:IntStat>
                             </local:StatGroup>
                         </GroupBox>
@@ -560,13 +550,9 @@
                             </GroupBox.Header>
                             <local:StatGroup LabelWidth="120">
                                 <local:BoolStat Text="No Aggression" FieldId="0x47:0x2">
-                                    <local:BoolStat.ToolTip>
-                                        <ToolTip>
-                                            <TextBlock>
+                                    <local:BoolStat.ToolTipText>
     Makes the unit not pick targets when cloaked, unless it is told to Hold Position.
-                                            </TextBlock>
-                                        </ToolTip>
-                                    </local:BoolStat.ToolTip>
+                                    </local:BoolStat.ToolTipText>
                                 </local:BoolStat>
                             </local:StatGroup>
                         </GroupBox>
@@ -576,14 +562,12 @@
                             </GroupBox.Header>
                             <local:StatGroup LabelWidth="120">
                                 <local:IntStat Text="Bunker Range Bonus" FieldId="0x49" Signed="True">
-                                    <local:IntStat.ToolTip>
-                                        <ToolTip>
-                                            <TextBlock>
+                                    <local:IntStat.ToolTipText>
+                                        <TextBlock>
     Additional range the unit gains when inside a Bunker.<LineBreak />
     May be set to negative to reduce the range.
-                                            </TextBlock>
-                                        </ToolTip>
-                                    </local:IntStat.ToolTip>
+                                        </TextBlock>
+                                    </local:IntStat.ToolTipText>
                                 </local:IntStat>
                             </local:StatGroup>
                         </GroupBox>
