@@ -876,8 +876,12 @@ namespace Tatti3
                             ArrayFileType.Sprites,
                             i => {
                                 uint image = dat.GetFieldUint(i, 0);
-                                uint grp = GameData?.Images.GetFieldUint(image, 0) ?? 0;
-                                string? path = GameData?.ImagesTbl.GetByIndex(grp);
+                                string? path = null;
+                                if (image < (GameData?.Images.Entries ?? 0))
+                                {
+                                    uint grp = GameData?.Images.GetFieldUint(image, 0) ?? 0;
+                                    path = GameData?.ImagesTbl.GetByIndex(grp);
+                                }
                                 return path ?? $"Sprite #{i}";
                             }
                         );
