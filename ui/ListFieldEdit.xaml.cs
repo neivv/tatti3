@@ -81,7 +81,7 @@ namespace Tatti3
         ListBox buttonList = new();
         StackPanel childPanel = new();
 
-        public Control EditControl
+        public FrameworkElement EditControl
         {
             set
             {

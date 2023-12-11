@@ -8,6 +8,9 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
 
+    <UserControl.Resources>
+        <local:ListIndexConverter x:Key="ListIndexConverter" />
+    </UserControl.Resources>
     <Grid Background="#FFE5E5E5">
         <TabControl>
             <TabItem Header="Basic">
@@ -501,7 +504,51 @@
                                         <local:BoolStat Text="Unused 6" FieldId="0x15:0x40"/>
                                         <local:BoolStat Text="Unused 7" FieldId="0x15:0x80"/>
                                     </local:StatGroup>
+                                    <local:StatGroup Flags="true" MinWidth="120">
+                                        <local:BoolStat Text="Town Unit" FieldId="0x47:0x100"/>
+                                        <local:BoolStat Text="Can Move To Another Town" FieldId="0x47:0x80"/>
+                                        <local:BoolStat Text="No Town Region In Campaign" FieldId="0x47:0x200"/>
+                                        <local:BoolStat Text="Military In Spawn Region" FieldId="0x47:0x400"/>
+                                    </local:StatGroup>
                                 </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                            <GroupBox>
+                                <GroupBox.Header>
+                                    <TextBlock Text="Building Guards" />
+                                </GroupBox.Header>
+                                <GroupBox.DataContext>
+                                    <Binding
+                                        RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
+                                        Path="DataContext" />
+                                </GroupBox.DataContext>
+                                <local:ListFieldEdit Dat="Units" ListFieldId="0x4e" FirstArrayField="0x50">
+                                    <local:ListFieldEdit.ListBoxTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Path=[0], Converter={StaticResource ListIndexConverter}}">
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </local:ListFieldEdit.ListBoxTemplate>
+                                    <local:ListFieldEdit.EditControl>
+                                        <StackPanel Orientation="Vertical">
+                                            <local:StatGroup LabelWidth="100">
+                                                <local:DatRefStat Text="Unit" Dat="Units" FieldId="0x50" DropdownWidth="180"/>
+                                            </local:StatGroup>
+                                            <local:StatGroup LabelWidth="100">
+                                                <local:IntStat Text="Minimum Seconds" FieldId="0x51"/>
+                                                <local:IntStat Text="Minimum Amount" FieldId="0x52"/>
+                                            </local:StatGroup>
+                                        </StackPanel>
+                                    </local:ListFieldEdit.EditControl>
+                                    <local:ListFieldEdit.DefaultValues>
+                                        <x:Array Type="system:UInt32">
+                                            <system:UInt32>0</system:UInt32>
+                                            <system:UInt32>0</system:UInt32>
+                                            <system:UInt32>0</system:UInt32>
+                                        </x:Array>
+                                    </local:ListFieldEdit.DefaultValues>
+                                </local:ListFieldEdit>
                             </GroupBox>
                         </StackPanel>
                     </DockPanel>

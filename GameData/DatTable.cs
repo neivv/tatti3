@@ -490,6 +490,12 @@ namespace Tatti3.GameData
             FieldChanged?.Invoke(this, new FieldChangedEventArgs(fieldId, index));
         }
 
+        public void SetBitFlags(uint index, uint fieldId, uint value)
+        {
+            var old = GetFieldUint(index, fieldId);
+            SetFieldUint(index, fieldId, old | value);
+        }
+
         static void WriteU16(List<byte> list, uint index, uint value)
         {
             int i = (int)index * 2;
@@ -1077,7 +1083,7 @@ namespace Tatti3.GameData
         uint invalidIndexCount;
         LegacyDatDecl legacyDecl;
 
-        const UInt16 CurrentMinorVersion = 9;
+        const UInt16 CurrentMinorVersion = 10;
 
         public static bool operator ==(DatTable? left, DatTable? right)
         {

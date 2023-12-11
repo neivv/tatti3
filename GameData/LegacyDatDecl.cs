@@ -225,6 +225,7 @@ namespace Tatti3.GameData
                     },
                     ListFields = new ListField[] {
                         new ListField(0x2b, new uint[] { 0x40 }, U32Code("UntR"), 0),
+                        new ListField(0x4e, new uint[] { 0x50, 0x51, 0x52 }, 0, 0x4f),
                     },
                 };
             }

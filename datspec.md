@@ -61,6 +61,7 @@ some default values that the user can edit afterwards.
 - V7 Adds max energy upgrades
 - V8 Adds ext unit flag 0x40
 - V9 Adds ext unit flag 0x4
+- V10 Adds ext unit flags 0x80, 0x100, 0x200, 0x400, and AI building guards
 
 # Field flags
 
@@ -366,6 +367,10 @@ Units.dat:
         0x3 = Always show alt rank
     * 0x20 = Always hide kills (Scourge, Infested Terran)
     * 0x40 = Can rally
+    * 0x80 = Doesn't keep AI town alive
+    * 0x100 = Non-worker non-building AI town unit
+    * 0x200 = Don't create town region if campaign AI
+    * 0x400 = Military AI always attaches to spawned region
 - 0x48 Turret max angle
     `Single integer`. Used to prevent goliath turrets from going to far from parent unit's angle.
 - 0x49 Bunker range bonus
@@ -378,6 +383,12 @@ Units.dat:
     `Single integer` Will not include the (50 * 256) bonus for heroes
 - 0x4d Infestation HP percentage
     `Single integer`
+- 0x4e (offset), 0x4f (length) AI Building guards
+    `Variable length list`. Contains unit ids that get added as guards when AI finishes a building.
+    * 0x50 Unit ID
+    * 0x51 Minimum elapsed seconds
+    * 0x52 Minimum buildings of same type before guards are added
+
 
 Upgrades.dat:
 - 0x10 Req buffer

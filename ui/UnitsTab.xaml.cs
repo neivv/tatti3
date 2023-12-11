@@ -22,6 +22,25 @@ namespace Tatti3
         public UnitsTab()
         {
             InitializeComponent();
+            this.DataContextChanged += (o, e) => this.UpdateBinding();
+        }
+
+        void UpdateBinding()
+        {
+            var dat = (AppState.DatTableRef)this.DataContext;
+            if (dat == null)
+            {
+                return;
+            }
+            ((ListIndexConverter)Resources["ListIndexConverter"]).List = dat.Names;
+            var root = dat.Root;
+            root.NamesChanged += (o, args) => {
+                if (ReferenceEquals(root, o) && args.Type == GameData.ArrayFileType.Units) {
+                    var dat = (AppState.DatTableRef)this.DataContext;
+                    ((ListIndexConverter)Resources["ListIndexConverter"]).List = dat.Names;
+                }
+            };
+
         }
     }
 }

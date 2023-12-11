@@ -123,6 +123,27 @@ namespace Tatti3.GameData
             {
                 Units.AddFieldWithValueForAll(0x4d, 50, DatFieldFormat.Uint8);
             }
+            // AI building guards
+            if (!Units.HasField(0x4e))
+            {
+                Units.AddZeroField(0x4e, DatFieldFormat.Uint16);
+                Units.AddZeroField(0x4f, DatFieldFormat.Uint16);
+                Units.AddField(0x50, DatFieldFormat.Uint16, new List<byte>());
+                Units.AddField(0x51, DatFieldFormat.Uint32, new List<byte>());
+                Units.AddField(0x52, DatFieldFormat.Uint16, new List<byte>());
+                var defaultValues = new (uint, uint, uint, uint)[] {
+                    (0x7c, 1, 0, 4), (0x7d, 5, 60, 0), (0x7d, 1, 60, 0),
+                };
+                foreach (var (unit, guard, time, count) in defaultValues)
+                {
+                    var old = Units.GetListRaw(unit, 0x4e);
+                    Units.SetListRaw(unit, 0x4e, new uint[][] {
+                        ArrayPush(old[0], guard),
+                        ArrayPush(old[1], time),
+                        ArrayPush(old[2], count),
+                    });
+                }
+            }
             Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);
             Upgrades = LoadDatTable(fsys, "arr/upgrades.dat", LegacyDatDecl.Upgrades, firegraft);
             // Attached units
@@ -374,6 +395,21 @@ namespace Tatti3.GameData
                     var old = Units.GetFieldUint(unit, 0x47);
                     Units.SetFieldUint(unit, 0x47, old | 0x4);
                 }
+            }
+            if (Units.VersionLessThan(10))
+            {
+                // Overlord
+                Units.SetBitFlags(0x2a, 0x47, 0x180);
+                // Larva, egg
+                Units.SetBitFlags(0x23, 0x47, 0x100);
+                Units.SetBitFlags(0x24, 0x47, 0x100);
+                // No town region in campaign
+                foreach (var unit in new uint[] { 0x7c, 0x7d, 0x8f, 0x90, 0x92, 0x9c, 0xa2 })
+                {
+                    Units.SetBitFlags(unit, 0x47, 0x200);
+                }
+                // Broodling
+                Units.SetBitFlags(0x28, 0x47, 0x400);
             }
             Buttons = LoadButtons(fsys, "arr/buttons.dat", LegacyDatDecl.Buttons, Units, firegraft);
             StatTxt = LoadStringTable(fsys, "rez/stat_txt", Properties.Resources.rez_stat_txt_json);
