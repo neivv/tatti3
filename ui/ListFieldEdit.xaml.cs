@@ -120,6 +120,15 @@ namespace Tatti3
             set => this.tableRef.FirstArrayField = value;
         }
 
+        public float ListHeight
+        {
+            set
+            {
+                this.buttonList.MinHeight = value;
+                this.buttonList.MaxHeight = value;
+            }
+        }
+
         void UpdateBinding()
         {
             var state = (AppState)this.DataContext;

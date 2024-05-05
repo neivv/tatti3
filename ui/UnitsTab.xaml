@@ -523,7 +523,7 @@
                                         RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
                                         Path="DataContext" />
                                 </GroupBox.DataContext>
-                                <local:ListFieldEdit Dat="Units" ListFieldId="0x4e" FirstArrayField="0x50">
+                                <local:ListFieldEdit Dat="Units" ListFieldId="0x4e" FirstArrayField="0x50" ListHeight="150">
                                     <local:ListFieldEdit.ListBoxTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Path=[0], Converter={StaticResource ListIndexConverter}}">
