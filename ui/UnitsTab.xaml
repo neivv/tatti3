@@ -601,6 +601,7 @@
     Makes the unit not pick targets when cloaked, unless it is told to Hold Position.
                                     </local:BoolStat.ToolTipText>
                                 </local:BoolStat>
+                                <local:DatRefStat Text="Cloak Tech" Dat="techdata" FieldId="0x53"/>
                             </local:StatGroup>
                         </GroupBox>
                         <GroupBox DockPanel.Dock="Top">

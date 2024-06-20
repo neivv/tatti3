@@ -388,7 +388,8 @@ Units.dat:
     * 0x50 Unit ID
     * 0x51 Minimum elapsed seconds
     * 0x52 Minimum buildings of same type before guards are added
-
+- 0x53 Cloak tech
+    `Single integer`
 
 Upgrades.dat:
 - 0x10 Req buffer
