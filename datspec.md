@@ -390,6 +390,8 @@ Units.dat:
     * 0x52 Minimum buildings of same type before guards are added
 - 0x53 Cloak tech
     `Single integer`
+- 0x54 Cloak energy regen (usually degen so negative)
+    `Single integer`
 
 Upgrades.dat:
 - 0x10 Req buffer

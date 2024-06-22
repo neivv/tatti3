@@ -12,6 +12,7 @@ using System.Windows;
 
 using ArrayFileType = Tatti3.GameData.ArrayFileType;
 using Requirement = Tatti3.GameData.Requirement;
+using DatFieldFormat = Tatti3.GameData.DatFieldFormat;
 
 namespace Tatti3
 {
@@ -116,6 +117,38 @@ namespace Tatti3
                     }
                 }
 
+                public int ItemSigned
+                {
+                    get
+                    {
+                        if (parent.table == null) { return 0; }
+                        var format = parent.table.FieldFormat(fieldIndex);
+                        switch (format)
+                        {
+                            case DatFieldFormat.Uint8:
+                                return unchecked((int)(sbyte)item);
+                            case DatFieldFormat.Uint16:
+                                return unchecked((int)(short)item);
+                            case DatFieldFormat.Uint32:
+                                return unchecked((int)item);
+                            default:
+                                throw new ArgumentException(
+                                    $"Field 0x{fieldIndex:x} cannot be accessed as signed"
+                                );
+                        }
+                    }
+                    set
+                    {
+                        uint valueUint = unchecked((uint)value);
+                        if (parent.table != null && item != valueUint)
+                        {
+                            uint entryIndex = (uint)parent.entryIndex;
+                            parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, valueUint);
+                            item = valueUint;
+                        }
+                    }
+                }
+
                 // Somewhat hacky, but getting gives the entire value and a dummy value,
                 // setting must be `(mask, new_value)`
                 public (uint, uint) ItemBits
@@ -148,6 +181,7 @@ namespace Tatti3
                             item = newItem;
                             currentEntry = entryIndex;
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemSigned"));
                             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemBits"));
                         }
                     }

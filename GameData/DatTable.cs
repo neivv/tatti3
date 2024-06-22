@@ -453,6 +453,11 @@ namespace Tatti3.GameData
             );
         }
 
+        public void SetFieldInt(uint index, uint fieldId, int value)
+        {
+            SetFieldSubIndexUint(index, fieldId, 0, unchecked((uint)value));
+        }
+
         public void SetFieldUint(uint index, uint fieldId, uint value)
         {
             SetFieldSubIndexUint(index, fieldId, 0, value);

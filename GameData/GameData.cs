@@ -144,19 +144,22 @@ namespace Tatti3.GameData
                     });
                 }
             }
-            // Cloak tech
-            if (!Units.HasField(0x53))
+            // Cloak tech, energy drain
+            if (!Units.HasField(0x54))
             {
                 Units.AddFieldWithValueForAll(0x53, 0x2c, DatFieldFormat.Uint16);
+                Units.AddFieldWithValueForAll(0x54, 0, DatFieldFormat.Uint16);
                 var wraiths = new uint[] { 0x08, 0x15 };
                 var ghosts = new uint[] { 0x01, 0x10, 0x63, 0x64, 0x68, 0x33 };
                 foreach (var unit in wraiths)
                 {
                     Units.SetFieldUint(unit, 0x53, 0x09);
+                    Units.SetFieldInt(unit, 0x54, -13);
                 }
                 foreach (var unit in ghosts)
                 {
                     Units.SetFieldUint(unit, 0x53, 0x0a);
+                    Units.SetFieldInt(unit, 0x54, -10);
                 }
             }
             Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);

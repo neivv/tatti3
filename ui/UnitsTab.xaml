@@ -602,6 +602,7 @@
                                     </local:BoolStat.ToolTipText>
                                 </local:BoolStat>
                                 <local:DatRefStat Text="Cloak Tech" Dat="techdata" FieldId="0x53"/>
+                                <local:IntStat Text="Energy Drain" FieldId="0x54" Signed ="True"/>
                             </local:StatGroup>
                         </GroupBox>
                         <GroupBox DockPanel.Dock="Top">

@@ -19,7 +19,7 @@ namespace Tatti3
     /// </summary>
     public partial class IntStat : UserControl, IStatControl
     {
-        [ValueConversion(typeof(uint), typeof(float))]
+        [ValueConversion(typeof(uint), typeof(double))]
         class ScaleConverter : IValueConverter
         {
             public ScaleConverter(uint scale, bool percent, bool signed)
@@ -35,9 +35,9 @@ namespace Tatti3
                 object parameter,
                 System.Globalization.CultureInfo culture
             ) {
-                float scaled = signed ?
-                    (float)(int)(uint)value / (float)scale :
-                    (float)(uint)value / (float)scale;
+                double scaled = signed ?
+                    (double)(int)value / (double)scale :
+                    (double)(uint)value / (double)scale;
                 scaled = percent ? scaled * 100.0f : scaled;
                 return percent ?
                     String.Format(CultureInfo.InvariantCulture, "{0:F1}", scaled) :
@@ -53,14 +53,14 @@ namespace Tatti3
                 try
                 {
                     var format = System.Globalization.NumberFormatInfo.InvariantInfo;
-                    float val = Single.Parse((string)value, format);
+                    double val = Single.Parse((string)value, format);
                     if (percent)
                     {
                         val = val / 100.0f;
                     }
                     return signed ?
-                        (uint)(int)(val * (float)scale) :
-                        (uint)(val * (float)scale);
+                        (int)(val * (double)scale) :
+                        (uint)(val * (double)scale);
                 }
                 catch
                 {
@@ -153,7 +153,8 @@ namespace Tatti3
 
         void UpdateBinding()
         {
-            var path = $"Fields[{Field}~{SubIndex}].Item";
+            var itemName = Signed ? "ItemSigned" : "Item";
+            var path = $"Fields[{Field}~{SubIndex}].{itemName}";
             IValueConverter? converter = null;
             if (Scale != 1 || Percent || Signed)
             {
