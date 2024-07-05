@@ -103,16 +103,39 @@ namespace Tatti3
                     UpdateItem();
                 }
 
+                public FieldRef(SoaStruct soa, uint index)
+                {
+                    this.parent = null;
+                    this.soa = soa;
+                    this.soaIndex = (int)index;
+                    this.fieldIndex = 0xffff_ffff;
+                    this.subIndex = 0xffff_ffff;
+                    this.item = 0xffff_ffff;
+                    this.currentEntry = -1;
+                }
+
+                private uint GetItem()
+                {
+                    return this.soa != null ? this.soa[this.soaIndex] : this.item;
+                }
+
                 public uint Item
                 {
-                    get => item;
+                    get => GetItem();
                     set
                     {
-                        if (parent.table != null && item != value)
+                        if (this.soa != null)
                         {
-                            uint entryIndex = (uint)parent.entryIndex;
-                            parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, value);
-                            item = value;
+                            this.soa[this.soaIndex] = value;
+                        }
+                        else if (parent != null)
+                        {
+                            if (parent.table != null && item != value)
+                            {
+                                uint entryIndex = (uint)parent.entryIndex;
+                                parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, value);
+                                item = value;
+                            }
                         }
                     }
                 }
@@ -121,30 +144,49 @@ namespace Tatti3
                 {
                     get
                     {
-                        if (parent.table == null) { return 0; }
-                        var format = parent.table.FieldFormat(fieldIndex);
-                        switch (format)
+                        uint val = GetItem();
+                        if (this.soa != null)
                         {
-                            case DatFieldFormat.Uint8:
-                                return unchecked((int)(sbyte)item);
-                            case DatFieldFormat.Uint16:
-                                return unchecked((int)(short)item);
-                            case DatFieldFormat.Uint32:
-                                return unchecked((int)item);
-                            default:
-                                throw new ArgumentException(
-                                    $"Field 0x{fieldIndex:x} cannot be accessed as signed"
-                                );
+                            return unchecked((int)val);
+                        }
+                        else if (parent != null)
+                        {
+                            if (parent.table == null) { return 0; }
+                            var format = parent.table.FieldFormat(fieldIndex);
+                            switch (format)
+                            {
+                                case DatFieldFormat.Uint8:
+                                    return unchecked((int)(sbyte)val);
+                                case DatFieldFormat.Uint16:
+                                    return unchecked((int)(short)val);
+                                case DatFieldFormat.Uint32:
+                                    return unchecked((int)val);
+                                default:
+                                    throw new ArgumentException(
+                                        $"Field 0x{fieldIndex:x} cannot be accessed as signed"
+                                    );
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Unreachable");
                         }
                     }
                     set
                     {
                         uint valueUint = unchecked((uint)value);
-                        if (parent.table != null && item != valueUint)
+                        if (this.soa != null)
                         {
-                            uint entryIndex = (uint)parent.entryIndex;
-                            parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, valueUint);
-                            item = valueUint;
+                            this.soa[this.soaIndex] = valueUint;
+                        }
+                        else if (parent != null)
+                        {
+                            if (parent.table != null && item != valueUint)
+                            {
+                                uint entryIndex = (uint)parent.entryIndex;
+                                parent.table.SetFieldSubIndexUint(entryIndex, fieldIndex, subIndex, valueUint);
+                                item = valueUint;
+                            }
                         }
                     }
                 }
@@ -153,10 +195,21 @@ namespace Tatti3
                 // setting must be `(mask, new_value)`
                 public (uint, uint) ItemBits
                 {
-                    get => (item, 0U);
+                    get
+                    {
+                        if (this.soa != null)
+                        {
+                            throw new NotImplementedException();
+                        }
+                        return (item, 0U);
+                    }
                     set
                     {
-                        if (parent.table != null)
+                        if (this.soa != null)
+                        {
+                            throw new NotImplementedException();
+                        }
+                        if (parent != null && parent.table != null)
                         {
                             var mask = value.Item1;
                             var combined = (mask & value.Item2) | (~mask & item);
@@ -172,26 +225,37 @@ namespace Tatti3
 
                 public void UpdateItem()
                 {
-                    if (parent.table != null)
+                    if (this.soa != null)
                     {
-                        int entryIndex = parent.entryIndex;
-                        var newItem = parent.table.GetFieldSubIndexUint((uint)entryIndex, fieldIndex, subIndex);
-                        if (item != newItem || currentEntry != entryIndex)
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemSigned"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemBits"));
+                    }
+                    else if (parent != null)
+                    {
+                        if (parent.table != null)
                         {
-                            item = newItem;
-                            currentEntry = entryIndex;
-                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
-                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemSigned"));
-                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemBits"));
+                            int entryIndex = parent.entryIndex;
+                            var newItem = parent.table.GetFieldSubIndexUint((uint)entryIndex, fieldIndex, subIndex);
+                            if (item != newItem || currentEntry != entryIndex)
+                            {
+                                item = newItem;
+                                currentEntry = entryIndex;
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemSigned"));
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ItemBits"));
+                            }
                         }
                     }
                 }
 
-                DatTableRef parent;
+                DatTableRef? parent;
                 uint fieldIndex;
                 uint subIndex;
                 uint item;
                 int currentEntry;
+                SoaStruct? soa = null;
+                int soaIndex = -1;
             }
 
             public class RequirementsRef

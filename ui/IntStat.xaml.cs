@@ -20,7 +20,7 @@ namespace Tatti3
     public partial class IntStat : UserControl, IStatControl
     {
         [ValueConversion(typeof(uint), typeof(double))]
-        class ScaleConverter : IValueConverter
+        public class ScaleConverter : IValueConverter
         {
             public ScaleConverter(uint scale, bool percent, bool signed)
             {
@@ -35,13 +35,28 @@ namespace Tatti3
                 object parameter,
                 System.Globalization.CultureInfo culture
             ) {
-                double scaled = signed ?
-                    (double)(int)value / (double)scale :
-                    (double)(uint)value / (double)scale;
-                scaled = percent ? scaled * 100.0f : scaled;
-                return percent ?
-                    String.Format(CultureInfo.InvariantCulture, "{0:F1}", scaled) :
-                    String.Format(CultureInfo.InvariantCulture, "{0:G}", scaled);
+                if (scale == 1 && !percent)
+                {
+                    if (signed)
+                    {
+                        return String.Format(CultureInfo.InvariantCulture, "{0:G}", (int)value);
+                    }
+                    else
+                    {
+                        // (Unreachable since converter isn't needed for non-scale non-signed)
+                        return String.Format(CultureInfo.InvariantCulture, "{0:G}", (uint)value);
+                    }
+                }
+                else
+                {
+                    double scaled = signed ?
+                        (double)(int)value / (double)scale :
+                        (double)(uint)value / (double)scale;
+                    scaled = percent ? scaled * 100.0f : scaled;
+                    return percent ?
+                        String.Format(CultureInfo.InvariantCulture, "{0:F1}", scaled) :
+                        String.Format(CultureInfo.InvariantCulture, "{0:G}", scaled);
+                }
             }
 
             object? IValueConverter.ConvertBack(
@@ -53,14 +68,29 @@ namespace Tatti3
                 try
                 {
                     var format = System.Globalization.NumberFormatInfo.InvariantInfo;
-                    double val = Single.Parse((string)value, format);
-                    if (percent)
+                    if (scale == 1 && !percent)
                     {
-                        val = val / 100.0f;
+                        if (signed)
+                        {
+                            return Int32.Parse((string)value, format);
+                        }
+                        else
+                        {
+                            // (Unreachable since converter isn't needed for non-scale non-signed)
+                            return UInt32.Parse((string)value, format);
+                        }
                     }
-                    return signed ?
-                        (int)(val * (double)scale) :
-                        (uint)(val * (double)scale);
+                    else
+                    {
+                        double val = Double.Parse((string)value, format);
+                        if (percent)
+                        {
+                            val = val / 100.0f;
+                        }
+                        return signed ?
+                            (int)Math.Round(val * (double)scale) :
+                            (uint)Math.Round(val * (double)scale);
+                    }
                 }
                 catch
                 {

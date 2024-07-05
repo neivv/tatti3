@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 
 using Requirement = Tatti3.GameData.Requirement;
 using ArrayFileType = Tatti3.GameData.ArrayFileType;
+using FieldRef = Tatti3.AppState.DatTableRef.FieldRef;
 
 namespace Tatti3
 {
@@ -329,7 +330,7 @@ namespace Tatti3
             uint baseIndex;
             ArrayFileType dat;
 
-            public FieldRef this[uint index]
+            public AppState.DatTableRef.FieldRef this[uint index]
             {
                 get
                 {
@@ -354,7 +355,7 @@ namespace Tatti3
             {
                 if (!fieldRefs.TryGetValue(index, out FieldRef? val))
                 {
-                    val = new FieldRef(data, index - baseIndex);
+                    val = new AppState.DatTableRef.FieldRef(data, index - baseIndex);
                     fieldRefs[index] = val;
                 }
                 return val;
@@ -390,56 +391,9 @@ namespace Tatti3
             {
                 foreach (var fref in fieldRefs.Values)
                 {
-                    fref.Update();
+                    fref.UpdateItem();
                 }
             }
-        }
-
-        // Duck typed to be compatible with AppState.FieldRef
-        public class FieldRef : INotifyPropertyChanged
-        {
-            public event PropertyChangedEventHandler? PropertyChanged;
-
-            public FieldRef(SoaStruct data, uint index)
-            {
-                this.data = data;
-                this.index = (int)index;
-            }
-
-            public uint Item
-            {
-                get => data[index];
-                set
-                {
-                    data[index] = value;
-                }
-            }
-
-            public int ItemSigned
-            {
-                get => unchecked((int)data[index]);
-                set
-                {
-                    data[index] = unchecked((uint)value);
-                }
-            }
-
-            public (uint, uint) ItemBits
-            {
-                get => throw new Exception("ItemBits not implemented for ListFieldEdit.FieldRef");
-                set
-                {
-                    throw new Exception("ItemBits not implemented for ListFieldEdit.FieldRef");
-                }
-            }
-
-            public void Update()
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
-            }
-
-            readonly SoaStruct data;
-            readonly int index;
         }
     }
 }
