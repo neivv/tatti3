@@ -415,6 +415,15 @@ namespace Tatti3
                 }
             }
 
+            public int ItemSigned
+            {
+                get => unchecked((int)data[index]);
+                set
+                {
+                    data[index] = unchecked((uint)value);
+                }
+            }
+
             public (uint, uint) ItemBits
             {
                 get => throw new Exception("ItemBits not implemented for ListFieldEdit.FieldRef");
