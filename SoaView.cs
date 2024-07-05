@@ -233,7 +233,11 @@ namespace Tatti3
             get
             {
                 return Values.Length > index ? Values[index] :
-                    throw new Exception($"Out of bounds index {index}, size was {Values.Length}");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(index),
+                        index,
+                        $"Out of bounds index {index}, size was {Values.Length}"
+                    );
             }
             set
             {
