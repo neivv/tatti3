@@ -453,105 +453,260 @@
             </TabItem>
             <TabItem Header="AI Actions">
                 <Grid Background="#FFE5E5E5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0">
-                        <GroupBox DockPanel.Dock="Top">
-                            <GroupBox.Header>
-                                <TextBlock Text="AI Actions" />
-                            </GroupBox.Header>
-                            <StackPanel Orientation="Vertical">
-                                <local:StatGroup LabelWidth="100">
-                                    <local:DatRefStat Text="Computer Idle" Dat="Orders" FieldId="0xc" />
-                                    <local:DatRefStat Text="Human Idle" Dat="Orders" FieldId="0xd" />
-                                    <local:DatRefStat Text="Return to Idle" Dat="Orders" FieldId="0xe" />
-                                    <local:DatRefStat Text="Attack Unit" Dat="Orders" FieldId="0xf" />
-                                    <local:DatRefStat Text="Attack Move" Dat="Orders" FieldId="0x10" />
-                                </local:StatGroup>
-                                <Separator />
-                                <local:StatGroup LabelWidth="100">
-                                    <local:EnumStat Text="Right-click Action" FieldId="0x1c" DropdownWidth="220">
-                                        <system:String>No commands / Auto Attack</system:String>
-                                        <system:String>Normal movement / Normal Attack</system:String>
-                                        <system:String>Normal movement / No Attack</system:String>
-                                        <system:String>No movement / Normal Attack</system:String>
-                                        <system:String>Harvest</system:String>
-                                        <system:String>Harvest &amp; Repair</system:String>
-                                        <system:String>Nothing (With indicator)</system:String>
-                                    </local:EnumStat>
-                                </local:StatGroup>
-                            </StackPanel>
-                        </GroupBox>
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-                            <GroupBox>
-                                <GroupBox.Header>
-                                    <TextBlock Text="AI Flags" />
-                                </GroupBox.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <local:StatGroup Flags="true" MinWidth="120">
-                                        <local:BoolStat Text="Don't Become Guard" FieldId="0x15:0x1"/>
-                                        <local:BoolStat Text="Non-Military" FieldId="0x15:0x2"/>
-                                        <local:BoolStat Text="Unused 2" FieldId="0x15:0x4"/>
-                                        <local:BoolStat Text="Unused 3" FieldId="0x15:0x8"/>
-                                    </local:StatGroup>
-                                    <local:StatGroup Flags="true" MinWidth="120">
-                                        <local:BoolStat Text="Unused 4" FieldId="0x15:0x10"/>
-                                        <local:BoolStat Text="Unused 5" FieldId="0x15:0x20"/>
-                                        <local:BoolStat Text="Unused 6" FieldId="0x15:0x40"/>
-                                        <local:BoolStat Text="Unused 7" FieldId="0x15:0x80"/>
-                                    </local:StatGroup>
-                                    <local:StatGroup Flags="true" MinWidth="120">
-                                        <local:BoolStat Text="Town Unit" FieldId="0x47:0x100"/>
-                                        <local:BoolStat Text="Can Move To Another Town" FieldId="0x47:0x80"/>
-                                        <local:BoolStat Text="No Town Region In Campaign" FieldId="0x47:0x200"/>
-                                        <local:BoolStat Text="Military In Spawn Region" FieldId="0x47:0x400"/>
-                                    </local:StatGroup>
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-                            <GroupBox>
-                                <GroupBox.Header>
-                                    <TextBlock Text="Building Guards" />
-                                </GroupBox.Header>
-                                <GroupBox.DataContext>
-                                    <Binding
-                                        RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
-                                        Path="DataContext" />
-                                </GroupBox.DataContext>
-                                <local:ListFieldEdit Dat="Units" ListFieldId="0x4e" FirstArrayField="0x50" ListHeight="150">
-                                    <local:ListFieldEdit.ListBoxTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Path=[0], Converter={StaticResource ListIndexConverter}}">
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </local:ListFieldEdit.ListBoxTemplate>
-                                    <local:ListFieldEdit.EditControl>
+                    <TabControl>
+                        <TabItem Header="Main">
+                            <Grid Background="#FFE5E5E5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <DockPanel Grid.Row="0">
+                                    <GroupBox DockPanel.Dock="Top">
+                                        <GroupBox.Header>
+                                            <TextBlock Text="AI Actions" />
+                                        </GroupBox.Header>
                                         <StackPanel Orientation="Vertical">
                                             <local:StatGroup LabelWidth="100">
-                                                <local:DatRefStat Text="Unit" Dat="Units" FieldId="0x50" DropdownWidth="180"/>
+                                                <local:DatRefStat Text="Computer Idle" Dat="Orders" FieldId="0xc" />
+                                                <local:DatRefStat Text="Human Idle" Dat="Orders" FieldId="0xd" />
+                                                <local:DatRefStat Text="Return to Idle" Dat="Orders" FieldId="0xe" />
+                                                <local:DatRefStat Text="Attack Unit" Dat="Orders" FieldId="0xf" />
+                                                <local:DatRefStat Text="Attack Move" Dat="Orders" FieldId="0x10" />
                                             </local:StatGroup>
+                                            <Separator />
                                             <local:StatGroup LabelWidth="100">
-                                                <local:IntStat Text="Minimum Seconds" FieldId="0x51"/>
-                                                <local:IntStat Text="Minimum Amount" FieldId="0x52"/>
+                                                <local:EnumStat Text="Right-click Action" FieldId="0x1c" DropdownWidth="220">
+                                                    <system:String>No commands / Auto Attack</system:String>
+                                                    <system:String>Normal movement / Normal Attack</system:String>
+                                                    <system:String>Normal movement / No Attack</system:String>
+                                                    <system:String>No movement / Normal Attack</system:String>
+                                                    <system:String>Harvest</system:String>
+                                                    <system:String>Harvest &amp; Repair</system:String>
+                                                    <system:String>Nothing (With indicator)</system:String>
+                                                </local:EnumStat>
                                             </local:StatGroup>
                                         </StackPanel>
-                                    </local:ListFieldEdit.EditControl>
-                                    <local:ListFieldEdit.DefaultValues>
-                                        <x:Array Type="system:UInt32">
-                                            <system:UInt32>0</system:UInt32>
-                                            <system:UInt32>0</system:UInt32>
-                                            <system:UInt32>0</system:UInt32>
-                                        </x:Array>
-                                    </local:ListFieldEdit.DefaultValues>
-                                </local:ListFieldEdit>
-                            </GroupBox>
-                        </StackPanel>
-                    </DockPanel>
+                                    </GroupBox>
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                                        <GroupBox>
+                                            <GroupBox.Header>
+                                                <TextBlock Text="AI Flags" />
+                                            </GroupBox.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <local:StatGroup Flags="true" MinWidth="120">
+                                                    <local:BoolStat Text="Don't Become Guard" FieldId="0x15:0x1"/>
+                                                    <local:BoolStat Text="Non-Military" FieldId="0x15:0x2"/>
+                                                    <local:BoolStat Text="Unused 2" FieldId="0x15:0x4"/>
+                                                    <local:BoolStat Text="Unused 3" FieldId="0x15:0x8"/>
+                                                </local:StatGroup>
+                                                <local:StatGroup Flags="true" MinWidth="120">
+                                                    <local:BoolStat Text="Unused 4" FieldId="0x15:0x10"/>
+                                                    <local:BoolStat Text="Unused 5" FieldId="0x15:0x20"/>
+                                                    <local:BoolStat Text="Unused 6" FieldId="0x15:0x40"/>
+                                                    <local:BoolStat Text="Unused 7" FieldId="0x15:0x80"/>
+                                                </local:StatGroup>
+                                                <local:StatGroup Flags="true" MinWidth="120">
+                                                    <local:BoolStat Text="Town Unit" FieldId="0x47:0x100"/>
+                                                    <local:BoolStat Text="Can Move to Another Town" FieldId="0x47:0x80"/>
+                                                    <local:BoolStat Text="No Town Region in Campaign" FieldId="0x47:0x200"/>
+                                                    <local:BoolStat Text="Military in Spawn Region" FieldId="0x47:0x400"/>
+                                                </local:StatGroup>
+                                                <local:StatGroup Flags="true" MinWidth="120">
+                                                    <local:BoolStat Text="Burrow on Idle" FieldId="0x55:0x1"/>
+                                                    <local:BoolStat Text="Siege Mode on Idle" FieldId="0x55:0x2"/>
+                                                    <local:BoolStat Text="Large help radius" FieldId="0x55:0x4">
+                                                        <local:BoolStat.ToolTipText>
+                                                            <TextBlock>
+                        Helps player units under attack up to 20 tiles away from this unit.
+                                                            </TextBlock>
+                                                        </local:BoolStat.ToolTipText>
+                                                    </local:BoolStat>
+                                                </local:StatGroup>
+                                            </StackPanel>
+                                        </GroupBox>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                                        <GroupBox>
+                                            <GroupBox.Header>
+                                                <TextBlock Text="Building Guards" />
+                                            </GroupBox.Header>
+                                            <GroupBox.DataContext>
+                                                <Binding
+                                                    RelativeSource="{RelativeSource AncestorType={x:Type local:MainWindow}}"
+                                                    Path="DataContext" />
+                                            </GroupBox.DataContext>
+                                            <local:ListFieldEdit Dat="Units" ListFieldId="0x4e" FirstArrayField="0x50" ListHeight="150">
+                                                <local:ListFieldEdit.ListBoxTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Path=[0], Converter={StaticResource ListIndexConverter}}">
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </local:ListFieldEdit.ListBoxTemplate>
+                                                <local:ListFieldEdit.EditControl>
+                                                    <StackPanel Orientation="Vertical">
+                                                        <local:StatGroup LabelWidth="100">
+                                                            <local:DatRefStat Text="Unit" Dat="Units" FieldId="0x50" DropdownWidth="180"/>
+                                                        </local:StatGroup>
+                                                        <local:StatGroup LabelWidth="100">
+                                                            <local:IntStat Text="Minimum Seconds" FieldId="0x51"/>
+                                                            <local:IntStat Text="Minimum Amount" FieldId="0x52"/>
+                                                        </local:StatGroup>
+                                                    </StackPanel>
+                                                </local:ListFieldEdit.EditControl>
+                                                <local:ListFieldEdit.DefaultValues>
+                                                    <x:Array Type="system:UInt32">
+                                                        <system:UInt32>0</system:UInt32>
+                                                        <system:UInt32>0</system:UInt32>
+                                                        <system:UInt32>0</system:UInt32>
+                                                    </x:Array>
+                                                </local:ListFieldEdit.DefaultValues>
+                                            </local:ListFieldEdit>
+                                        </GroupBox>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Building Placement">
+                            <Grid Background="#FFE5E5E5">
+                                <GroupBox>
+                                    <GroupBox.Header>
+                                        <TextBlock Text="Placement Flags" />
+                                    </GroupBox.Header>
+                                    <DockPanel>
+                                        <local:StatGroup Flags="true" MinWidth="120" DockPanel.Dock="Left">
+                                            <local:BoolStat Text="Build in Any Town" FieldId="0x55:0x8">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    This building can be built in any town that has a worker and space available
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Second Town Hall Logic" FieldId="0x55:0x40">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    If this building is placed to a town which already has a main town hall,<LineBreak />
+                    use an alternate algorithm that may place it in a place that helps resource mining.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Can Place at Town Center" FieldId="0x55:0x4000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    Most buildings try to avoid being placed in a 6x7 tile area at town center,<LineBreak />
+                    as well as any tile directly on above/below/sides of that area in a + shape,<LineBreak />
+                    leaving space that for units.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Require Safe Area" FieldId="0x55:0x40000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI will refuse to place this building in an area that has enemies nearby.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Near Unpowered Buildings" FieldId="0x55:0x8000" />
+                                            <local:BoolStat Text="Prefer Unpowered Area" FieldId="0x55:0x800000" />
+                                        </local:StatGroup>
+                                        <local:StatGroup Flags="true" MinWidth="120" DockPanel.Dock="Left">
+                                            <local:BoolStat Text="Allow Near Resource Buildings" FieldId="0x55:0x100000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI won't try to avoid area near town halls or player's gas buildings.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Allow Near Resources" FieldId="0x55:0x200000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI won't try to avoid area near neutral resources.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Extra Space - 1 Tile" FieldId="0x55:0x400">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI tries to leave 1 tile of additional space around this building when placing other buildings.<LineBreak />
+                    Can be combined with "Extra Space - 2 Tiles" for total 3 tiles.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Extra Space - 2 Tiles" FieldId="0x55:0x800">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI tries to leave 2 tiles of additional space around this building when placing other buildings.<LineBreak />
+                    Can be combined with "Extra Space - 1 Tile" for total 3 tiles.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Ignore Extra Space" FieldId="0x55:0x80000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    This building's placement will not consider the extra space flags<LineBreak />
+                    and can be placed directly next to buildings that have extra space flags set.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Spread Out" FieldId="0x55:0x400000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    This building tries to avoid any building with "Spread Out - All" flag set,<LineBreak />
+                    as well as buildings of same unit ID if "Spread Out - This" flag is set.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Spread Out - All" FieldId="0x55:0x2000"/>
+                                            <local:BoolStat Text="Spread Out - This" FieldId="0x55:0x1000"/>
+                                        </local:StatGroup>
+                                        <local:StatGroup Flags="true" MinWidth="120" DockPanel.Dock="Left">
+                                            <local:BoolStat Text="Place at Chokes" FieldId="0x55:0x10000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI will prefer to place this building to defend a choke point of one region wide
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Aiscript `creep` Chokes" FieldId="0x55:0x20000">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI will prefer to place this building to defend a choke point if so instructed with the
+                    `creep` aiscript command.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Is Choke Defense Building" FieldId="0x55:0x200">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    Marks this building as defending a choke point.<LineBreak /><LineBreak />
+                    If there are multiple chokes that the AI needs to defend,<LineBreak />
+                    it prefers building to one without any buildings defending it.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Aiscript `build_bunkers`" FieldId="0x55:0x10"/>
+                                            <local:BoolStat Text="Aiscript `build_turrets`" FieldId="0x55:0x20"/>
+                                            <local:BoolStat Text="Make Town Region When Building" FieldId="0x55:0x80">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    Any region that the AI places this building at becomes immedieately a town region.
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                            <local:BoolStat Text="Reduced Placement Area" FieldId="0x55:0x100">
+                                                <local:BoolStat.ToolTipText>
+                                                    <TextBlock>
+                    AI will place this building at most 20 tiles from town center (Instead of the usual 32 tiles)
+                                                    </TextBlock>
+                                                </local:BoolStat.ToolTipText>
+                                            </local:BoolStat>
+                                        </local:StatGroup>
+                                    </DockPanel>
+                                </GroupBox>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
                 </Grid>
             </TabItem>
             <TabItem Header="Requirements">

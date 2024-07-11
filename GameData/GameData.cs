@@ -162,6 +162,54 @@ namespace Tatti3.GameData
                     Units.SetFieldInt(unit, 0x54, -10);
                 }
             }
+            // Extended AI flags
+            if (!Units.HasField(0x55))
+            {
+                Units.AddFieldWithValueForAll(0x55, 0, DatFieldFormat.Uint32);
+                // Burrow on idle
+                for (uint i = 0; i < Units.Entries; i++)
+                {
+                    var flags = Units.GetFieldUint(i, 0x16);
+                    if ((flags & 0x00100000) != 0 && i != 0x29)
+                    {
+                        Units.SetBitFlags(i, 0x55, 0x1);
+                    }
+                }
+                // Siege mode on idle
+                Units.SetBitFlags(0x5, 0x55, 0x2);
+                // Arbiter pick fights
+                Units.SetBitFlags(0x47, 0x55, 0x4);
+                // Supply depots bits
+                Units.SetBitFlags(0x6d, 0x55, 0x8);
+                // Bunker bits
+                Units.SetBitFlags(0x7d, 0x55, 0x69_1690);
+                // Missile turret bits
+                Units.SetBitFlags(0x7c, 0x55, 0x48_1920);
+                // Hatchery bits
+                Units.SetBitFlags(0x83, 0x55, 0x3c_4040);
+                // CC bits
+                Units.SetBitFlags(0x6a, 0x55, 0x3c_4000);
+                // Nexus bits
+                Units.SetBitFlags(0x9a, 0x55, 0x3c_4000);
+                // Pylon bits
+                Units.SetBitFlags(0x9c, 0x55, 0x8c_8000);
+                // Creep colony bits
+                Units.SetBitFlags(0x8f, 0x55, 0x4a_2600);
+                // Sunken colony bits
+                Units.SetBitFlags(0x92, 0x55, 0x2200);
+                // Spore colony bits
+                Units.SetBitFlags(0x90, 0x55, 0x2000);
+                // Photon cannon bits
+                Units.SetBitFlags(0xa2, 0x55, 0x48_1800);
+                // Barracks bits
+                Units.SetBitFlags(0x6f, 0x55, 0x400);
+                // Factory bits
+                Units.SetBitFlags(0x71, 0x55, 0x800);
+                // Gateway bits
+                Units.SetBitFlags(0xa0, 0x55, 0x800);
+                // Robofac bits
+                Units.SetBitFlags(0x9b, 0x55, 0x800);
+            }
             Weapons = LoadDatTable(fsys, "arr/weapons.dat", LegacyDatDecl.Weapons, firegraft);
             Upgrades = LoadDatTable(fsys, "arr/upgrades.dat", LegacyDatDecl.Upgrades, firegraft);
             // Attached units

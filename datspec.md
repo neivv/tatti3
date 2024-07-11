@@ -392,6 +392,31 @@ Units.dat:
     `Single integer`
 - 0x54 Cloak energy regen (usually degen so negative)
     `Single integer`
+- 0x55 Ext flags 2 (AI-related)
+    * 0x1 = AI Burrow on idle
+    * 0x2 = AI Siege Mode on idle
+    * 0x4 = AI defend nearby units in combat (Arbiter behaviour)
+    * 0x8 = AI Build in any town
+    * 0x10 = AI placement - Responds to aiscript build\_bunkers
+    * 0x20 = AI placement - Responds to aiscript build\_turrets
+    * 0x40 = AI placement - Secondary town hall logic (Hatchery)
+    * 0x80 = AI placement - Make town region once built
+    * 0x100 = AI placement - Reduced (40 tile) placement area
+    * 0x200 = AI placement - Is choke defense building
+    * 0x400 = AI placement - Extra placement space, 1 tile
+    * 0x800 = AI placement - Extra placement space, 2 tiles (Stack with 1 tile extra for 3)
+    * 0x1000 = AI placement - Spread out with same Unit ID
+    * 0x2000 = AI placement - Spread out with any Unit ID
+    * 0x4000 = AI placement - No town center mask
+    * 0x8000 = AI placement - Near unpowered buildings
+    * 0x1\_0000 = AI placement - Bunker chokes
+    * 0x2\_0000 = AI placement - Creep colony chokes
+    * 0x4\_0000 = AI placement - Require safe area
+    * 0x8\_0000 = AI placement - No building extra space
+    * 0x10\_0000 = AI placement - Allow near resource buildings
+    * 0x20\_0000 = AI placement - Allow near resources
+    * 0x40\_0000 = AI placement - Check spread out (Flags 0x1000, 0x2000)
+    * 0x80\_0000 = AI placement - Prefer unpowered area
 
 Upgrades.dat:
 - 0x10 Req buffer
