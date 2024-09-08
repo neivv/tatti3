@@ -411,7 +411,7 @@ Units.dat:
     * 0x8000 = AI placement - Near unpowered buildings
     * 0x1\_0000 = AI placement - Bunker chokes
     * 0x2\_0000 = AI placement - Creep colony chokes
-    * 0x4\_0000 = AI placement - Require safe area
+    * 0x4\_0000 = AI placement - Don't Require safe area
     * 0x8\_0000 = AI placement - No building extra space
     * 0x10\_0000 = AI placement - Allow near resource buildings
     * 0x20\_0000 = AI placement - Allow near resources

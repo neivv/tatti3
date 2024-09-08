@@ -600,7 +600,7 @@
                                                     </TextBlock>
                                                 </local:BoolStat.ToolTipText>
                                             </local:BoolStat>
-                                            <local:BoolStat Text="Require Safe Area" FieldId="0x55:0x40000">
+                                            <local:BoolStat Text="Don't Require Safe Area" FieldId="0x55:0x40000">
                                                 <local:BoolStat.ToolTipText>
                                                     <TextBlock>
                     AI will refuse to place this building in an area that has enemies nearby.
