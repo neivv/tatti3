@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -48,6 +49,7 @@ namespace Tatti3
             var args = Environment.GetCommandLineArgs();
             GameData.GameData? gameData = null;
             Title = "Dat editing thing";
+            popup = new Popup();
             this.state = new AppState(gameData);
             this.DataContext = state;
             InitializeComponent();
@@ -191,6 +193,8 @@ namespace Tatti3
         AppState state;
         int currentTab = -1;
         string root = "";
+
+        Popup popup;
 
         void OnIdGotoButtonClicked(object sender, RoutedEventArgs e)
         {
@@ -388,14 +392,67 @@ namespace Tatti3
 
         void CopyEntryCmdExecuted(object target, ExecutedRoutedEventArgs e)
         {
-            var sourceEntry = (uint)entryList.SelectedIndex;
-            var dat = state.GetDat(state.CurrentDat);
-            if (dat == null)
+            try
             {
-                return;
+                var sourceEntry = (uint)entryList.SelectedIndex;
+                var dat = state.GetDat(state.CurrentDat);
+                if (dat == null)
+                {
+                    return;
+                }
+                var text = dat.SerializeEntryToJson(sourceEntry);
+                SetClipboardText(text);
             }
-            var text = dat.SerializeEntryToJson(sourceEntry);
-            Clipboard.SetText(text);
+            catch (Exception ex)
+            {
+                ShowPopup(entryList, $"Failed to copy: {FormatException(ex)}");
+            }
+        }
+
+        void SetClipboardText(string text) {
+            // Clipboard touching fails if other program is using it; try a few times and then
+            // give up.
+            Exception? ex = null;
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    Clipboard.SetText(text);
+                    return;
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                    System.Threading.Thread.Sleep(5);
+                }
+            }
+            if (ex != null)
+            {
+                throw ex;
+            }
+        }
+
+        string GetClipboardText() {
+            // Clipboard touching fails if other program is using it; try a few times and then
+            // give up.
+            Exception? ex = null;
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    return Clipboard.GetText();
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                    System.Threading.Thread.Sleep(5);
+                }
+            }
+            if (ex != null)
+            {
+                throw ex;
+            }
+            throw new Exception("unreachable");
         }
 
         void CopyEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
@@ -405,16 +462,22 @@ namespace Tatti3
 
         void PasteEntryCmdExecuted(object target, ExecutedRoutedEventArgs e)
         {
-            var entry = (uint)entryList.SelectedIndex;
-            var dat = state.GetDat(state.CurrentDat);
-            if (dat == null)
-            {
-                return;
+            try {
+                var entry = (uint)entryList.SelectedIndex;
+                var dat = state.GetDat(state.CurrentDat);
+                if (dat == null)
+                {
+                    return;
+                }
+                var text = GetClipboardText();
+                if (dat.IsValidEntryJson(text))
+                {
+                    dat.DeserializeEntryFromJson(entry, text);
+                }
             }
-            var text = Clipboard.GetText();
-            if (dat.IsValidEntryJson(text))
+            catch (Exception ex)
             {
-                dat.DeserializeEntryFromJson(entry, text);
+                ShowPopup(entryList, $"Failed to paste: {FormatException(ex)}");
             }
         }
 
@@ -452,6 +515,35 @@ namespace Tatti3
         void PasteNewEntryCmdCanExecute(object target, CanExecuteRoutedEventArgs e)
         {
             PasteEntryCmdCanExecute(target, e);
+        }
+
+        void ShowPopup(UIElement parent, string message) {
+            // Recreating text is fine, it'll get garbage collected if another
+            // call to this method overrides it.
+            var text = new TextBlock();
+            text.Text = message;
+            text.Background = Brushes.White;
+            popup.Child = text;
+            popup.PlacementTarget = parent;
+            popup.IsOpen = true;
+            popup.StaysOpen = false;
+            var task = new Task(async () => {
+                // Think exceptions thrown here are swallowed anyway but just to be sure..
+                try
+                {
+                    var delay = 100;
+                    for (int i = 0; i < 2; i++) {
+                        await Task.Delay(delay);
+                        text.Background = Brushes.Red;
+                        text.Foreground = Brushes.White;
+                        await Task.Delay((int)(delay * 0.75));
+                        text.Background = Brushes.White;
+                        text.Foreground = Brushes.Black;
+                    }
+                }
+                catch {}
+            });
+            task.Start(TaskScheduler.FromCurrentSynchronizationContext());
         }
     }
 
