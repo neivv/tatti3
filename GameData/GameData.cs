@@ -541,6 +541,7 @@ namespace Tatti3.GameData
             SaveDatTable(tempFiles, Weapons, Path.Join(root, "arr/weapons.dat"));
             SaveDatTable(tempFiles, Flingy, Path.Join(root, "arr/flingy.dat"));
             SaveDatTable(tempFiles, Sprites, Path.Join(root, "arr/sprites.dat"));
+            SaveDatTable(tempFiles, Images, Path.Join(root, "arr/images.dat"));
             SaveDatTable(tempFiles, Upgrades, Path.Join(root, "arr/upgrades.dat"));
             SaveDatTable(tempFiles, TechData, Path.Join(root, "arr/techdata.dat"));
             SaveDatTable(tempFiles, PortData, Path.Join(root, "arr/portdata.dat"));
